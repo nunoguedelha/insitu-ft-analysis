@@ -1,5 +1,6 @@
 function [q, dq, d2q, time] = readStateExt(n, filename)
-
+%n i sthe number of degrees of freedom of the part of the robot
+%filename is the name of the file containing the data from stateEXT:o port
 format = '%d %f ';
 fid    = fopen(filename);
 
