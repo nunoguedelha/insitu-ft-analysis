@@ -10,7 +10,7 @@ if( size(input_args,1) == 3)
     y = input_args(2,:);
     z = input_args(3,:);
 end
-output_args = plot3(x,y,z);
+output_args = plot3(x,y,z,'.');
 
 end
 

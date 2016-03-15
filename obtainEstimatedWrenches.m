@@ -109,8 +109,12 @@ fullBodyUnknowns.addNewContactInFrame(estimator.model(),contact_index,unknownWre
 %TODO: replace the zeros with the loaded data from the robot
 for t=1:size(resampledTime)
     qj=qj_all(:,t);
-    dqj=dqj_all(:,t);
-    ddqj=ddqj_all(:,t);
+   dqj=dqj_all(:,t);
+   ddqj=ddqj_all(:,t);
+%    % velocity and acceleration to 0 to prove if they are neglegible. (slow
+%    % experiment scenario)
+%     dqj=zeros(size(qj));
+%     ddqj=zeros(size(qj));
     
     qj_idyn   = iDynTree.JointPosDoubleArray(dofs);
     dqj_idyn  = iDynTree.JointDOFsDoubleArray(dofs);
@@ -142,7 +146,7 @@ for t=1:size(resampledTime)
     % store the estimated measurements
     for ftIndex = 0:(nrOfFTSensors-1)
         estimatedSensorWrench = iDynTree.Wrench();
-        sens = estimator.sensors().getSensor(iDynTree.SIX_AXIS_FORCE_TORQUE,ftIndex);
+        %sens = estimator.sensors().getSensor(iDynTree.SIX_AXIS_FORCE_TORQUE,ftIndex);
         estFTmeasurements.getMeasurement(iDynTree.SIX_AXIS_FORCE_TORQUE,ftIndex,estimatedSensorWrench);
         %store in the correct variable, format from readDataDumpre results in (time,sensorindex)
         %TODO: generalized code for any number of sensors , idea create a
@@ -152,14 +156,6 @@ for t=1:size(resampledTime)
         %matlab
         ftMeasures(ftIndex+1,t,:)=estimatedSensorWrench.toMatlab();
         
-        
-        % Print info
-        %         fprintf('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n');
-        %         fprintf('Sensor %s has index %d\n',sens.getName(),ftIndex);
-        %         fprintf('Estimated measured wrench: %s',estimatedSensorWrench.toString());
-        
-        % the estimated sensor wrench can be easily converted to matlab with
-        % estimatedSensorWrench.toMatlab()
     end
     
     % print the estimated contact forces
