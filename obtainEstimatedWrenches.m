@@ -1,6 +1,12 @@
-function [estimatedFtMeasures]=obtainEstimatedWrenches(dataStateDirs,stateExtNames,robotName,resampledTime)% ,contactInfo)
+function [estimatedFtMeasures]=obtainEstimatedWrenches(dataStateDirs,stateExtNames,robotName,resampledTime,contactInfo)
 %TODO: add contactInfo (which part of the robot is in contact) obtained from minimal knowledge on the FT sensors
-left_support=false;
+% contactInfo should in the end have this information for every time step,
+% for now assuming contact doesnt change
+if (contactInfo==1)
+    left_support=false;
+else
+    left_support=true;
+end
 %% Load the estimator
 
 % Create estimator class
