@@ -75,3 +75,40 @@ e_left_foot=estimatedFtMeasures.(sensorNames{index});
 
 index = find(strcmp(sensorNames, 'r_foot_ft_sensor'));
 e_right_foot=estimatedFtMeasures.(sensorNames{index});
+
+%match FT vs estimated for comparison
+l_arm='leftArm'; value1=left_arm;
+e_l_arm='estimatedLeftArm'; value2=e_left_arm;
+vs_l_arm='leftArmDataVsEstimation'; value3=left_arm-e_left_arm;
+ leftArm=struct(l_arm,value1,e_l_arm, value2,vs_l_arm, value3);
+ FTplots(leftArm,time1)
+
+ r_arm='rightArm'; value1=right_arm;
+e_r_arm='estimatedRightArm'; value2=e_right_arm;
+vs_r_arm='rightArmDataVsEstimation'; value3=right_arm-e_right_arm;
+ rightArm=struct(r_arm,value1,e_r_arm, value2,vs_r_arm, value3);
+ FTplots(rightArm,time1)
+ 
+ l_leg='leftLeg'; value1=left_leg;
+e_l_leg='estimatedLeftLeg'; value2=e_left_leg;
+vs_l_leg='leftLegDataVsEstimation'; value3=left_leg-e_left_leg;
+ leftleg=struct(l_leg,value1,e_l_leg, value2,vs_l_leg, value3);
+ FTplots(leftleg,time1)
+ 
+  r_leg='rightLeg'; value1=right_leg;
+e_r_leg='estimatedRightLeg'; value2=e_right_leg;
+vs_r_leg='rightLegDataVsEstimation'; value3=right_leg-e_right_leg;
+ rightleg=struct(r_leg,value1,e_r_leg, value2,vs_r_leg, value3);
+ FTplots(rightleg,time1)
+ 
+ l_foot='leftFoot'; value1=left_foot;
+e_l_foot='estimatedLeftFoot'; value2=e_left_foot;
+vs_l_foot='leftFootDataVsEstimation'; value3=left_foot-e_left_foot;
+ leftfoot=struct(l_foot,value1,e_l_foot, value2,vs_l_foot, value3);
+ FTplots(leftfoot,time1)
+ 
+ r_foot='rightFoot'; value1=right_foot;
+e_r_foot='estimatedRightFoot'; value2=e_right_foot;
+vs_r_foot='rightFootDataVsEstimation'; value3=right_foot-e_right_foot;
+ rightfoot=struct(r_foot,value1,e_r_foot, value2,vs_r_foot, value3);
+ FTplots(rightfoot,time1)

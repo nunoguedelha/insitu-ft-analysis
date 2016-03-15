@@ -10,7 +10,7 @@ estimator = iDynTree.ExtWrenchesAndJointTorquesEstimator();
 estimator.loadModelAndSensorsFromFile(strcat('./',robotName,'.urdf'));
 
 % Check if the model was correctly created by printing the model
-estimator.model().toString()
+%estimator.model().toString()
 
 %store number of sensors
 nrOfFTSensors = estimator.sensors().getNrOfSensors(iDynTree.SIX_AXIS_FORCE_TORQUE);
