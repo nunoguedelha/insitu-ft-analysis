@@ -78,7 +78,7 @@ if (size(fields,1)==2)
         figure,
         plot(time-timeStampinit,data.(fields{i})(:,4)-data.(fields{i+1})(:,4),xPlotOptions);hold on;
         plot(time-timeStampinit,data.(fields{i})(:,5)-data.(fields{i+1})(:,5),yPlotOptions);hold on;
-        plot(time-timeStampinit,data.(fields{i})(:,6)-data.(fields{i+1})(:,6),zPlotOptions'.');hold on;
+        plot(time-timeStampinit,data.(fields{i})(:,6)-data.(fields{i+1})(:,6),zPlotOptions);hold on;
         legend('Tx','Ty','Tz','Location','west');
         title(strcat((fields{i}),' vs  ',(fields{i+1})));
         xlabel('TimeStamp');
