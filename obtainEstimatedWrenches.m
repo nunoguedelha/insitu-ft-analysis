@@ -1,4 +1,4 @@
-function [estimatedFtMeasures]=obtainEstimatedWrenches(dataStateDirs,stateExtNames,robotName,resampledTime,contactInfo)
+function [dataset]=obtainEstimatedWrenches(dataStateDirs,stateExtNames,robotName,resampledTime,contactInfo)
 %TODO: add contactInfo (which part of the robot is in contact) obtained from minimal knowledge on the FT sensors
 % contactInfo should in the end have this information for every time step,
 % for now assuming contact doesnt change
@@ -55,25 +55,32 @@ fNames=fieldnames(stateExtNames);
 % stateExtNames.(fNames{i})
 %for the first elment in the first field it would be
 %stateExtnames.(fNames{1}){1}
+dataset.jointNames = {};
 for i=1:size(fNames)
     Dof=size(stateExtNames.(fNames{i}));
     [qj_temp,dqj_temp,ddqj_temp,time_temp]=readStateExt(Dof(1),dataStateDirs{i});
     %store only the ones that have a degree of freedom (the names of the joint
     %should match one of the names stored in the model of the robot
     % we resample joint encoders on the timestamp of the FT sensors
-    fprintf('Resampiling the state\n');
+    fprintf('Resampliling the state\n');
     [qj_temp,dqj_temp,ddqj_temp] = resampleState(resampledTime, time_temp, qj_temp, dqj_temp, ddqj_temp);
     
     for j=1:Dof
         index = find(strcmp(names, stateExtNames.(fNames{i}){j}));
         if(isempty(index)==0)
+            dataset.jointNames{index} = stateExtNames.(fNames{i}){j};
             qj_all(index,:) = deg2rad*qj_temp(j,:);
             dqj_all(index,:) =deg2rad* dqj_temp(j,:);
             ddqj_all(index,:) =deg2rad* ddqj_temp(j,:);
         end
     end
-    
 end
+
+% Store the used position in the returned dataset
+dataset.qj = qj_all';
+dataset.dqj = dqj_all';
+dataset.ddqj = ddqj_all;
+
 
 %% Specify unknown wrenches
 
@@ -105,27 +112,27 @@ fullBodyUnknowns.addNewContactInFrame(estimator.model(),contact_index,unknownWre
 % Print the unknowns to make sure that everything is properly working
 %fullBodyUnknowns.toString(estimator.model())
 
+qj_idyn   = iDynTree.JointPosDoubleArray(dofs);
+dqj_idyn  = iDynTree.JointDOFsDoubleArray(dofs);
+ddqj_idyn = iDynTree.JointDOFsDoubleArray(dofs);
+
 %% For each time instant
-%TODO: replace the zeros with the loaded data from the robot
 for t=1:size(resampledTime)
     qj=qj_all(:,t);
-   dqj=dqj_all(:,t);
-   ddqj=ddqj_all(:,t);
+    dqj=dqj_all(:,t);
+    ddqj=ddqj_all(:,t);
+   
 %    % velocity and acceleration to 0 to prove if they are neglegible. (slow
 %    % experiment scenario)
 %     dqj=zeros(size(qj));
 %     ddqj=zeros(size(qj));
-    
-    qj_idyn   = iDynTree.JointPosDoubleArray(dofs);
-    dqj_idyn  = iDynTree.JointDOFsDoubleArray(dofs);
-    ddqj_idyn = iDynTree.JointDOFsDoubleArray(dofs);
-    
+
     qj_idyn.fromMatlab(qj);
     dqj_idyn.fromMatlab(dqj);
     ddqj_idyn.fromMatlab(ddqj);
     
     % Set the kinematics information in the estimator
-    estimator.updateKinematicsFromFixedBase(qj_idyn,dqj_idyn,ddqj_idyn,contact_index,grav_idyn);
+    ok = estimator.updateKinematicsFromFixedBase(qj_idyn,dqj_idyn,ddqj_idyn,contact_index,grav_idyn);
     
     %% Run the prediction of FT measurements
     
@@ -147,7 +154,7 @@ for t=1:size(resampledTime)
     for ftIndex = 0:(nrOfFTSensors-1)
         estimatedSensorWrench = iDynTree.Wrench();
         %sens = estimator.sensors().getSensor(iDynTree.SIX_AXIS_FORCE_TORQUE,ftIndex);
-        estFTmeasurements.getMeasurement(iDynTree.SIX_AXIS_FORCE_TORQUE,ftIndex,estimatedSensorWrench);
+        ok = estFTmeasurements.getMeasurement(iDynTree.SIX_AXIS_FORCE_TORQUE,ftIndex,estimatedSensorWrench);
         %store in the correct variable, format from readDataDumpre results in (time,sensorindex)
         %TODO: generalized code for any number of sensors , idea create a
         %struct with the name of the sensor as field measures as values and
@@ -168,5 +175,5 @@ for ftIndex = 0:(nrOfFTSensors-1)
     sens = estimator.sensors().getSensor(iDynTree.SIX_AXIS_FORCE_TORQUE,ftIndex);
     %sensorNames{ftIndex+1}=sens.getName();
     %squeeze(ftMeasures(ftIndex+1,:,:)) to remove singleton of ftIndex
-    estimatedFtMeasures.(sens.getName())=squeeze(ftMeasures(ftIndex+1,:,:));
+    dataset.estimatedFtMeasures.(sens.getName())=squeeze(ftMeasures(ftIndex+1,:,:));
 end

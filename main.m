@@ -25,6 +25,8 @@ dataStateDirs={strcat('data/',experimentName,'/icub/head/',stateDataName);
     strcat('data/',experimentName,'/icub/right_leg/',stateDataName);
     strcat('data/',experimentName,'/icub/torso/',stateDataName);
     };
+
+
 %DoF=[6,16,6,16,6,3];% degrees of freedom in the same order of dataStateDirs (head, left_arm _leg, right_arm _leg, torso)
 head='head'; value1={'neck_pitch';'neck_roll';'neck_yaw';'eyes_tilt';'eyes_tilt';'eyes_tilt'};
 left_arm='left_arm'; value2={'l_shoulder_pitch';'l_shoulder_roll';'l_shoulder_yaw';'l_shoulder_yaw';'l_shoulder_yaw';'l_shoulder_yaw';'l_shoulder_yaw';'l_hand_finger';...
@@ -54,7 +56,9 @@ right_leg=resampleFt(time1,time5,right_leg);
 right_foot=resampleFt(time1,time6,right_foot);
 
 %% load state and calculate estimated wrenches for comparison
-[estimatedFtMeasures]=obtainEstimatedWrenches(dataStateDirs,stateExtNames,robotName,time1,contactInfo);
+[dataset]=obtainEstimatedWrenches(dataStateDirs,stateExtNames,robotName,time1,contactInfo);
+
+estimatedFtMeasures = dataset.estimatedFtMeasures;
 sensorNames=fieldnames(estimatedFtMeasures);
 
 %match field names with sensor loaded through readDataDumper
@@ -78,29 +82,29 @@ index = find(strcmp(sensorNames, 'r_foot_ft_sensor'));
 e_right_foot=estimatedFtMeasures.(sensorNames{index});
 
 if (relevant==1)
-rData=load(strcat('data/',experimentName,'/relevantData'));
-time=time1(time1>time1(1)+rData(1) & time1<time1(1)+rData(2));
-mask=time1>time1(1)+rData(1) & time1<time1(1)+rData(2);
+    rData=load(strcat('data/',experimentName,'/relevantData'));
+    time=time1(time1>time1(1)+rData(1) & time1<time1(1)+rData(2));
+    mask=time1>time1(1)+rData(1) & time1<time1(1)+rData(2);
     
-%%extract relevant data from FT data
-left_arm=left_arm(mask,:);
-left_leg=left_leg(mask,:);
-left_foot=left_foot(mask,:);
-right_arm=right_arm(mask,:);
-right_leg=right_leg(mask,:);
-right_foot=right_foot(mask,:);
+    %%extract relevant data from FT data
+    left_arm=left_arm(mask,:);
+    left_leg=left_leg(mask,:);
+    left_foot=left_foot(mask,:);
+    right_arm=right_arm(mask,:);
+    right_leg=right_leg(mask,:);
+    right_foot=right_foot(mask,:);
 
-%%%%extract relevant data from estimation wrenches
-e_left_arm=e_left_arm(mask,:);
-e_left_leg=e_left_leg(mask,:);
-e_left_foot=e_left_foot(mask,:);
-e_right_arm=e_right_arm(mask,:);
-e_right_leg=e_right_leg(mask,:);
-e_right_foot=e_right_foot(mask,:);
+    %%%%extract relevant data from estimation wrenches
+    e_left_arm=e_left_arm(mask,:);
+    e_left_leg=e_left_leg(mask,:);
+    e_left_foot=e_left_foot(mask,:);
+    e_right_arm=e_right_arm(mask,:);
+    e_right_leg=e_right_leg(mask,:);
+    e_right_foot=e_right_foot(mask,:);
 else
     time=time1;
-    
 end
+
 %match FT vs estimated for comparison and plotting
 l_arm='leftArm'; value1=left_arm;
 e_l_arm='estimatedLeftArm'; value2=e_left_arm;
@@ -144,10 +148,10 @@ e_r_foot='estimatedRightFoot'; value2=e_right_foot;
  
 left_arm_noOffset=removeOffset(left_arm,e_left_arm);
 right_arm_noOffset=removeOffset(right_arm,e_right_arm);
- left_leg_noOffset=removeOffset( left_leg,e_left_leg);
- right_leg_noOffset=removeOffset( right_leg,e_right_leg);
- left_foot_noOffset=removeOffset( left_foot,e_left_foot);
- right_foot_noOffset=removeOffset( right_foot,e_right_foot);
+left_leg_noOffset=removeOffset( left_leg,e_left_leg);
+right_leg_noOffset=removeOffset( right_leg,e_right_leg);
+left_foot_noOffset=removeOffset( left_foot,e_left_foot);
+right_foot_noOffset=removeOffset( right_foot,e_right_foot);
 
 l_arm_noOffset='leftArmNoOffset'; value1=left_arm_noOffset;
 e_l_arm='estimatedLeftArm'; value2=e_left_arm;
