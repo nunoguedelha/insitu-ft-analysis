@@ -7,8 +7,11 @@ addpath utils
 experimentName='dumperLeftLeg';% Name of the experiment
 ftDataName='analog:o/data.log'; % (arm, foot and leg have FT data)
 stateDataName='stateExt:o/data.log'; % (only foot has no state data)
-contactInfo=0; % 1 if is on the right , 0 if is on the left
-relevant=1; %if relevantData file exists
+paramScript=strcat('data/',experimentName,'/params.m');
+run(paramScript)
+
+ftNames={'left_arm','right_arm','left_leg','right_leg','left_foot','right_foot'}; %name of folders that contain ft measures
+stateNames={'head','left_arm','right_arm','left_leg','right_leg','torso'}; % name of the folders that contain state information
 
 dataFTDirs={strcat('data/',experimentName,'/icub/left_arm/',ftDataName);
     strcat('data/',experimentName,'/icub/left_leg/',ftDataName);
@@ -58,94 +61,67 @@ right_foot=resampleFt(time1,time6,right_foot);
 %% load state and calculate estimated wrenches for comparison
 [dataset]=obtainEstimatedWrenches(dataStateDirs,stateExtNames,robotName,time1,contactInfo);
 
-estimatedFtMeasures = dataset.estimatedFtMeasures;
-sensorNames=fieldnames(estimatedFtMeasures);
+estimatedFtData = dataset.estimatedFtData;
+sensorNames=fieldnames(estimatedFtData);
 
 %match field names with sensor loaded through readDataDumper
 % sensorNames={'l_arm_ft_sensor';% 'r_arm_ft_sensor';% 'l_leg_ft_sensor';% 'r_leg_ft_sensor';% 'l_foot_ft_sensor';% 'r_foot_ft_sensor';};
 index = find(strcmp(sensorNames, 'l_arm_ft_sensor'));
-e_left_arm=estimatedFtMeasures.(sensorNames{index});
+e_left_arm=estimatedFtData.(sensorNames{index});
 
 index = find(strcmp(sensorNames, 'r_arm_ft_sensor'));
-e_right_arm=estimatedFtMeasures.(sensorNames{index});
+e_right_arm=estimatedFtData.(sensorNames{index});
 
 index = find(strcmp(sensorNames, 'l_leg_ft_sensor'));
-e_left_leg=estimatedFtMeasures.(sensorNames{index});
+e_left_leg=estimatedFtData.(sensorNames{index});
 
 index = find(strcmp(sensorNames, 'r_leg_ft_sensor'));
-e_right_leg=estimatedFtMeasures.(sensorNames{index});
+e_right_leg=estimatedFtData.(sensorNames{index});
 
 index = find(strcmp(sensorNames, 'l_foot_ft_sensor'));
-e_left_foot=estimatedFtMeasures.(sensorNames{index});
+e_left_foot=estimatedFtData.(sensorNames{index});
 
 index = find(strcmp(sensorNames, 'r_foot_ft_sensor'));
-e_right_foot=estimatedFtMeasures.(sensorNames{index});
+e_right_foot=estimatedFtData.(sensorNames{index});
+% add to dataset
+    dataset.ftData.left_arm=left_arm;
+    dataset.ftData.right_arm=right_arm;
+    dataset.ftData.left_leg=left_leg;
+    dataset.ftData.right_leg=right_leg;
+    dataset.ftData.left_foot=left_foot;
+    dataset.ftData.right_foot=right_foot;
+    dataset.time=time1;
 
 if (relevant==1)
-    rData=load(strcat('data/',experimentName,'/relevantData'));
     time=time1(time1>time1(1)+rData(1) & time1<time1(1)+rData(2));
     mask=time1>time1(1)+rData(1) & time1<time1(1)+rData(2);
-    
-    %%extract relevant data from FT data
-    left_arm=left_arm(mask,:);
-    left_leg=left_leg(mask,:);
-    left_foot=left_foot(mask,:);
-    right_arm=right_arm(mask,:);
-    right_leg=right_leg(mask,:);
-    right_foot=right_foot(mask,:);
-
-    %%%%extract relevant data from estimation wrenches
-    e_left_arm=e_left_arm(mask,:);
-    e_left_leg=e_left_leg(mask,:);
-    e_left_foot=e_left_foot(mask,:);
-    e_right_arm=e_right_arm(mask,:);
-    e_right_leg=e_right_leg(mask,:);
-    e_right_foot=e_right_foot(mask,:);
+    dataset=applyMask(dataset,mask);
+%     %%extract relevant data from FT data
+%     left_arm=left_arm(mask,:);
+%     left_leg=left_leg(mask,:);
+%     left_foot=left_foot(mask,:);
+%     right_arm=right_arm(mask,:);
+%     right_leg=right_leg(mask,:);
+%     right_foot=right_foot(mask,:);
+%     
+%     %%%%extract relevant data from estimation wrenches
+%     e_left_arm=e_left_arm(mask,:);
+%     e_left_leg=e_left_leg(mask,:);
+%     e_left_foot=e_left_foot(mask,:);
+%     e_right_arm=e_right_arm(mask,:);
+%     e_right_leg=e_right_leg(mask,:);
+%     e_right_foot=e_right_foot(mask,:);
 else
     time=time1;
 end
 
-%match FT vs estimated for comparison and plotting
-l_arm='leftArm'; value1=left_arm;
-e_l_arm='estimatedLeftArm'; value2=e_left_arm;
-leftArm=struct(l_arm,value1,e_l_arm, value2);
 
- r_arm='rightArm'; value1=right_arm;
-e_r_arm='estimatedRightArm'; value2=e_right_arm;
- rightArm=struct(r_arm,value1,e_r_arm, value2);
+%simple visual exploration suggests an offset problem, this parts aims
+%to calculate the offset and then compare the data with the offset
+%removed
 
+%compute offset on meaningful data
 
- l_leg='leftLeg'; value1=left_leg;
-e_l_leg='estimatedLeftLeg'; value2=e_left_leg;
-leftleg=struct(l_leg,value1,e_l_leg, value2);
-
-  r_leg='rightLeg'; value1=right_leg;
-e_r_leg='estimatedRightLeg'; value2=e_right_leg;
- rightleg=struct(r_leg,value1,e_r_leg, value2);
-
- l_foot='leftFoot'; value1=left_foot;
-e_l_foot='estimatedLeftFoot'; value2=e_left_foot;
-  leftfoot=struct(l_foot,value1,e_l_foot, value2);
-
- r_foot='rightFoot'; value1=right_foot;
-e_r_foot='estimatedRightFoot'; value2=e_right_foot;
- rightfoot=struct(r_foot,value1,e_r_foot, value2);
-
- %ploting
- %FTplots(leftArm,time)
-% FTplots(rightArm,time)
-% FTplots(leftleg,time)
- FTplots(rightleg,time)
- %FTplots(leftfoot,time)
- %FTplots(rightfoot,time)
-
- %% Data exploration
- %simple visual exploration suggests only offset problem, this parts aims
- %to calculate the offset and then compare the data with the offset
- %removed
- 
- %compute offset on meaningful data
- 
 left_arm_noOffset=removeOffset(left_arm,e_left_arm);
 right_arm_noOffset=removeOffset(right_arm,e_right_arm);
 left_leg_noOffset=removeOffset( left_leg,e_left_leg);
@@ -153,6 +129,50 @@ right_leg_noOffset=removeOffset( right_leg,e_right_leg);
 left_foot_noOffset=removeOffset( left_foot,e_left_foot);
 right_foot_noOffset=removeOffset( right_foot,e_right_foot);
 
+%% Save the workspace
+%     %save meaninful data, estimated data, meaninful data no offset
+%     ftData=struct(l_arm,left_arm,r_arm,right_arm,l_leg,left_leg,r_leg,right_leg,l_foot,left_foot,r_foot,right_foot);
+%     estimatedData=struct(e_l_arm,e_left_arm,e_r_arm,e_right_arm,e_l_leg,e_left_leg,e_r_leg,e_right_leg,e_l_foot,e_left_foot,e_r_foot,e_right_foot);
+%     ftDataNoOffset=struct(l_arm_noOffset,left_arm_noOffset,r_arm_noOffset,right_arm_noOffset,l_leg_noOffset,left_leg_noOffset,r_leg_noOffset,right_leg_noOffset,l_foot_noOffset,left_foot_noOffset,r_foot_noOffset,right_foot_noOffset);
+%
+%     save(strcat('data/',experimentName,'/ftData.mat'),'ftData')
+%      save(strcat('data/',experimentName,'/estimatedData.mat'),'estimatedData')
+%       save(strcat('data/',experimentName,'/ftDataNoOffset.mat'),'ftDataNoOffset')
+%       save(strcat('data/',experimentName,'/time.mat'),'time')
+
+% dataset.ftData=ftData; dataset.estimatedData= estimatedData;
+% dataset.ftDataNoOffset=ftDataNoOffset;
+%  save(strcat('data/',experimentName,'/dataset.mat'),'dataset')
+%% Data exploration
+
+%match FT vs estimated for comparison and plotting
+l_arm='leftArm'; value1=left_arm;
+e_l_arm='estimatedLeftArm'; value2=e_left_arm;
+leftArm=struct(l_arm,value1,e_l_arm, value2);
+
+r_arm='rightArm'; value1=right_arm;
+e_r_arm='estimatedRightArm'; value2=e_right_arm;
+rightArm=struct(r_arm,value1,e_r_arm, value2);
+
+
+l_leg='leftLeg'; value1=left_leg;
+e_l_leg='estimatedLeftLeg'; value2=e_left_leg;
+leftleg=struct(l_leg,value1,e_l_leg, value2);
+
+r_leg='rightLeg'; value1=right_leg;
+e_r_leg='estimatedRightLeg'; value2=e_right_leg;
+rightleg=struct(r_leg,value1,e_r_leg, value2);
+
+l_foot='leftFoot'; value1=left_foot;
+e_l_foot='estimatedLeftFoot'; value2=e_left_foot;
+leftfoot=struct(l_foot,value1,e_l_foot, value2);
+
+r_foot='rightFoot'; value1=right_foot;
+e_r_foot='estimatedRightFoot'; value2=e_right_foot;
+rightfoot=struct(r_foot,value1,e_r_foot, value2);
+
+
+%match FT without offset vs estimated for comparison and plotting
 l_arm_noOffset='leftArmNoOffset'; value1=left_arm_noOffset;
 e_l_arm='estimatedLeftArm'; value2=e_left_arm;
 leftArm_noOffset=struct(l_arm_noOffset,value1,e_l_arm, value2);
@@ -162,42 +182,39 @@ e_r_arm='estimatedRightArm'; value2=e_right_arm;
 rightArm_noOffset=struct(r_arm_noOffset,value1,e_r_arm, value2);
 
 
- l_leg_noOffset='leftLegNoOffset'; value1=left_leg_noOffset;
+l_leg_noOffset='leftLegNoOffset'; value1=left_leg_noOffset;
 e_l_leg='estimatedLeftLeg'; value2=e_left_leg;
 leftleg_noOffset=struct(l_leg_noOffset,value1,e_l_leg, value2);
 
-  r_leg_noOffset='rightLegNoOffset'; value1=right_leg_noOffset;
+r_leg_noOffset='rightLegNoOffset'; value1=right_leg_noOffset;
 e_r_leg='estimatedRightLeg'; value2=e_right_leg;
- rightleg_noOffset=struct(r_leg_noOffset,value1,e_r_leg, value2);
+rightleg_noOffset=struct(r_leg_noOffset,value1,e_r_leg, value2);
 
- l_foot_noOffset='leftFootNoOffset'; value1=left_foot_noOffset;
+l_foot_noOffset='leftFootNoOffset'; value1=left_foot_noOffset;
 e_l_foot='estimatedLeftFoot'; value2=e_left_foot;
-  leftfoot_noOffset=struct(l_foot_noOffset,value1,e_l_foot, value2);
+leftfoot_noOffset=struct(l_foot_noOffset,value1,e_l_foot, value2);
 
- r_foot_noOffset='rightFootNoOffset'; value1=right_foot_noOffset;
+r_foot_noOffset='rightFootNoOffset'; value1=right_foot_noOffset;
 e_r_foot='estimatedRightFoot'; value2=e_right_foot;
- rightfoot_noOffset=struct(r_foot_noOffset,value1,e_r_foot, value2);
+rightfoot_noOffset=struct(r_foot_noOffset,value1,e_r_foot, value2);
 
- %ploting
- %FTplots(leftArm_noOffset,time)
+%ploting with offset
+%FTplots(leftArm,time)
+% FTplots(rightArm,time)
+ FTplots(leftleg,time)
+FTplots(rightleg,time)
+%FTplots(leftfoot,time)
+%FTplots(rightfoot,time)
+
+%ploting without offset
+%FTplots(leftArm_noOffset,time)
 % FTplots(rightArm_noOffset,time)
 % FTplots(leftleg_noOffset,time)
- FTplots(rightleg_noOffset,time)
- %FTplots(leftfoot_noOffset,time)
- %FTplots(rightfoot_noOffset,time)
- 
- 
-     %% Save the workspace 
-%     %save meaninful data, estimated data, meaninful data no offset
-%     ftData=struct(l_arm,left_arm,r_arm,right_arm,l_leg,left_leg,r_leg,right_leg,l_foot,left_foot,r_foot,right_foot);
-%     estimatedData=struct(e_l_arm,e_left_arm,e_r_arm,e_right_arm,e_l_leg,e_left_leg,e_r_leg,e_right_leg,e_l_foot,e_left_foot,e_r_foot,e_right_foot);
-%     ftDataNoOffset=struct(l_arm_noOffset,left_arm_noOffset,r_arm_noOffset,right_arm_noOffset,l_leg_noOffset,left_leg_noOffset,r_leg_noOffset,right_leg_noOffset,l_foot_noOffset,left_foot_noOffset,r_foot_noOffset,right_foot_noOffset);
-% 
-%     save(strcat('data/',experimentName,'/ftData.mat'),'ftData')
-%      save(strcat('data/',experimentName,'/estimatedData.mat'),'estimatedData')
-%       save(strcat('data/',experimentName,'/ftDataNoOffset.mat'),'ftDataNoOffset')
-%       save(strcat('data/',experimentName,'/time.mat'),'time')
-%% Plot forces in 3D space
+FTplots(rightleg_noOffset,time)
+%FTplots(leftfoot_noOffset,time)
+%FTplots(rightfoot_noOffset,time)
+
+% Plot forces in 3D space
 figure,plot3_matrix(left_arm_noOffset(:,1:3)); hold on; plot3_matrix(e_left_arm(:,1:3));grid on;
 figure,plot3_matrix(right_arm_noOffset(:,1:3)); hold on; plot3_matrix(e_right_arm(:,1:3));grid on;
 figure,plot3_matrix( left_leg_noOffset(:,1:3)); hold on; plot3_matrix(e_left_leg(:,1:3));grid on;

@@ -15,7 +15,7 @@ figure,
 plot(time-timeStampinit,data.(fields{i})(:,1),xPlotOptions);hold on;
 plot(time-timeStampinit,data.(fields{i})(:,2),yPlotOptions);hold on;
 plot(time-timeStampinit,data.(fields{i})(:,3),zPlotOptions);hold on;
-legend('Fx','Fy','Fz','Location','west');
+legend('F_{x}','F_{y}','F_{z}','Location','west');
 title((fields{i}));
 xlabel('TimeStamp');
 ylabel('N');
@@ -26,7 +26,7 @@ figure,
 plot(time-timeStampinit,data.(fields{i})(:,4),xPlotOptions);hold on;
 plot(time-timeStampinit,data.(fields{i})(:,5),yPlotOptions);hold on;
 plot(time-timeStampinit,data.(fields{i})(:,6),zPlotOptions);hold on;
-legend('Tx','Ty','Tz','Location','west');
+legend('\tau_{x}','\tau_{y}','\tau_{z}','Location','west');
 title((fields{i}));
 xlabel('TimeStamp');
 ylabel('Nm');
@@ -43,7 +43,7 @@ if (size(fields,1)==2)
         plot(time-timeStampinit,data.(fields{i+1})(:,1),xPlotOptions);hold on;
         plot(time-timeStampinit,data.(fields{i+1})(:,2),yPlotOptions);hold on;
         plot(time-timeStampinit,data.(fields{i+1})(:,3),zPlotOptions);hold on;
-        legend('Fx','Fy','Fz','Fx2','Fy2','Fz2','Location','west');
+        legend('F_{x}','F_{y}','F_{z}','F_{x2}','F_{y2}','F_{z2}','Location','west');
         title(strcat((fields{i}),' and','  ',(fields{i+1})));
         xlabel('TimeStamp');
         ylabel('N');
@@ -57,7 +57,7 @@ if (size(fields,1)==2)
         plot(time-timeStampinit,data.(fields{i+1})(:,4),xPlotOptions);hold on;
         plot(time-timeStampinit,data.(fields{i+1})(:,5),yPlotOptions);hold on;
         plot(time-timeStampinit,data.(fields{i+1})(:,6),zPlotOptions);hold on;
-        legend('Tx','Ty','Tz','Tx2','Ty2','Tz2','Location','west');
+        legend('\tau_{x}','\tau_{y}','\tau_{z}','\tau_{x2}','\tau_{y2}','\tau_{z2}','Location','west');
         title(strcat((fields{i}),' and  ',(fields{i+1})));
         xlabel('TimeStamp');
         ylabel('Nm');
@@ -68,7 +68,7 @@ if (size(fields,1)==2)
         plot(time-timeStampinit,data.(fields{i})(:,1)-data.(fields{i+1})(:,1),xPlotOptions);hold on;
         plot(time-timeStampinit,data.(fields{i})(:,2)-data.(fields{i+1})(:,2),yPlotOptions);hold on;
         plot(time-timeStampinit,data.(fields{i})(:,3)-data.(fields{i+1})(:,3),zPlotOptions);hold on;
-        legend('Fx','Fy','Fz','Location','west');
+        legend('F_{x}','F_{y}','F_{z}','Location','west');
         title(strcat((fields{i}),' vs  ',(fields{i+1})));
         xlabel('TimeStamp');
         ylabel('N');
@@ -79,7 +79,7 @@ if (size(fields,1)==2)
         plot(time-timeStampinit,data.(fields{i})(:,4)-data.(fields{i+1})(:,4),xPlotOptions);hold on;
         plot(time-timeStampinit,data.(fields{i})(:,5)-data.(fields{i+1})(:,5),yPlotOptions);hold on;
         plot(time-timeStampinit,data.(fields{i})(:,6)-data.(fields{i+1})(:,6),zPlotOptions);hold on;
-        legend('Tx','Ty','Tz','Location','west');
+        legend('\tau_{x}','\tau_{y}','\tau_{z}','Location','west');
         title(strcat((fields{i}),' vs  ',(fields{i+1})));
         xlabel('TimeStamp');
         ylabel('Nm');

@@ -21,8 +21,8 @@ estimator.loadModelAndSensorsFromFile(strcat('./',robotName,'.urdf'));
 %store number of sensors
 nrOfFTSensors = estimator.sensors().getNrOfSensors(iDynTree.SIX_AXIS_FORCE_TORQUE);
 
-%size of array with the expected measures
- ftMeasures=zeros(nrOfFTSensors,size(resampledTime,1),6);
+%size of array with the expected Data
+ftData=zeros(nrOfFTSensors,size(resampledTime,1),6);
 %% Set kinematics information
 
 % Set kinematics information: for this example, we will assume
@@ -43,8 +43,8 @@ qj_all = zeros(dofs,size(resampledTime,1));
 dqj_all = zeros(dofs,size(resampledTime,1));
 ddqj_all = zeros(dofs,size(resampledTime,1));
 
-% convert also to radians 
-    deg2rad = pi/180.0;
+% convert also to radians
+deg2rad = pi/180.0;
 %get the names of the model to match the names from the data file read
 for i=0:dofs-1
     % disp(strcat('name=',estimator.model().getJointName(i),' , index=',num2str(i)))
@@ -62,7 +62,7 @@ for i=1:size(fNames)
     %store only the ones that have a degree of freedom (the names of the joint
     %should match one of the names stored in the model of the robot
     % we resample joint encoders on the timestamp of the FT sensors
-    fprintf('Resampliling the state\n');
+    fprintf('Resampling the state\n');
     [qj_temp,dqj_temp,ddqj_temp] = resampleState(resampledTime, time_temp, qj_temp, dqj_temp, ddqj_temp);
     
     for j=1:Dof
@@ -79,7 +79,7 @@ end
 % Store the used position in the returned dataset
 dataset.qj = qj_all';
 dataset.dqj = dqj_all';
-dataset.ddqj = ddqj_all;
+dataset.ddqj = ddqj_all';
 
 
 %% Specify unknown wrenches
@@ -121,12 +121,12 @@ for t=1:size(resampledTime)
     qj=qj_all(:,t);
     dqj=dqj_all(:,t);
     ddqj=ddqj_all(:,t);
-   
-%    % velocity and acceleration to 0 to prove if they are neglegible. (slow
-%    % experiment scenario)
-%     dqj=zeros(size(qj));
-%     ddqj=zeros(size(qj));
-
+    
+    %    % velocity and acceleration to 0 to prove if they are neglegible. (slow
+    %    % experiment scenario)
+    %     dqj=zeros(size(qj));
+    %     ddqj=zeros(size(qj));
+    
     qj_idyn.fromMatlab(qj);
     dqj_idyn.fromMatlab(dqj);
     ddqj_idyn.fromMatlab(ddqj);
@@ -157,11 +157,11 @@ for t=1:size(resampledTime)
         ok = estFTmeasurements.getMeasurement(iDynTree.SIX_AXIS_FORCE_TORQUE,ftIndex,estimatedSensorWrench);
         %store in the correct variable, format from readDataDumpre results in (time,sensorindex)
         %TODO: generalized code for any number of sensors , idea create a
-        %struct with the name of the sensor as field measures as values and
+        %struct with the name of the sensor as field Data as values and
         %compare in the main with the name of the sensors.
         %estimatedSensorWrench.toMatlab() transforms the wrench into 6x1 vector of
         %matlab
-        ftMeasures(ftIndex+1,t,:)=estimatedSensorWrench.toMatlab();
+        ftData(ftIndex+1,t,:)=estimatedSensorWrench.toMatlab();
         
     end
     
@@ -174,6 +174,6 @@ nrOfFTSensors = estimator.sensors().getNrOfSensors(iDynTree.SIX_AXIS_FORCE_TORQU
 for ftIndex = 0:(nrOfFTSensors-1)
     sens = estimator.sensors().getSensor(iDynTree.SIX_AXIS_FORCE_TORQUE,ftIndex);
     %sensorNames{ftIndex+1}=sens.getName();
-    %squeeze(ftMeasures(ftIndex+1,:,:)) to remove singleton of ftIndex
-    dataset.estimatedFtMeasures.(sens.getName())=squeeze(ftMeasures(ftIndex+1,:,:));
+    %squeeze(ftData(ftIndex+1,:,:)) to remove singleton of ftIndex
+    dataset.estimatedFtData.(sens.getName())=squeeze(ftData(ftIndex+1,:,:));
 end
