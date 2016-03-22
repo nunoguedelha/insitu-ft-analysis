@@ -1,12 +1,8 @@
-function [dataset]=obtainEstimatedWrenches(dataStateDirs,stateExtNames,robotName,resampledTime,contactInfo)
+function [dataset]=obtainEstimatedWrenches(dataStateDirs,stateExtNames,robotName,resampledTime,contactFrameName)
 %TODO: add contactInfo (which part of the robot is in contact) obtained from minimal knowledge on the FT sensors
 % contactInfo should in the end have this information for every time step,
 % for now assuming contact doesnt change
-if (contactInfo==1)
-    left_support=false;
-else
-    left_support=true;
-end
+
 %% Load the estimator
 
 % Create estimator class
@@ -90,11 +86,9 @@ dataset.ddqj = ddqj_all';
 %TODO: recognize when the feet are in contact either left or right or both
 %and establish the unkown wrench accordingly
 % Set the contact information in the estimator
-if (left_support==true)
-    contact_index = estimator.model().getFrameIndex('l_sole');
-else
-    contact_index = estimator.model().getFrameIndex('r_sole');
-end
+
+    contact_index = estimator.model().getFrameIndex(contactFrameName);
+
 
 unknownWrench = iDynTree.UnknownWrenchContact();
 unknownWrench.unknownType = iDynTree.FULL_WRENCH;
