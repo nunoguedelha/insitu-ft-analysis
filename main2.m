@@ -32,99 +32,92 @@ experimentName='21_03_2016/yogaLeft1';% Name of the experiment;
 paramScript=strcat('data/',experimentName,'/params.m');
 run(paramScript)
 
-
-ftDataName=strcat(input.ftPortName,'/data.log'); % (arm, foot and leg have FT data)
-stateDataName=strcat(input.statePortName,'/data.log');  % (only foot has no state data)
-%params.m is expected to have contactInfo (1 right ,0 left ), relevant (if
-%there is an specific interval desired to study (1 true, 0 false ) and
-%rData which is a double array 1x2 that has begining and ending of interval in seconds
-
-
-for i=1:size(input.ftNames,1)
-    dataFTDirs{i}=strcat('data/',experimentName,'/icub/',input.ftNames{i},'/',ftDataName);
+if (exist(strcat('data/',experimentName,'/dataset.mat'),'file')==2)
+    %% Load from workspace
+    %     %load meaninful data, estimated data, meaninful data no offset
+    load(strcat('data/',experimentName,'/dataset.mat'),'dataset')
+      
+else
+    ftDataName=strcat(input.ftPortName,'/data.log'); % (arm, foot and leg have FT data)
+    stateDataName=strcat(input.statePortName,'/data.log');  % (only foot has no state data)
+    %params.m is expected to have contactInfo (1 right ,0 left ), relevant (if
+    %there is an specific interval desired to study (1 true, 0 false ) and
+    %rData which is a double array 1x2 that has begining and ending of interval in seconds
     
-end
-stateNames=fieldnames(input.stateNames);
-for i=1:size(stateNames,1)
-    dataStateDirs{i}=strcat('data/',experimentName,'/icub/',stateNames{i},'/',stateDataName);
     
-end
-%TODO: replace "icub" for robot model? so that it can be used for other
-%robots, although this is dependent on the output kind of the data dumper
-
-
-%% load FT data
-[ftData.(input.ftNames{1}),time]=readDataDumper(dataFTDirs{1});
-nanIndex=0;
-nanCount=0;
-for i=2:size(input.ftNames,1)
-    %read from dataDumper
-    [ftData_temp,time_temp]=readDataDumper(dataFTDirs{i});
-    %resample FT data
-    ftData.(input.ftNames{i})=resampleFt(time,time_temp,ftData_temp);
-    %if the initial time of the time_temp is less than time it might return
-    %NaN values for the those first values, so we will take into account
-    %which has the biggest amount of nans and remove those values with
-    %applyMask later
-    if (sum(isnan(ftData.(input.ftNames{i})(:,1)))>nanCount)
-        nanIndex=i;
-        nanCount=sum(isnan(ftData.(input.ftNames{i})(:,1)));
+    for i=1:size(input.ftNames,1)
+        dataFTDirs{i}=strcat('data/',experimentName,'/icub/',input.ftNames{i},'/',ftDataName);
+        
     end
+    stateNames=fieldnames(input.stateNames);
+    for i=1:size(stateNames,1)
+        dataStateDirs{i}=strcat('data/',experimentName,'/icub/',stateNames{i},'/',stateDataName);
+        
+    end
+    %TODO: replace "icub" for robot model? so that it can be used for other
+    %robots, although this is dependent on the output kind of the data dumper
+    
+    
+    %% load FT data
+    [ftData.(input.ftNames{1}),time]=readDataDumper(dataFTDirs{1});
+    nanIndex=0;
+    nanCount=0;
+    for i=2:size(input.ftNames,1)
+        %read from dataDumper
+        [ftData_temp,time_temp]=readDataDumper(dataFTDirs{i});
+        %resample FT data
+        ftData.(input.ftNames{i})=resampleFt(time,time_temp,ftData_temp);
+        %if the initial time of the time_temp is less than time it might return
+        %NaN values for the those first values, so we will take into account
+        %which has the biggest amount of nans and remove those values with
+        %applyMask later
+        if (sum(isnan(ftData.(input.ftNames{i})(:,1)))>nanCount)
+            nanIndex=i;
+            nanCount=sum(isnan(ftData.(input.ftNames{i})(:,1)));
+        end
+    end
+    
+    %% load state and calculate estimated wrenches for comparison
+    [dataset]=obtainEstimatedWrenches(dataStateDirs,input.stateNames,input.robotName,time,contactFrameName);
+    
+    dataset.time=time;
+    dataset.ftData=ftData;
+    
+    sensorNames=fieldnames(dataset.estimatedFtData);
+    
+    %match field names with sensor loaded through readDataDumper
+    %
+    matchup=zeros(size(input.sensorNames,1),1);
+    for i=1:size(input.sensorNames,1)
+        matchup(i) = find(strcmp(sensorNames, input.sensorNames{i}));
+    end
+    
+    %replace the estored estimatedFtData for one with the same order as the
+    %ftData
+    for i=1:size(input.ftNames,1)
+        estimatedFtData.(input.ftNames{i})=dataset.estimatedFtData.(sensorNames{matchup(i)});
+    end
+    dataset.estimatedFtData=estimatedFtData;
+      
+    if (relevant==1)
+        mask=dataset.time>dataset.time(1)+rData(1) & dataset.time<dataset.time(1)+rData(2);
+        dataset=applyMask(dataset,mask);
+    end
+        
+    %simple visual exploration suggests an offset problem, this parts aims
+    %to calculate the offset and then compare the data with the offset
+    %removed
+    
+    %compute offset on meaningful data
+    for i=1:size(input.ftNames,1)
+        ftDataNoOffset.(input.ftNames{i})=removeOffset(dataset.ftData.(input.ftNames{i}),dataset.estimatedFtData.(input.ftNames{i}));
+    end
+    dataset.ftDataNoOffset=ftDataNoOffset;
+    
+    %% Save the workspace
+    %     %save meaninful data, estimated data, meaninful data no offset
+    save(strcat('data/',experimentName,'/dataset.mat'),'dataset')
 end
-
-%% load state and calculate estimated wrenches for comparison
-[dataset]=obtainEstimatedWrenches(dataStateDirs,input.stateNames,input.robotName,time,contactFrameName);
-
-dataset.time=time;
-dataset.ftData=ftData;
-
-sensorNames=fieldnames(dataset.estimatedFtData);
-
-%match field names with sensor loaded through readDataDumper
-%
-matchup=zeros(size(input.sensorNames,1),1);
-for i=1:size(input.sensorNames,1)
-    matchup(i) = find(strcmp(sensorNames, input.sensorNames{i}));
-end
-
-%replace the estored estimatedFtData for one with the same order as the
-%ftData
-for i=1:size(input.ftNames,1)
-    estimatedFtData.(input.ftNames{i})=dataset.estimatedFtData.(sensorNames{matchup(i)});
-end
-dataset.estimatedFtData=estimatedFtData;
-
-
-
-if (relevant==1)
-    mask=dataset.time>dataset.time(1)+rData(1) & dataset.time<dataset.time(1)+rData(2);
-    dataset=applyMask(dataset,mask);
-end
-
-if (nanIndex>0)
-    %    mask=not(isnan( ftData.(input.ftNames{nanIndex})(:,1)));
-    %     dataset=applyMask(dataset,mask);
-    disp('There is some NaN value in the force torque sensor data');
-end
-
-%simple visual exploration suggests an offset problem, this parts aims
-%to calculate the offset and then compare the data with the offset
-%removed
-
-%compute offset on meaningful data
-for i=1:size(input.ftNames,1)
-    ftDataNoOffset.(input.ftNames{i})=removeOffset(dataset.ftData.(input.ftNames{i}),dataset.estimatedFtData.(input.ftNames{i}));
-end
-dataset.ftDataNoOffset=ftDataNoOffset;
-
-%% Save the workspace
-%     %save meaninful data, estimated data, meaninful data no offset
-save(strcat('data/',experimentName,'/dataset.mat'),'dataset')
-
-%% Load from workspace
-%     %load meaninful data, estimated data, meaninful data no offset
-load(strcat('data/',experimentName,'/dataset.mat'),'dataset')
-
 %% Data exploration
 % Plot ftDataNoOffset and/vs estimatedFtData
 % for i=4:4
@@ -156,45 +149,70 @@ end
 
 % ellipsoid
 
+%TODO:
+% 
+% for i=4:4
+%     %     %     for i=1:size(input.ftNames,1)
+%     %     figure,plot3_matrix(dataset.ftDataNoOffset.(input.ftNames{i})(:,1:3));hold on;
+%     
+%     %     plot3_matrix(dataset.estimatedFtData.(input.ftNames{i})(:,1:3)); grid on;
+%     
+%     % ellipsoidfit(dataset.ftDataNoOffset.(input.ftNames{i})(:,1),dataset.ftDataNoOffset.(input.ftNames{i})(:,2),dataset.ftDataNoOffset.(input.ftNames{i})(:,3))
+%     % ellipsoidfit_leastsquares(dataset.estimatedFtData.(input.ftNames{i})(:,1),dataset.estimatedFtData.(input.ftNames{i})(:,2),dataset.estimatedFtData.(input.ftNames{i})(:,3))
+%     ft_raw=dataset.ftDataNoOffset.(input.ftNames{i})(:,1:3);
+%     acc=dataset.estimatedFtData.(input.ftNames{i})(:,1:3);
+%     ft_raw_no_mean = ft_raw-ones(size(ft_raw,1),1)*mean(ft_raw);
+%     ft_raw_mean = mean(ft_raw);
+%     
+%     [U_raw,S_ft_raw,V_raw] = svd(ft_raw_no_mean,'econ');
+%     bar((S_ft_raw));
+%     ft_raw_projector = V_raw(:,1:3)';
+%     ft_raw_projected = (V_raw(:,1:3)'*ft_raw_no_mean')';
+%     title('Raw sensor data singular values')
+%     
+%     normalize = @(x) (x-ones(size(x,1),1)*mean(x))./(ones(size(x,1),1)*std(x));
+%     normalize_isotropically = @(x) (x-ones(size(x,1),1)*mean(x))/mean(std(x));
+%     
+%     % normalize data
+%     ft_raw_projected_norm = normalize(ft_raw_projected);
+%     %%
+%     %Plotting ellipsoid fitted in raw space
+%     fprintf(['Fitting ft ellipsoid\n']);
+%     [p_ft_norm,ft_proj_norm_refitted]   = ellipsoidfit_smart(ft_raw_projected_norm,acc);
+%     fprintf(['Fitting acc ellipsoid\n']);
+%     p_acc  = ellipsoidfit(acc(1:end,1),acc(1:end,2),acc(1:end,3));
+%     
+%     figure
+%     plot_ellipsoid_im(p_ft_norm);
+%     plot3_matrix(ft_raw_projected_norm(1:end,:))
+%     axis equal
+%     title('Ellipsoid fitted in FT raw space');
+%     
+% end
 
 
+%%Calibration matrix correction
+dataset.rawData=getRawData(dataset,input.calibMatPath,input.calibMatFileNames);
 
+[mb, nb] = size(B);
 
-for i=4:4
-%     %     for i=1:size(input.ftNames,1)
-%     figure,plot3_matrix(dataset.ftDataNoOffset.(input.ftNames{i})(:,1:3));hold on;
-
-%     plot3_matrix(dataset.estimatedFtData.(input.ftNames{i})(:,1:3)); grid on;
-
-% ellipsoidfit(dataset.ftDataNoOffset.(input.ftNames{i})(:,1),dataset.ftDataNoOffset.(input.ftNames{i})(:,2),dataset.ftDataNoOffset.(input.ftNames{i})(:,3))
-% ellipsoidfit_leastsquares(dataset.estimatedFtData.(input.ftNames{i})(:,1),dataset.estimatedFtData.(input.ftNames{i})(:,2),dataset.estimatedFtData.(input.ftNames{i})(:,3))
-ft_raw=dataset.ftDataNoOffset.(input.ftNames{i})(:,1:3);
-acc=dataset.estimatedFtData.(input.ftNames{i})(:,1:3);
-ft_raw_no_mean = ft_raw-ones(size(ft_raw,1),1)*mean(ft_raw);
-ft_raw_mean = mean(ft_raw);
-    
-[U_raw,S_ft_raw,V_raw] = svd(ft_raw_no_mean,'econ');
-bar((S_ft_raw));
-ft_raw_projector = V_raw(:,1:3)';
-ft_raw_projected = (V_raw(:,1:3)'*ft_raw_no_mean')';
-title('Raw sensor data singular values')
-
-normalize = @(x) (x-ones(size(x,1),1)*mean(x))./(ones(size(x,1),1)*std(x));
-normalize_isotropically = @(x) (x-ones(size(x,1),1)*mean(x))/mean(std(x));
-
-% normalize data
-ft_raw_projected_norm = normalize(ft_raw_projected);
-%% 
-%Plotting ellipsoid fitted in raw space
-fprintf(['Fitting ft ellipsoid\n']);
-[p_ft_norm,ft_proj_norm_refitted]   = ellipsoidfit_smart(ft_raw_projected_norm,acc);
-fprintf(['Fitting acc ellipsoid\n']);
-p_acc  = ellipsoidfit(acc(1:end,1),acc(1:end,2),acc(1:end,3));
-
-figure
-plot_ellipsoid_im(p_ft_norm);
-plot3_matrix(ft_raw_projected_norm(1:end,:))
-axis equal
-title('Ellipsoid fitted in FT raw space');
-
+kIA = kron(eye(6), A);
+%kIAr = kron(eye(6), Ar);
+for i = 0 : 5
+    Anew = kIA(1+i*mb: (i+1)*mb,:);
+    bnew = B(:,i+1);
+    W = diag([ones(1,18), ones(1,6).*.3]);
+    kIAw(1+i*mb: (i+1)*mb, :) = W*Anew;
+    Bw(:,i+1) = W*bnew;
 end
+
+vec_xw = pinv(kIAw)*Bw(:);
+Xw = reshape(vec_xw, 6, 6);
+Bw_pred = A*Xw;
+
+vec_x = pinv(kIA)*B(:);
+X = reshape(vec_x, 6, 6);
+B_pred = A*X;
+%Br_pred = Ar*X;
+
+Calib = X';
