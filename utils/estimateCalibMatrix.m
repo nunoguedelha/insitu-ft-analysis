@@ -1,4 +1,4 @@
-function [calibM]=estimateCalibMatrix(rawData,expectedWrench)
+function [calibM,full_scale]=estimateCalibMatrix(rawData,expectedWrench)
 [mb, nb] = size(expectedWrench);
 
 kIA = kron(eye(6), rawData);
