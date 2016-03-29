@@ -9,7 +9,7 @@ ft_raw_no_mean = ft_raw-ones(size(ft_raw,1),1)*mean(ft_raw);
 ft_raw_mean = mean(ft_raw);
     
 [U_raw,S_ft_raw,V_raw] = svd(ft_raw_no_mean,'econ');
-bar((S_ft_raw));
+figure,bar((S_ft_raw));
 ft_raw_projector = V_raw(:,1:3)';
 ft_raw_projected = (V_raw(:,1:3)'*ft_raw_no_mean')';
 title('Raw sensor data singular values')
@@ -26,11 +26,11 @@ ft_raw_projected_norm = normalize(ft_raw_projected);
 fprintf(['Fitting ft ellipsoid\n']);
 [p_ft_norm,ft_proj_norm_refitted]   = ellipsoidfit_smart(ft_raw_projected_norm,acc);
 fprintf(['Fitting acc ellipsoid\n']);
-p_acc  = ellipsoidfit(acc(1:end,1),acc(1:end,2),acc(1:end,3));
+% p_acc  = ellipsoidfit(acc(1:end,1),acc(1:end,2),acc(1:end,3));
 
 figure
 plot_ellipsoid_im(p_ft_norm);
-plot3_matrix(ft_raw_projected_norm(1:end,:))
+plot3_matrix(ft_raw_projected_norm(1:end,:));
 axis equal
 title('Ellipsoid fitted in FT raw space');
 
