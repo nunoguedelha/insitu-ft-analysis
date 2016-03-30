@@ -28,7 +28,7 @@ addpath external/quadfit
 addpath utils
 % name and paths of the data files
 
-experimentName='16_03_2016/leftRightLegsGrid';% Name of the experiment;
+experimentName='icub-insitu-ft-analysis-big-datasets/16_03_2016/leftRightLegsGrid';% Name of the experiment;
 paramScript=strcat('data/',experimentName,'/params.m');
 run(paramScript)
 
@@ -126,10 +126,10 @@ end
 % end
 
 % Plot ftDataNoOffset and/vs estimatedFtData
-for i=4:4
-    %     for i=1:size(input.ftNames,1)
-    FTplots(struct(input.ftNames{i},dataset.ftDataNoOffset.(input.ftNames{i}),strcat('estimated',input.ftNames{i}),dataset.estimatedFtData.(input.ftNames{i})),dataset.time);
-end
+% for i=4:4
+%     %     for i=1:size(input.ftNames,1)
+%     FTplots(struct(input.ftNames{i},dataset.ftDataNoOffset.(input.ftNames{i}),strcat('estimated',input.ftNames{i}),dataset.estimatedFtData.(input.ftNames{i})),dataset.time);
+% end
 
 % Plot forces in 3D space
 % %with offset
@@ -198,10 +198,10 @@ end
 dataset2=applyMask(dataset,mask);
 filterd=applyMask(filteredFtData,mask);
 dataset2.filteredFtData=filterd;
-for i=4:4
-    %     for i=1:size(input.ftNames,1)
-    FTplots(struct(input.ftNames{i},filterd.(input.ftNames{i}),strcat('estimated',input.ftNames{i}),dataset2.estimatedFtData.(input.ftNames{i})),dataset2.time);
-end
+% for i=4:4
+%     %     for i=1:size(input.ftNames,1)
+%     FTplots(struct(input.ftNames{i},filterd.(input.ftNames{i}),strcat('estimated',input.ftNames{i}),dataset2.estimatedFtData.(input.ftNames{i})),dataset2.time);
+% end
 %getting raw datat
 [dataset2.rawData,cMat]=getRawData(dataset2.filteredFtData,input.calibMatPath,input.calibMatFileNames);
 [calibMatrices,offset]=estimateMatrices(dataset2.rawData,dataset2.estimatedFtData);

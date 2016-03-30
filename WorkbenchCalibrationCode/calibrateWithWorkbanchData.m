@@ -292,7 +292,7 @@ ellipsoidfit_smart(B_pred5(:,1:3),acc5);
 
 
 %% write calibration matrix to file
- write_matrix;
+%  write_matrix;
 
 %% plot the results
 % nicePlots
