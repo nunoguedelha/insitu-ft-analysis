@@ -209,7 +209,7 @@ eC=cMat.left_leg-calibMatrices.left_leg;
 
 for i=4:4
     for j=1:size(dataset2.rawData.(input.ftNames{i}),1)
-        reCalibData(j,:)=calibMatrices.(input.ftNames{i})*dataset2.rawData.(input.ftNames{i})(j,:)';
+        reCalibData(j,:)=calibMatrices.(input.ftNames{i})*(dataset2.rawData.(input.ftNames{i})(j,:)'-offset.(input.ftNames{i})');
     end
 end
 
