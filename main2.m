@@ -28,7 +28,7 @@ addpath external/quadfit
 addpath utils
 % name and paths of the data files
 
-experimentName='icub-insitu-ft-analysis-big-datasets/16_03_2016/leftRightLegsGrid';% Name of the experiment;
+experimentName='icub-insitu-ft-analysis-big-datasets/21_03_2016/yogaLeft1';% Name of the experiment;
 paramScript=strcat('data/',experimentName,'/params.m');
 run(paramScript)
 
@@ -120,10 +120,10 @@ else
 end
 %% Data exploration
 % Plot ftDataNoOffset and/vs estimatedFtData
-% for i=4:4
-%     %     for i=1:size(input.ftNames,1)
-%     FTplots(struct(input.ftNames{i},dataset.ftData.(input.ftNames{i}),strcat('estimated',input.ftNames{i}),dataset.estimatedFtData.(input.ftNames{i})),dataset.time);
-% end
+for i=4:4
+    %     for i=1:size(input.ftNames,1)
+    FTplots(struct(input.ftNames{i},dataset.ftData.(input.ftNames{i}),strcat('estimated',input.ftNames{i}),dataset.estimatedFtData.(input.ftNames{i})),dataset.time);
+end
 
 % Plot ftDataNoOffset and/vs estimatedFtData
 for i=4:4
@@ -178,7 +178,7 @@ for i=4:4
 end
 
 dataset2.calibMatrices=calibMatrices;
-dataset2.oofset=offset;
+dataset2.offset=offset;
 dataset2.fullscale=fullscale;
  %% Save the workspace
     %     %save meaninful data, estimated data, meaninful data no offset
