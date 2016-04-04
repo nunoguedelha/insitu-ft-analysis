@@ -43,6 +43,8 @@ end
 %get raw data or directly load raw data
 ftNames=fieldnames(e1.dataset2.ftData);
 %recalibrate with matrix 1 experiment1
+
+
 % for i=4:4
 %     for j=1:size(e1.dataset2.rawData.( ftNames{i}),1)
 %         reCalibData1(j,:)=calibMat1*(e1.dataset2.rawData.( ftNames{i})(j,:)'-e1.dataset2.offset.( ftNames{i})');
@@ -61,6 +63,42 @@ ftNames=fieldnames(e1.dataset2.ftData);
 %     end
 % end
 if(e==1)
+    
+    for i=4:4
+        for j=1:size(e1.dataset2.rawData.( ftNames{i}),1)
+            reCalibData1(j,:)=calibMat1*(e1.dataset2.rawData.( ftNames{i})(j,:)');%-e1.dataset2.offset.( ftNames{i})');
+        end
+    end
+
+%remove offset 
+ ftDataNoOffset1=removeOffset(reCalibData1,e1.dataset2.estimatedFtData.(ftNames{i}));
+
+% recalibrate with matrix 2
+for i=4:4
+    for j=1:size(e1.dataset2.rawData.( ftNames{i}),1)
+        reCalibData2(j,:)=calibMat2*(e1.dataset2.rawData.( ftNames{i})(j,:)');%-e1.dataset2.offset.( ftNames{i})');
+    end
+end
+ ftDataNoOffset2=removeOffset(reCalibData2,e1.dataset2.estimatedFtData.(ftNames{i}));
+
+%recalibrate with matrix 3
+for i=4:4
+    for j=1:size(e1.dataset2.rawData.( ftNames{i}),1)
+        reCalibData3(j,:)=calibMat3*(e1.dataset2.rawData.( ftNames{i})(j,:)');%-e1.dataset2.offset.( ftNames{i})');
+    end
+end
+ ftDataNoOffset3=removeOffset(reCalibData3,e1.dataset2.estimatedFtData.(ftNames{i}));
+ 
+    figure,plot3_matrix(ftDataNoOffset1(:,1:3));hold on;
+    plot3_matrix(e1.dataset2.estimatedFtData.(ftNames{4})(:,1:3)); grid on;
+    
+     figure,plot3_matrix(ftDataNoOffset2(:,1:3));hold on;
+    plot3_matrix(e1.dataset2.estimatedFtData.(ftNames{4})(:,1:3)); grid on;
+    
+     figure,plot3_matrix(ftDataNoOffset3(:,1:3));hold on;
+    plot3_matrix(e1.dataset2.estimatedFtData.(ftNames{4})(:,1:3)); grid on;
+    
+    
 %recalibrate with matrix 1 experiment1
 for i=4:4
     for j=1:size(e1.dataset2.rawData.( ftNames{i}),1)
@@ -96,10 +134,7 @@ if(e==2)
 for i=4:4
     for j=1:size(e2.dataset2.rawData.( ftNames{i}),1)
         reCalibData1(j,:)=calibMat1*(e2.dataset2.rawData.( ftNames{i})(j,:)');%-e1.dataset2.offset.( ftNames{i})');
-         
-       
-    
-    end
+     end
 end
 
 %remove offset 
