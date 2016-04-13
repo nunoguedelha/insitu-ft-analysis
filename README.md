@@ -21,5 +21,5 @@ svn co https://svn.icub.iit.local/repos/mecha/ftSensCalib/trunk/ ./external/ftSe
 #### [icub-insitu-ft-analysis-big-datasets](https://gitlab.com/traversaro/icub-insitu-ft-analysis-big-datasets)
 You can download the https://gitlab.com/traversaro/icub-insitu-ft-analysis-big-datasets repository in the data directory to make the data from that repo available: 
 ~~~
-git clone https://gitlab.com/traversaro/icub-insitu-ft-analysis-big-datasets ./data/icub-insitu-ft-analysis-big-datasets
+git clone https://gitlab.com/traversaro/icub-insitu-ft-analysis-big-datasets.git ./data/icub-insitu-ft-analysis-big-datasets
 ~~~
