@@ -1,8 +1,8 @@
 function []=FTplots(data,time)
-%Function to plot data from FT sensors
-%data is a struct type which includes data with sets wrenches 
-%for which two different figures will be created
-%It assumes wrenches are in a double matrix (time x wrench), wrench [F,T] 
+%% Function to plot data from FT sensors
+% data is a struct type which includes data with sets wrenches 
+% for which two different figures will be created
+% It assumes wrenches are in a double matrix (time x wrench), wrench [F,T] 
 
 xPlotOptions = 'r.';
 yPlotOptions = 'g.';
