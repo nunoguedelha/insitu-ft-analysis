@@ -18,8 +18,8 @@ you can run this command:
 svn co https://svn.icub.iit.local/repos/mecha/ftSensCalib/trunk/ ./external/ftSensCalib
 ~~~
 
-#### [icub-insitu-ft-analysis-big-datasets](https://gitlab.com/traversaro/icub-insitu-ft-analysis-big-datasets)
-You can download the https://gitlab.com/traversaro/icub-insitu-ft-analysis-big-datasets repository in the data directory to make the data from that repo available: 
+#### [icub-insitu-ft-analysis-big-datasets](https://gitlab.com/dynamic-interaction-control/icub-insitu-ft-analysis-big-datasets)
+You can download the https://gitlab.com/dynamic-interaction-control/icub-insitu-ft-analysis-big-datasets repository in the data directory to make the data from that repo available: 
 ~~~
-git clone https://gitlab.com/traversaro/icub-insitu-ft-analysis-big-datasets.git ./data/icub-insitu-ft-analysis-big-datasets
+git clone https://gitlab.com/dynamic-interaction-control/icub-insitu-ft-analysis-big-datasets.git ./data/icub-insitu-ft-analysis-big-datasets
 ~~~
