@@ -7,9 +7,9 @@
 dataset2=applyMask(dataset,mask);
 filterd=applyMask(filteredFtData,mask);
 dataset2.filteredFtData=filterd;
- for i=1:size(input.ftNames,1)
-        [ftDataNoOffset.(input.ftNames{i}),offsetX.(input.ftNames{i})]=removeOffset(dataset.ftData.(input.ftNames{i}),dataset.estimatedFtData.(input.ftNames{i}));
-    end
+for i=1:size(input.ftNames,1)
+    [ftDataNoOffset.(input.ftNames{i}),offsetX.(input.ftNames{i})]=removeOffset(filterd.(input.ftNames{i}),dataset2.estimatedFtData.(input.ftNames{i}));
+end
 
 for i=4:4
     %     for i=1:size(input.ftNames,1)
@@ -19,7 +19,7 @@ end
 %getting raw datat
 [dataset2.rawData,cMat]=getRawData(dataset2.filteredFtData,input.calibMatPath,input.calibMatFileNames);
 
-lambda=.5;
+lambda=1;
 n=1; %n=3 usually start from 3rd, start from first
 %add offset removal here? estimateOffsetusingInsitu(rawData(:,1:3), estimatedFtData(:.1:3))
 for i=n:6
@@ -53,14 +53,16 @@ end
 
  
  for i=4:4
-    filtrdNO.(input.ftNames{i})=filterd.(input.ftNames{i});%+repmat(offset.(input.ftNames{i}),size(filterd.(input.ftNames{i}),1),1);
+%     filtrdNO.(input.ftNames{i})=filterd.(input.ftNames{i});%+repmat(offset.(input.ftNames{i}),size(filterd.(input.ftNames{i}),1),1);
     %     for i=1:size(input.ftNames,1)
 %       figure,plot3_matrix(reCalibData.(input.ftNames{i})(:,1:3));hold on;
 %     figure,plot3_matrix(dataset.estimatedFtData.(input.ftNames{i})(:,1:3)); grid on;
     figure,plot3_matrix(reCalibData.(input.ftNames{i})(:,1:3));hold on;
     plot3_matrix(dataset.estimatedFtData.(input.ftNames{i})(:,1:3)); grid on;
-     hold on; plot3_matrix(filtrdNO.(input.ftNames{i})(:,1:3)); grid on;
+%      hold on; plot3_matrix(filtrdNO.(input.ftNames{i})(:,1:3)); grid on;
      hold on; plot3_matrix(recabNoOffset.(input.ftNames{i})(:,1:3)); grid on;
+       hold on; plot3_matrix(ftDataNoOffset.(input.ftNames{i})(:,1:3)); grid on;
+     
 end
  
 dataset2.calibMatrices=calibMatrices;

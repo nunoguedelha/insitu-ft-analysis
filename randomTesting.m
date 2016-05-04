@@ -1,4 +1,4 @@
-
+%%
 
 
 dataStateDirs={strcat('data/',experimentName,'/icub/head/',stateDataName);
@@ -103,5 +103,46 @@ xlabel('TimeStamp');
 ylabel('N@Nm');
 title('right leg- estimation');
 
-%%
+%% checking comparisong among the singular values of different experiments
+% the idea is to find a way to discriminate cases where insitu offest
+% estimation can be used (ideally rank should be 3, but in all cases the
+% rank is 6)
+addpath ../figs
+
+sv1L=load(strcat('../figs/sVals1.mat'),'S_ft_raw')
+sv2L=  load(strcat('../figs/sVals2.mat'),'S_ft_raw')
+  sv1R=  load(strcat('../figs/sVals1rightleg.mat'),'S_ft_raw')
+  sv2R=    load(strcat('../figs/sVals2rightleg.mat'),'S_ft_raw')
+  sv3L=  load(strcat('../figs/sVals3.mat'),'S_ft_raw')
+  sv3R=  load(strcat('../figs/sVals3rightleg.mat'),'S_ft_raw')
+  
+  sv1L=load(strcat('figs/sVals1.mat'),'S_ft_raw')
+sv2L=  load(strcat('figs/sVals2.mat'),'S_ft_raw')
+  sv1R=  load(strcat('figs/sVals1rightleg.mat'),'S_ft_raw')
+  sv2R=    load(strcat('figs/sVals2rightleg.mat'),'S_ft_raw')
+  sv3L=  load(strcat('figs/sVals3.mat'),'S_ft_raw')
+  sv3R=  load(strcat('figs/sVals3rightleg.mat'),'S_ft_raw')
+  
+  sv1L.S_ft_raw
+sv2L.S_ft_raw
+  sv1R.S_ft_raw
+  svR.S_ft_raw
+  
+%    sv1L.S_ft_raw(3,3)- sv1L.S_ft_raw(4,4)
+ diff(1)=   sv2L.S_ft_raw(3,3)- sv2L.S_ft_raw(4,4)
+ diff(2)=    sv1R.S_ft_raw(3,3)- sv1R.S_ft_raw(4,4)
+ diff(3)=     sv2R.S_ft_raw(3,3)- sv2R.S_ft_raw(4,4)
+ diff(4)=   sv3L.S_ft_raw(3,3)- sv3L.S_ft_raw(4,4)
+ diff(5)=     sv3R.S_ft_raw(3,3)- sv3R.S_ft_raw(4,4)
+      
+%        sv1L.S_ft_raw(3,3)/ sv1L.S_ft_raw(4,4)
+ div(1)=   sv2L.S_ft_raw(3,3)/ sv2L.S_ft_raw(4,4)
+ div(2)=    sv1R.S_ft_raw(3,3)/ sv1R.S_ft_raw(4,4)
+ div(3)=     sv2R.S_ft_raw(3,3)/ sv2R.S_ft_raw(4,4)
+ div(4)=  sv3L.S_ft_raw(3,3)/ sv3L.S_ft_raw(4,4)
+ div(5)=     sv3R.S_ft_raw(3,3)/ sv3R.S_ft_raw(4,4)
+
+ diff(2)/diff(3)
+ 
+ 
 

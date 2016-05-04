@@ -6,12 +6,12 @@
 %using insitu
 % NOTE: only use when position of center of mass is constant
 %TODO: procedure for choosing when to use insitu or not required
-
-    %[calibMatrices,offset,fullscale]=estimateMatrices(dataset2.rawData,dataset2.estimatedFtData);
-
-    % with regularization
-    [calibMatrices,offset,fullscale]=estimateMatricesReg(dataset2.rawData,dataset2.estimatedFtData,cMat);
-    
+% 
+%     %[calibMatrices,offset,fullscale]=estimateMatrices(dataset2.rawData,dataset2.estimatedFtData);
+% 
+%     % with regularization
+%     [calibMatrices,offset,fullscale]=estimateMatricesReg(dataset2.rawData,dataset2.estimatedFtData,cMat);
+%     
 %not using insitu
 
     lambda=1;

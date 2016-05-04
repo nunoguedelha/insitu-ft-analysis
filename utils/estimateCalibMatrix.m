@@ -2,12 +2,10 @@ function [calibM,full_scale]=estimateCalibMatrix(rawData,expectedWrench)
 [mb, nb] = size(expectedWrench);
 
 kIA = kron(eye(6), rawData);
-
-
 vec_x = pinv(kIA)*expectedWrench(:);
 X = reshape(vec_x, 6, 6);
 B_pred = rawData*X;
-%Br_pred = Ar*X;
+
 
 calibM = X';
 
