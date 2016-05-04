@@ -28,11 +28,12 @@ addpath external/quadfit
 addpath utils
 % name and paths of the data files
 
-experimentName='icub-insitu-ft-analysis-big-datasets/21_03_2016/yogaLeft1';% Name of the experiment;
+% experimentName='icub-insitu-ft-analysis-big-datasets/2016_04_21/extendedYoga4StandingOnLeft';% Name of the experiment;
+experimentName='icub-insitu-ft-analysis-big-datasets/2016_04_21/extendedYoga4StandingOnLeft';% Name of the experiment;
 paramScript=strcat('data/',experimentName,'/params.m');
 run(paramScript)
-
-if (exist(strcat('data/',experimentName,'/dataset.mat'),'file')==2)
+ forceCalculation=false;
+if (exist(strcat('data/',experimentName,'/dataset.mat'),'file')==2 && forceCalculation==false)
     %% Load from workspace
     %     %load meaninful data, estimated data, meaninful data no offset
     load(strcat('data/',experimentName,'/dataset.mat'),'dataset')
@@ -110,7 +111,7 @@ else
     
     %compute offset on meaningful data
     for i=1:size(input.ftNames,1)
-        ftDataNoOffset.(input.ftNames{i})=removeOffset(dataset.ftData.(input.ftNames{i}),dataset.estimatedFtData.(input.ftNames{i}));
+        [ftDataNoOffset.(input.ftNames{i}),offsetX.(input.ftNames{i})]=removeOffset(dataset.ftData.(input.ftNames{i}),dataset.estimatedFtData.(input.ftNames{i}));
     end
     dataset.ftDataNoOffset=ftDataNoOffset;
     
@@ -160,7 +161,9 @@ end
 
 %getting raw datat
 [dataset2.rawData,cMat]=getRawData(dataset2.filteredFtData,input.calibMatPath,input.calibMatFileNames);
-[calibMatrices,offset,fullscale]=estimateMatrices(dataset2.rawData,dataset2.estimatedFtData);
+% [calibMatrices,offset,fullscale]=estimateMatrices(dataset2.rawData,dataset2.estimatedFtData);
+[calibMatrices,offset,fullscale]=estimateMatricesReg(dataset2.rawData,dataset2.estimatedFtData,cMat);
+
 eC=cMat.left_leg-calibMatrices.left_leg;
 
 for i=3:6
@@ -170,11 +173,13 @@ for i=3:6
 end
 
 for i=4:4
+    filtrdNO.(input.ftNames{i})=filterd.(input.ftNames{i})+repmat(offset.(input.ftNames{i}),size(filterd.(input.ftNames{i}),1),1);
     %     for i=1:size(input.ftNames,1)
 %       figure,plot3_matrix(reCalibData.(input.ftNames{i})(:,1:3));hold on;
 %     figure,plot3_matrix(dataset.estimatedFtData.(input.ftNames{i})(:,1:3)); grid on;
     figure,plot3_matrix(reCalibData.(input.ftNames{i})(:,1:3));hold on;
     plot3_matrix(dataset.estimatedFtData.(input.ftNames{i})(:,1:3)); grid on;
+     hold on; plot3_matrix(filtrdNO.(input.ftNames{i})(:,1:3)); grid on;
 end
 
 dataset2.calibMatrices=calibMatrices;
