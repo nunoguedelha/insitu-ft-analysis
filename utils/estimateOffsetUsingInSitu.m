@@ -1,4 +1,4 @@
-function [ offset_ft ] = estimateOffsetUsingInSitu( ft_raw, acc)
+function [ offset_ft, svdRank ] = estimateOffsetUsingInSitu( ft_raw, acc)
 %estimateOffsetUsingInSitu Estimate FT offset using the techniques
 %described in the paper
 % In situ calibration of six-axis force-torque sensors using accelerometer measurements
@@ -13,7 +13,7 @@ figure,bar((S_ft_raw));
 ft_raw_projector = V_raw(:,1:3)';
 ft_raw_projected = (V_raw(:,1:3)'*ft_raw_no_mean')';
 title('Raw sensor data singular values')
-
+rank(S_ft_raw)
 normalize = @(x) (x-ones(size(x,1),1)*mean(x))./(ones(size(x,1),1)*std(x));
 normalize_isotropically = @(x) (x-ones(size(x,1),1)*mean(x))/mean(std(x));
 

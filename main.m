@@ -5,12 +5,13 @@
 addpath external/quadfit
 addpath utils
 % name and paths of the data files
-% experimentName=''icub-insitu-ft-analysis-big-datasets/16_03_2016/leftRightLegsGrid';';% Name of the experiment;
-% experimentName=''icub-insitu-ft-analysis-big-datasets/16_03_2016/leftRightLegsGrid';';% Name of the experiment;
-experimentName='icub-insitu-ft-analysis-big-datasets/2016_04_21/extendedYoga4StandingOnLeft';% Name of the experiment;
+% experimentName='icub-insitu-ft-analysis-big-datasets/16_03_2016/leftRightLegsGrid';% Name of the experiment;
+%  experimentName='icub-insitu-ft-analysis-big-datasets/21_03_2016/yogaLeft1';% Name of the experiment;
+ experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_06';% Name of the experiment;
+% experimentName='icub-insitu-ft-analysis-big-datasets/2016_04_21/extendedYoga4StandingOnLeft';% Name of the experiment;
 paramScript=strcat('data/',experimentName,'/params.m');
 run(paramScript)
-forceCalculation=false;
+forceCalculation=true;
 if (exist(strcat('data/',experimentName,'/dataset.mat'),'file')==2 && forceCalculation==false)
     %% Load from workspace
     %     %load meaninful data, estimated data, meaninful data no offset

@@ -10,7 +10,8 @@ e=1; %one for doing comparison on experiment1 data, 2 for experiment
 [calibMat1,fullscale] = readCalibMat(strcat('../data/sensorCalibMatrices/matrix_',serialNumber,'.txt'));
 
 % experiment 1
-experiment1='icub-insitu-ft-analysis-big-datasets/16_03_2016/leftRightLegsGrid';
+experiment1='icub-insitu-ft-analysis-big-datasets/21_03_2016/yogaLeft1';
+% experiment1='icub-insitu-ft-analysis-big-datasets/16_03_2016/leftRightLegsGrid';
 [calibMat2,fullscale2] = readCalibMat(strcat('../data/',experiment1,'/calibrationMatrices/',serialNumber));
 
 % experiment 2
@@ -45,11 +46,22 @@ if (exist(strcat('../data/',experiment2,'/dataset2.mat'),'file')==2)
 end 
 %get raw data or directly load raw data
 ftNames=fieldnames(e1.dataset2.ftData);
-%recalibrate with matrix 1 experiment1
+
+
+% (rande1(1:e1size/n1),:)
+% 
+% (rande2(1:e2size/n2),:)
 
 %insitu
-n1=5; n2=3;
+
 % for i=3:6
+% generate random vectors for mixed training
+% n1=5; n2=3;
+% 
+% e1size=size(e1.dataset2.rawData.( ftNames{i}),1);
+% rande1=randperm(e1size);
+% e2size=size(e2.dataset2.rawData.( ftNames{i}),1);
+% rande2=randperm(e2size);
 %      offset.(ftNames{i})=estimateOffsetUsingInSitu(e1.dataset2.rawData.(ftNames{i}), e1.dataset2.estimatedFtData.(ftNames{i})(:,1:3));
 %     rawNoOffset1=e1.dataset2.rawData.(ftNames{i})-repmat(offset.(ftNames{i}),size(e1.dataset2.rawData.(ftNames{i}),1),1);
 %     
@@ -57,7 +69,7 @@ n1=5; n2=3;
 %     rawNoOffset2=e2.dataset2.rawData.(ftNames{i})-repmat(offset.(ftNames{i}),size(e2.dataset2.rawData.(ftNames{i}),1),1);
 % 
 %     
-%      moreData.rawData.( ftNames{i})=[e1.dataset2.rawData.( ftNames{i})(1:(size(e1.dataset2.rawData.( ftNames{i}),1)/n1),:);e2.dataset2.rawData.( ftNames{i})((size(e2.dataset2.rawData.( ftNames{i}),1)/n2):end,:)];
+%      moreData.rawData.( ftNames{i})=[e1.dataset2.rawData.( ftNames{i})(1:(size(e1.dataset2.rawData.( ftNames{i}),1)/n1),:);e2.dataset2.rawData.( ftNames{i})(rande2(1:e2size/n2),:)];
 %    moreData.rawNoOffset.( ftNames{i})=[rawNoOffset1(1:(size(e1.dataset2.rawData.( ftNames{i}),1)/n1),:);rawNoOffset2((size(e2.dataset2.rawData.( ftNames{i}),1)/n2):end,:)];
 %     moreData.estimatedFtData.( ftNames{i})=[e1.dataset2.estimatedFtData.( ftNames{i})(1:(size(e1.dataset2.estimatedFtData.( ftNames{i}),1)/n1),:);e2.dataset2.estimatedFtData.( ftNames{i})((size(e2.dataset2.estimatedFtData.( ftNames{i}),1)/n2):end,:)];
 % 
@@ -66,11 +78,26 @@ n1=5; n2=3;
 % end
 %not insitu
 for i=4:4
-     
-     moreData.rawData.( ftNames{i})=[e1.dataset2.rawData.( ftNames{i})(1:(size(e1.dataset2.rawData.( ftNames{i}),1)/n1),:);e2.dataset2.rawData.( ftNames{i})((size(e2.dataset2.rawData.( ftNames{i}),1)/n2):end,:)];
-   moreData.estimatedFtData.( ftNames{i})=[e1.dataset2.estimatedFtData.( ftNames{i})(1:(size(e1.dataset2.estimatedFtData.( ftNames{i}),1)/n1),:);e2.dataset2.estimatedFtData.( ftNames{i})((size(e2.dataset2.estimatedFtData.( ftNames{i}),1)/n2):end,:)];
+     % generate random vectors for mixed training
+n1=1; n2=1;
 
-    [calibMatrices.(ftNames{i}),fullscale.(ftNames{i}),offset.(ftNames{i})]=estimateCalibMatrixWithRegAndOff(moreData.rawData.(ftNames{i}),moreData.estimatedFtData.(ftNames{i}),calibMat1,.5,[0;0;0;0;0;0]);
+e1size=size(e1.dataset2.rawData.( ftNames{i}),1);
+rande1=randperm(e1size);
+e2size=size(e2.dataset2.rawData.( ftNames{i}),1);
+rande2=randperm(e2size);
+
+     moreData.rawData.( ftNames{i})=[e1.dataset2.rawData.( ftNames{i})(rande1(1:e1size/n1),:);...
+         e2.dataset2.rawData.( ftNames{i})(rande2(1:e2size/n2),:)];
+   moreData.estimatedFtData.( ftNames{i})=[e1.dataset2.estimatedFtData.( ftNames{i})(rande1(1:e1size/n1),:);...
+       e2.dataset2.estimatedFtData.( ftNames{i})(rande2(1:e2size/n2),:)];
+
+    [calibMatrices.(ftNames{i}),fullscale.(ftNames{i}),offset.(ftNames{i})]=...
+        estimateCalibMatrixWithRegAndOff(...
+             moreData.rawData.(ftNames{i}),...
+             moreData.estimatedFtData.(ftNames{i}),...
+             calibMat1,...
+             .5,...
+             [0;0;0;0;0;0]);
 
 end
 
@@ -88,6 +115,7 @@ end
 %     plot3_matrix(moreData.estimatedFtData.( ftNames{i})(:,1:3)); grid on;
 % end
 
+%recalibrate with matrix 1 experiment1
 
 if(e==1)
     
@@ -126,16 +154,37 @@ end
   
     figure,plot3_matrix(ftDataNoOffset1(:,1:3));hold on;
     plot3_matrix(e1.dataset2.estimatedFtData.(ftNames{4})(:,1:3)); grid on;
+    legend('measuredDataNoOffset','estimatedData','Location','west');
+title('Wrench space');
+xlabel('F_{x}');
+ylabel('F_{y}');
+zlabel('F_{z}');
     
      figure,plot3_matrix(ftDataNoOffset2(:,1:3));hold on;
     plot3_matrix(e1.dataset2.estimatedFtData.(ftNames{4})(:,1:3)); grid on;
+     legend('reCalDataE1','estimatedData','Location','west');
+    
+title('Wrench space');
+xlabel('F_{x}');
+ylabel('F_{y}');
+zlabel('F_{z}');
     
      figure,plot3_matrix(ftDataNoOffset3(:,1:3));hold on;
     plot3_matrix(e1.dataset2.estimatedFtData.(ftNames{4})(:,1:3)); grid on;
+   legend('reCalDataE2','estimatedData','Location','west');
+title('Wrench space');
+xlabel('F_{x}');
+ylabel('F_{y}');
+zlabel('F_{z}');
     
       figure,plot3_matrix(ftDataNoOffset4(:,1:3));hold on;
      plot3_matrix(e1.dataset2.estimatedFtData.(ftNames{4})(:,1:3)); grid on;
-    
+      legend('reCalDataMixed','estimatedData','Location','west');
+title('Wrench space');
+xlabel('F_{x}');
+ylabel('F_{y}');
+zlabel('F_{z}');
+
      figure,
       plot3_matrix(e1.dataset2.estimatedFtData.(ftNames{4})(:,1:3)); grid on;  hold on; 
       plot3_matrix(ftDataNoOffset1(:,1:3));hold on; 
@@ -185,6 +234,29 @@ zlabel('F_{z}');
 %   
 %     figure,plot3_matrix(reCalibData4(:,1:3));hold on;
 %      plot3_matrix(e1.dataset2.estimatedFtData.(ftNames{4})(:,1:3)); grid on;
+
+%error calculation
+
+    dif1=e1.dataset2.estimatedFtData.(ftNames{4})(:,1:3)-ftDataNoOffset1(:,1:3);
+     dif2=e1.dataset2.estimatedFtData.(ftNames{4})(:,1:3)-ftDataNoOffset2(:,1:3);
+      dif3=e1.dataset2.estimatedFtData.(ftNames{4})(:,1:3)-ftDataNoOffset3(:,1:3);
+  dif4=e1.dataset2.estimatedFtData.(ftNames{4})(:,1:3)-ftDataNoOffset4(:,1:3);
+  
+  figure, plot(dif1);
+  figure, plot(dif2);
+  figure, plot(dif3);
+  figure, plot(dif4);
+  
+  sum(sum(abs(dif1)))
+  sum(sum(abs(dif2)))
+  sum(sum(abs(dif3)))
+  sum(sum(abs(dif4)))
+  
+ sum(abs(dif1))
+ sum(abs(dif2))
+ sum(abs(dif3))
+ sum(abs(dif4))
+
 end
 if(e==2)
     %recalibrate with matrix 1 experiment2
@@ -223,18 +295,39 @@ end
  
     figure,plot3_matrix(ftDataNoOffset1(:,1:3));hold on;
     plot3_matrix(e2.dataset2.estimatedFtData.(ftNames{4})(:,1:3)); grid on;
-    
+    legend('measuredDataNoOffset','estimatedData','Location','west');
+title('Wrench space');
+xlabel('F_{x}');
+ylabel('F_{y}');
+zlabel('F_{z}');
+
      figure,plot3_matrix(ftDataNoOffset2(:,1:3));hold on;
     plot3_matrix(e2.dataset2.estimatedFtData.(ftNames{4})(:,1:3)); grid on;
+    legend('reCalDataE1','estimatedData','Location','west');
     
+title('Wrench space');
+xlabel('F_{x}');
+ylabel('F_{y}');
+zlabel('F_{z}');
+
      figure,plot3_matrix(ftDataNoOffset3(:,1:3));hold on;
     plot3_matrix(e2.dataset2.estimatedFtData.(ftNames{4})(:,1:3)); grid on;
-    
+    legend('reCalDataE2','estimatedData','Location','west');
+title('Wrench space');
+xlabel('F_{x}');
+ylabel('F_{y}');
+zlabel('F_{z}');
+
      figure,plot3_matrix(ftDataNoOffset4(:,1:3));hold on;
     plot3_matrix(e2.dataset2.estimatedFtData.(ftNames{4})(:,1:3)); grid on;
+     legend('reCalDataMixed','estimatedData','Location','west');
+title('Wrench space');
+xlabel('F_{x}');
+ylabel('F_{y}');
+zlabel('F_{z}');    
     
       figure,
-      plot3_matrix(e1.dataset2.estimatedFtData.(ftNames{4})(:,1:3)); grid on;  hold on; 
+      plot3_matrix(e2.dataset2.estimatedFtData.(ftNames{4})(:,1:3)); grid on;  hold on; 
       plot3_matrix(ftDataNoOffset1(:,1:3));hold on; 
       plot3_matrix(ftDataNoOffset2(:,1:3));hold on;
       plot3_matrix(ftDataNoOffset3(:,1:3));hold on;
@@ -281,5 +374,27 @@ zlabel('F_{z}');
 %     
 %     figure,plot3_matrix(reCalibData4(:,1:3));hold on;
 %      plot3_matrix(e2.dataset2.estimatedFtData.(ftNames{4})(:,1:3)); grid on;
+
+%error calculation
+
+    dif1=e2.dataset2.estimatedFtData.(ftNames{4})(:,1:3)-ftDataNoOffset1(:,1:3);
+     dif2=e2.dataset2.estimatedFtData.(ftNames{4})(:,1:3)-ftDataNoOffset2(:,1:3);
+      dif3=e2.dataset2.estimatedFtData.(ftNames{4})(:,1:3)-ftDataNoOffset3(:,1:3);
+  dif4=e2.dataset2.estimatedFtData.(ftNames{4})(:,1:3)-ftDataNoOffset4(:,1:3);
+  
+  figure, plot(dif1);
+  figure, plot(dif2);
+  figure, plot(dif3);
+  figure, plot(dif4);
+  
+  sum(sum(abs(dif1)))
+  sum(sum(abs(dif2)))
+  sum(sum(abs(dif3)))
+  sum(sum(abs(dif4)))
+  
+ sum(abs(dif1))
+ sum(abs(dif2))
+ sum(abs(dif3))
+ sum(abs(dif4))
 end
-    
+
