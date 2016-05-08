@@ -29,11 +29,21 @@ addpath utils
 % name and paths of the data files
 
 % experimentName='icub-insitu-ft-analysis-big-datasets/2016_04_21/extendedYoga4StandingOnLeft';% Name of the experiment;
-experimentName='icub-insitu-ft-analysis-big-datasets/2016_04_21/extendedYoga4StandingOnLeft';% Name of the experiment;
+experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_06';% Name of the experiment;
+
+% Script options, meant to control the behavior of this script 
+scriptOptions = {};
+scriptOptions.forceCalculation=true;%false;
+scriptOptions.printPlots=false;%true
+
+% load the script of parameters relative 
 paramScript=strcat('data/',experimentName,'/params.m');
 run(paramScript)
- forceCalculation=false;
-if (exist(strcat('data/',experimentName,'/dataset.mat'),'file')==2 && forceCalculation==false)
+
+% This script will produce dataset (containing the raw data) and dataset2
+% (contained the original data and the filtered ft). 
+
+if (exist(strcat('data/',experimentName,'/dataset.mat'),'file')==2 && scriptOptions.forceCalculation==false)
     %% Load from workspace
     %     %load meaninful data, estimated data, meaninful data no offset
     load(strcat('data/',experimentName,'/dataset.mat'),'dataset')
@@ -52,8 +62,7 @@ else
     end
     stateNames=fieldnames(input.stateNames);
     for i=1:size(stateNames,1)
-        dataStateDirs{i}=strcat('data/',experimentName,'/icub/',stateNames{i},'/',stateDataName);
-        
+        dataStateDirs{i}=strcat('data/',experimentName,'/icub/',stateNames{i},'/',stateDataName);     
     end
     %TODO: replace "icub" for robot model? so that it can be used for other
     %robots, although this is dependent on the output kind of the data dumper
@@ -86,7 +95,7 @@ else
     
     sensorNames=fieldnames(dataset.estimatedFtData);
     
-    %match field names with sensor loaded through readDataDumper
+    % match field names with sensor loaded through readDataDumper
     %
     matchup=zeros(size(input.sensorNames,1),1);
     for i=1:size(input.sensorNames,1)
@@ -109,7 +118,9 @@ else
     %to calculate the offset and then compare the data with the offset
     %removed
     
-    %compute offset on meaningful data
+    % compute the offset that minimizes the difference with 
+    % the estimated F/T (so if the estimates are wrong, the offset
+    % estimated in this way will be totally wrong) 
     for i=1:size(input.ftNames,1)
         [ftDataNoOffset.(input.ftNames{i}),offsetX.(input.ftNames{i})]=removeOffset(dataset.ftData.(input.ftNames{i}),dataset.estimatedFtData.(input.ftNames{i}));
     end
@@ -119,32 +130,35 @@ else
     %     %save meaninful data, estimated data, meaninful data no offset
     save(strcat('data/',experimentName,'/dataset.mat'),'dataset')
 end
+
 %% Data exploration
 % Plot ftDataNoOffset and/vs estimatedFtData
-for i=4:4
-    %     for i=1:size(input.ftNames,1)
-    FTplots(struct(input.ftNames{i},dataset.ftData.(input.ftNames{i}),strcat('estimated',input.ftNames{i}),dataset.estimatedFtData.(input.ftNames{i})),dataset.time);
-end
+if( scriptOptions.printPlots )
+    for i=4:4
+        %     for i=1:size(input.ftNames,1)
+        FTplots(struct(input.ftNames{i},dataset.ftData.(input.ftNames{i}),strcat('estimated',input.ftNames{i}),dataset.estimatedFtData.(input.ftNames{i})),dataset.time);
+    end
 
-% Plot ftDataNoOffset and/vs estimatedFtData
-for i=4:4
-    %     for i=1:size(input.ftNames,1)
-    FTplots(struct(input.ftNames{i},dataset.ftDataNoOffset.(input.ftNames{i}),strcat('estimated',input.ftNames{i}),dataset.estimatedFtData.(input.ftNames{i})),dataset.time);
-end
+    % Plot ftDataNoOffset and/vs estimatedFtData
+    for i=4:4
+        %     for i=1:size(input.ftNames,1)
+        FTplots(struct(input.ftNames{i},dataset.ftDataNoOffset.(input.ftNames{i}),strcat('estimated',input.ftNames{i}),dataset.estimatedFtData.(input.ftNames{i})),dataset.time);
+    end
 
-% Plot forces in 3D space
-% %with offset
-% for i=4:4
-%     %     for i=1:size(input.ftNames,1)
-%     figure,plot3_matrix(dataset.ftData.(input.ftNames{i})(:,1:3));hold on;
-%     plot3_matrix(dataset.estimatedFtData.(input.ftNames{i})(:,1:3)); grid on;
-% end
+    % Plot forces in 3D space
+    % %with offset
+    % for i=4:4
+    %     %     for i=1:size(input.ftNames,1)
+    %     figure,plot3_matrix(dataset.ftData.(input.ftNames{i})(:,1:3));hold on;
+    %     plot3_matrix(dataset.estimatedFtData.(input.ftNames{i})(:,1:3)); grid on;
+    % end
 
-%without offset
-for i=4:4
-    %     for i=1:size(input.ftNames,1)
-    figure,plot3_matrix(dataset.ftDataNoOffset.(input.ftNames{i})(:,1:3));hold on;
-    plot3_matrix(dataset.estimatedFtData.(input.ftNames{i})(:,1:3)); grid on;
+    %without offset
+    for i=4:4
+        %     for i=1:size(input.ftNames,1)
+        figure,plot3_matrix(dataset.ftDataNoOffset.(input.ftNames{i})(:,1:3));hold on;
+        plot3_matrix(dataset.estimatedFtData.(input.ftNames{i})(:,1:3)); grid on;
+    end
 end
 
 %% Calibration matrix correction
@@ -154,9 +168,13 @@ end
 dataset2=applyMask(dataset,mask);
 filterd=applyMask(filteredFtData,mask);
 dataset2.filteredFtData=filterd;
-for i=4:4
-    %     for i=1:size(input.ftNames,1)
-    FTplots(struct(input.ftNames{i},filterd.(input.ftNames{i}),strcat('estimated',input.ftNames{i}),dataset2.estimatedFtData.(input.ftNames{i})),dataset2.time);
+
+
+if( scriptOptions.printPlots )
+    for i=4:4
+        %     for i=1:size(input.ftNames,1)
+        FTplots(struct(input.ftNames{i},filterd.(input.ftNames{i}),strcat('estimated',input.ftNames{i}),dataset2.estimatedFtData.(input.ftNames{i})),dataset2.time);
+    end
 end
 
 %getting raw datat
@@ -172,26 +190,28 @@ for i=3:6
     end
 end
 
-for i=4:4
-    filtrdNO.(input.ftNames{i})=filterd.(input.ftNames{i})+repmat(offset.(input.ftNames{i}),size(filterd.(input.ftNames{i}),1),1);
-    %     for i=1:size(input.ftNames,1)
+if( scriptOptions.printPlots )
+    for i=4:4
+        filtrdNO.(input.ftNames{i})=filterd.(input.ftNames{i})+repmat(offset.(input.ftNames{i}),size(filterd.(input.ftNames{i}),1),1);
+        %     for i=1:size(input.ftNames,1)
 %       figure,plot3_matrix(reCalibData.(input.ftNames{i})(:,1:3));hold on;
-%     figure,plot3_matrix(dataset.estimatedFtData.(input.ftNames{i})(:,1:3)); grid on;
-    figure,plot3_matrix(reCalibData.(input.ftNames{i})(:,1:3));hold on;
-    plot3_matrix(dataset.estimatedFtData.(input.ftNames{i})(:,1:3)); grid on;
-     hold on; plot3_matrix(filtrdNO.(input.ftNames{i})(:,1:3)); grid on;
+%       figure,plot3_matrix(dataset.estimatedFtData.(input.ftNames{i})(:,1:3)); grid on;
+        figure,plot3_matrix(reCalibData.(input.ftNames{i})(:,1:3));hold on;
+        plot3_matrix(dataset.estimatedFtData.(input.ftNames{i})(:,1:3)); grid on;
+        hold on; plot3_matrix(filtrdNO.(input.ftNames{i})(:,1:3)); grid on;
+    end
 end
 
 dataset2.calibMatrices=calibMatrices;
 dataset2.offset=offset;
 dataset2.fullscale=fullscale;
- %% Save the workspace
-    %     %save meaninful data, estimated data, meaninful data no offset
-    save(strcat('data/',experimentName,'/dataset2.mat'),'dataset2')
+
+%% Save the workspace
+%     %save meaninful data, estimated data, meaninful data no offset
+save(strcat('data/',experimentName,'/dataset2.mat'),'dataset2')
   
  %%write calibration matrices file
 for i=3:6
-    
-      filename=strcat('data/',experimentName,'/calibrationMatrices/',input.calibMatFileNames{i});
+    filename=strcat('data/',experimentName,'/calibrationMatrices/',input.calibMatFileNames{i});
     writeCalibMat(calibMatrices.(input.ftNames{i}), fullscale.(input.ftNames{i}), filename)
 end
