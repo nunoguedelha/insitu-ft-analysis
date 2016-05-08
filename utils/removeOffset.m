@@ -1,6 +1,9 @@
 function [data_noOffset,offset]=removeOffset(ftData,estData)
-% remove the mean of the difference between the data from force-torque
-% sensor and estimated wrenches 
+% REMOTEOFFSET Remote the offset from an FT data using estimated data 
+%   This function compute the offset (and returned the ft data without
+%   offset) assuming that an estimated of the FT data without offset 
+%   is available
+
 diff=ftData-estData;
 %offset= mean(diff);
 offset=mean(diff(not(isnan(diff(:,1))),:));% ignore the possible NaN in the data

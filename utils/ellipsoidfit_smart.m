@@ -1,13 +1,37 @@
 function [ p_implicit, output_data_refitted ] = ellipsoidfit_smart( output_elliptic_data, input_circular_data )
+%% ELLIPSOIDFIT_SMART Fit a series of 3D data assuming that they are the affine function of a series of circular data 
+% This functions has the format of the ellipsoidfit_* function find in
+% quadfit (it also output the fitted ellipsoid in the same implicit format 
+% used by quadfit) functions. The main difference is that in this case we 
+% assume that the ellipsoid data to fit is obtained as an affine function
+% of an input (circular) data:
+% output = A*circular+b 
+% where output \in R^3 , \circular^3 \in R^3 , A \in R^{3\times3}, b \in R^3
+% 
+% This format fits the problem of fitting the force measurement obtained 
+% with a slowly movement of the FT sensor (i.e. only gravity matters)
+% at which a constant mass is attached. In the case of correct calibration
+% matrix, the ellipsoid fitted should be a circle, otherwise a different 
+% ellipsoid is fitted 
+% 
+% To do this, we estimate the A and b elements of the affine function,
+% and then we compute the ellipsoid parameters using A and b . 
+% In the past we observer that exploiting the known information 
+% about the "circular" data can improve the robustness of the ellipsoid 
+% fitting, with respect to method (as the one contained in quadfit) that 
+% ignore the circular data. 
+% 
 %ellipsoidfit_smart fit an 
     assert( size(output_elliptic_data,1) == size(input_circular_data,1) );
     n_samples = size(input_circular_data,1);
     assert( size(output_elliptic_data,2) == size(input_circular_data,2) );
     assert( size(output_elliptic_data,2) == 3 );
-%   This is how it works in theory, but it takes to much memory
+    
+% This is how it works in theory, but it takes to much memory
 %     known_terms = output_elliptic_data';
 %     known_terms = known_terms(:);
 %     regressor = [kron(input_circular_data,eye(3)),repmat(eye(3),n_samples)];
+% In the next few lines we exploit the format of the data to compute 
     cov = zeros(12,12);
     acc = zeros(12,1);
     
@@ -52,11 +76,11 @@ function [ p_implicit, output_data_refitted ] = ellipsoidfit_smart( output_ellip
     p_implicit(9) = 2*v(3);
     p_implicit(10) = o'*Q*o-1;
    
-    figure
-    plot3_matrix_aspoints(input_circular_data./a);
-    plot3(output_elliptic_data(:,1),output_elliptic_data(:,2),output_elliptic_data(:,3),'b*');
-    plot_ellipsoid_im(p_implicit);
-    axis equal;
+    % figure
+    % plot3_matrix_aspoints(input_circular_data./a);
+    % plot3(output_elliptic_data(:,1),output_elliptic_data(:,2),output_elliptic_data(:,3),'b*');
+    % plot_ellipsoid_im(p_implicit);
+    % axis equal;
 
 end
 
