@@ -1,7 +1,18 @@
 function [dataset]=obtainEstimatedWrenches(dataStateDirs,stateExtNames,robotName,resampledTime,contactFrameName)
+% OBTAINESTIMATEDWRENCH Get (model) estimated wrenches for a iCub dataset
+%   dataStateDirs  : ??
+%   stateExtNames  : ?? 
+%   robotName      : the YARP_ROBOT_NAME (iCubCity01 style) name of the
+%                    robot, used to load the correct model.
+%   resampleTime   : 
+%   contactFrameName : the name of the frame on which it is assumed that an 
+%                      external contact is (tipically the
+%                      root_link, r_sole or l_sole)
+
 %TODO: add contactInfo (which part of the robot is in contact) obtained from minimal knowledge on the FT sensors
 % contactInfo should in the end have this information for every time step,
 % for now assuming contact doesnt change
+% 
 
 %% Load the estimator
 
@@ -19,6 +30,7 @@ nrOfFTSensors = estimator.sensors().getNrOfSensors(iDynTree.SIX_AXIS_FORCE_TORQU
 
 %size of array with the expected Data
 ftData=zeros(nrOfFTSensors,size(resampledTime,1),6);
+
 %% Set kinematics information
 
 % Set kinematics information: for this example, we will assume
@@ -52,13 +64,15 @@ fNames=fieldnames(stateExtNames);
 %for the first elment in the first field it would be
 %stateExtnames.(fNames{1}){1}
 dataset.jointNames = {};
+
+fprintf('obtainEstimatedWrenches: Resampling the state\n');
 for i=1:size(fNames)
     Dof=size(stateExtNames.(fNames{i}));
     [qj_temp,dqj_temp,ddqj_temp,time_temp]=readStateExt(Dof(1),dataStateDirs{i});
     %store only the ones that have a degree of freedom (the names of the joint
     %should match one of the names stored in the model of the robot
     % we resample joint encoders on the timestamp of the FT sensors
-    fprintf('Resampling the state\n');
+    fprintf('obtainEstimatedWrenches: Resampling the state for the part %s\n',fNames{i});
     [qj_temp,dqj_temp,ddqj_temp] = resampleState(resampledTime, time_temp, qj_temp, dqj_temp, ddqj_temp);
     
     for j=1:Dof
@@ -87,7 +101,7 @@ dataset.ddqj = ddqj_all';
 %and establish the unkown wrench accordingly
 % Set the contact information in the estimator
 
-    contact_index = estimator.model().getFrameIndex(contactFrameName);
+contact_index = estimator.model().getFrameIndex(contactFrameName);
 
 
 unknownWrench = iDynTree.UnknownWrenchContact();
@@ -106,12 +120,36 @@ fullBodyUnknowns.addNewContactInFrame(estimator.model(),contact_index,unknownWre
 % Print the unknowns to make sure that everything is properly working
 %fullBodyUnknowns.toString(estimator.model())
 
+% Prepare the datastructure that we used in the loop outside the loop 
+% (to improve performances, as otherwise we allocate memory at each 
+% loop step, and allocating memory is usually quite a slow operation) 
 qj_idyn   = iDynTree.JointPosDoubleArray(dofs);
 dqj_idyn  = iDynTree.JointDOFsDoubleArray(dofs);
 ddqj_idyn = iDynTree.JointDOFsDoubleArray(dofs);
 
+    
+% The estimated FT sensor measurements
+estFTmeasurements = iDynTree.SensorsMeasurements(estimator.sensors());
+    
+% The estimated joint torques
+estJointTorques = iDynTree.JointDOFsDoubleArray(dofs);
+    
+% The estimated contact forces
+estContactForces = iDynTree.LinkContactWrenches(estimator.model());
+
+% Sensor wrench buffer 
+estimatedSensorWrench = iDynTree.Wrench();
+
+
 %% For each time instant
-for t=1:size(resampledTime)
+fprintf('obtainEstimatedWrenches: Computing the estimated wrenches\n');
+for t=1:length(resampledTime)
+    tic 
+    % print progress test 
+    if( mod(t,10000) == 0 ) 
+        fprintf('obtainedEstimatedWrenches: process the %d sample out of %d\n',t,length(resampledTime))
+    end
+    
     qj=qj_all(:,t);
     dqj=dqj_all(:,t);
     ddqj=ddqj_all(:,t);
@@ -130,23 +168,15 @@ for t=1:size(resampledTime)
     
     %% Run the prediction of FT measurements
     
-    % There are three output of the estimation:
-    
-    % The estimated FT sensor measurements
-    estFTmeasurements = iDynTree.SensorsMeasurements(estimator.sensors());
-    
-    % The estimated joint torques
-    estJointTorques = iDynTree.JointDOFsDoubleArray(dofs);
-    
-    % The estimated contact forces
-    estContactForces = iDynTree.LinkContactWrenches(estimator.model());
-    
+    % There are three output of the estimation, FT measurements, contact 
+    % forces and joint torques (they are declared outside the loop for 
+    % performance reason)
+
     % run the estimation
     estimator.computeExpectedFTSensorsMeasurements(fullBodyUnknowns,estFTmeasurements,estContactForces,estJointTorques);
     
     % store the estimated measurements
     for ftIndex = 0:(nrOfFTSensors-1)
-        estimatedSensorWrench = iDynTree.Wrench();
         %sens = estimator.sensors().getSensor(iDynTree.SIX_AXIS_FORCE_TORQUE,ftIndex);
         ok = estFTmeasurements.getMeasurement(iDynTree.SIX_AXIS_FORCE_TORQUE,ftIndex,estimatedSensorWrench);
         %store in the correct variable, format from readDataDumpre results in (time,sensorindex)
@@ -156,13 +186,13 @@ for t=1:size(resampledTime)
         %estimatedSensorWrench.toMatlab() transforms the wrench into 6x1 vector of
         %matlab
         ftData(ftIndex+1,t,:)=estimatedSensorWrench.toMatlab();
-        
     end
     
     % print the estimated contact forces
     %estContactForces.toString(estimator.model())
-    
 end
+
+
 nrOfFTSensors = estimator.sensors().getNrOfSensors(iDynTree.SIX_AXIS_FORCE_TORQUE);
 % sensorNames{nrOfFTSensors}='';
 for ftIndex = 0:(nrOfFTSensors-1)
