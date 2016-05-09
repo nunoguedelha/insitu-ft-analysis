@@ -1,10 +1,10 @@
 %Parameter script template
 %name of the file should be renamed to params.m and should be inside the
 %experiment folder
-relevant=0; %if relevantData file exists
-rData=[,]; %initial and final time of relevant data126
+input.relevant=0; %if relevantData file exists
+input.rData=[,]; %initial and final time of relevant data126
 
-contactFrameName=''; %name of the frame which is in contact
+input.contactFrameName=''; %name of the frame which is in contact
 %TODO: should become a vector that contains which frames are in contact,
 %can start being a simple matrix where first colum menas right leg in
 %contact ture/false and second column left leg in contact ture/false
@@ -33,3 +33,9 @@ input.stateNames=struct();% this should have a structure with the knowledge of t
 input.robotName=''; %name of the robot being used (urdf model should be present in the folder), example 'iCubGenova02'
 input.calibMatPath='';%path to where calibration matrices can be found
 input.calibMatFileNames={}; % name of the files containing the calibration matrics in the same order specified in ftNames
+
+% Support legacy part of the script that expect parameters outside of the
+% input structure 
+relevant=input.relevant;
+rData = input.rData;
+contactFrameName = input.contactFrameName;

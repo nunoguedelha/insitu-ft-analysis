@@ -9,10 +9,16 @@ addpath utils
 %  experimentName='icub-insitu-ft-analysis-big-datasets/21_03_2016/yogaLeft1';% Name of the experiment;
  experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_06';% Name of the experiment;
 % experimentName='icub-insitu-ft-analysis-big-datasets/2016_04_21/extendedYoga4StandingOnLeft';% Name of the experiment;
+
+% Script options, meant to control the behavior of this script 
+scriptOptions = {};
+scriptOptions.forceCalculation=true;%false;
+scriptOptions.printPlots=false;%true
+
 paramScript=strcat('data/',experimentName,'/params.m');
 run(paramScript)
-forceCalculation=true;
-if (exist(strcat('data/',experimentName,'/dataset.mat'),'file')==2 && forceCalculation==false)
+
+if (exist(strcat('data/',experimentName,'/dataset.mat'),'file')==2 && scriptOptions.forceCalculation==false)
     %% Load from workspace
     %     %load meaninful data, estimated data, meaninful data no offset
     load(strcat('data/',experimentName,'/dataset.mat'),'dataset')
@@ -90,7 +96,9 @@ end
     %to calculate the offset and then compare the data with the offset
     %removed
     
-    %compute offset on meaningful data
+    % compute the offset that minimizes the difference with 
+    % the estimated F/T (so if the estimates are wrong, the offset
+    % estimated in this way will be totally wrong) 
     for i=1:size(input.ftNames,1)
         [ftDataNoOffset.(input.ftNames{i}),offset.(input.ftNames{i})]=removeOffset(dataset.ftData.(input.ftNames{i}),dataset.estimatedFtData.(input.ftNames{i}));
     end
@@ -116,7 +124,9 @@ dataset2.filteredOffset=filteredOffset;
     %     %save meaninful data, estimated data, meaninful data no offset
     save(strcat('data/',experimentName,'/dataset2.mat'),'dataset2')
 
-%run('plottinScript.m')
+if( scriptOptions.printPlots )
+run('plottinScript.m')
+end
 
 run('CalibMatCorrection.m')
 

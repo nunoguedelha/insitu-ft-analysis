@@ -1,8 +1,6 @@
 %% Plotting script
 %assumes is run as part of main, having params and dataset already loaded.
-
-%TODO: make it a separate script with some few variables to set to obtain
-%different desired plots.
+%script options
 all=false;
 noOffset=true;
 onlyWSpace=true;
