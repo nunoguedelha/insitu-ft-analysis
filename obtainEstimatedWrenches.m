@@ -1,4 +1,4 @@
-function [dataset]=obtainEstimatedWrenches(dataStateDirs,stateExtNames,robotName,resampledTime,contactFrameName)
+ function [dataset]=obtainEstimatedWrenches(dataStateDirs,stateExtNames,robotName,resampledTime,contactFrameName)
 % OBTAINESTIMATEDWRENCH Get (model) estimated wrenches for a iCub dataset
 %   dataStateDirs  : ??
 %   stateExtNames  : ?? 

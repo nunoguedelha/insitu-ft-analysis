@@ -2,22 +2,29 @@
 % estimate new calibration matrices
 % assuming is run at the end of main, or after main
 %script options
-saveMat=false;
+saveMat=true;
 usingInsitu=false;
 plot=true;
 %using insitu
 % NOTE: only use when position of center of mass is constant
 %TODO: procedure for choosing when to use insitu or not required
 if(usingInsitu)
-    %      [calibMatrices,offset,fullscale]=estimateMatrices(dataset2.rawData,dataset2.estimatedFtData);
+          [calibMatrices,offset,fullscale]=estimateMatrices(dataset2.rawData,dataset2.estimatedFtData);
     %
     %     % with regularization
     %     [calibMatrices,offset,fullscale]=estimateMatricesReg(dataset2.rawData,dataset2.estimatedFtData,cMat);
     %
+    for i=3:6
+        for j=1:size(dataset2.rawData.(input.ftNames{i}),1)
+            reCalibData.(input.ftNames{i})(j,:)=calibMatrices.(input.ftNames{i})*(dataset2.rawData.(input.ftNames{i})(j,:)'-offset.(input.ftNames{i})');
+        end
+    end
+    
+    
 else
     %not using insitu
     
-    lambda=1;
+    lambda=.5;
     n=1; %n=3 usually start from 3rd, start from first
     
     for i=n:6
@@ -59,10 +66,12 @@ end
 if(plot)
     %% plot 3D graph
     for i=3:4
-        figure,plot3_matrix(reCalibData.(input.ftNames{i})(:,1:3));hold on;
-        plot3_matrix(dataset.estimatedFtData.(input.ftNames{i})(:,1:3)); grid on;
-        hold on; plot3_matrix(filteredNoOffset.(input.ftNames{i})(:,1:3)); grid on;
-        legend('reCalibratedData','estimatedData','measuredDataNoOffset','Location','west');
+        figure,
+         plot3_matrix(filteredNoOffset.(input.ftNames{i})(:,1:3)); grid on;hold on;
+        plot3_matrix(dataset.estimatedFtData.(input.ftNames{i})(:,1:3)); grid on;hold on;
+        plot3_matrix(reCalibData.(input.ftNames{i})(:,1:3));
+        
+        legend('measuredDataNoOffset','estimatedData','reCalibratedData','Location','west');
         title(strcat({'Wrench space '},(input.ftNames{i})));
         xlabel('F_{x}');
         ylabel('F_{y}');

@@ -5,15 +5,15 @@
 addpath external/quadfit
 addpath utils
 % name and paths of the data files
-% experimentName='icub-insitu-ft-analysis-big-datasets/16_03_2016/leftRightLegsGrid';% Name of the experiment;
-%  experimentName='icub-insitu-ft-analysis-big-datasets/21_03_2016/yogaLeft1';% Name of the experiment;
- experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_06';% Name of the experiment;
-% experimentName='icub-insitu-ft-analysis-big-datasets/2016_04_21/extendedYoga4StandingOnLeft';% Name of the experiment;
+%   experimentName='icub-insitu-ft-analysis-big-datasets/16_03_2016/leftRightLegsGrid';% Name of the experiment;
+   experimentName='icub-insitu-ft-analysis-big-datasets/21_03_2016/yogaLeft1';% Name of the experiment;
+%  experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_06';% Name of the experiment;
+%   experimentName='icub-insitu-ft-analysis-big-datasets/2016_04_21/extendedYoga4StandingOnLeft';% Name of the experiment;
 
 % Script options, meant to control the behavior of this script 
 scriptOptions = {};
-scriptOptions.forceCalculation=true;%false;
-scriptOptions.printPlots=false;%true
+scriptOptions.forceCalculation=false;%false;
+scriptOptions.printPlots=true;%true
 
 paramScript=strcat('data/',experimentName,'/params.m');
 run(paramScript)

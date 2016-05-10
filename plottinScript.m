@@ -16,18 +16,19 @@ if(~onlyWSpace || all)
             %     for i=1:size(input.ftNames,1)
             FTplots(struct(input.ftNames{i},dataset.ftData.(input.ftNames{i}),strcat('estimated',input.ftNames{i}),dataset.estimatedFtData.(input.ftNames{i})),dataset.time);
         end
-        
-        % Plot ftDataNoOffset and/vs estimatedFtData
-        for i=i0:ie
-            %     for i=1:size(input.ftNames,1)
-            FTplots(struct(input.ftNames{i},dataset.ftDataNoOffset.(input.ftNames{i}),strcat('estimated',input.ftNames{i}),dataset.estimatedFtData.(input.ftNames{i})),dataset.time);
-        end
-    end
-    if(noOffset || all)
         for i=i0:ie
             %     for i=1:size(input.ftNames,1)
             FTplots(struct(input.ftNames{i},filterd.(input.ftNames{i}),strcat('estimated',input.ftNames{i}),dataset2.estimatedFtData.(input.ftNames{i})),dataset2.time);
         end
+       
+    end
+    if(noOffset || all)
+         % Plot ftDataNoOffset and/vs estimatedFtData
+        for i=i0:ie
+            %     for i=1:size(input.ftNames,1)
+            FTplots(struct(input.ftNames{i},dataset.ftDataNoOffset.(input.ftNames{i}),strcat('estimated',input.ftNames{i}),dataset.estimatedFtData.(input.ftNames{i})),dataset.time);
+        end
+        
     end
     
 end
