@@ -14,6 +14,7 @@ else
                 rawData.(ftNames{i})(j,:)=calibMat\ftData.(ftNames{i})(j,:)';
             end
         else
+            disp(strcat({'getRawData: Calibration Matrix '},serialNumbers{i},{' not found in the specified folder'})) 
             rawData=0;
         end
     end
