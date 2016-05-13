@@ -14,8 +14,20 @@ else
                 rawData.(ftNames{i})(j,:)=calibMat\ftData.(ftNames{i})(j,:)';
             end
         else
-            disp(strcat({'getRawData: Calibration Matrix '},serialNumbers{i},{' not found in the specified folder'})) 
+            disp(strcat({'getRawData: Calibration Matrix '},serialNumbers{i},{' not found in the specified folder. Trying in default folders'}))
+            if (exist(strcat('external/ftSensCalib/software/sensAquisitionArchive/',serialNumbers{i},'/','matrix_',serialNumbers{i},'.txt'),'file')==2)
+                calibMat=readCalibMat(strcat('external/ftSensCalib/software/sensAquisitionArchive/',serialNumbers{i},'/','matrix_',serialNumbers{i},'.txt'));
+                calibMatrices.(ftNames{i})=calibMat;
+                for j=1:size(ftData.(ftNames{i}))
+                    rawData.(ftNames{i})(j,:)=calibMat\ftData.(ftNames{i})(j,:)';
+                end
+            else
+                 
+            
+            disp(strcat({'getRawData: Calibration Matrix '},serialNumbers{i},{' not found in the defult folder.'}))
+            
             rawData=0;
+            end
         end
     end
 end
