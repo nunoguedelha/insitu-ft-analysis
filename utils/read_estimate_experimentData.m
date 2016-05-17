@@ -85,7 +85,7 @@ else
     end
     dataset.estimatedFtData=estimatedFtData;
     
-    if (input.relevant==1)
+    if (relevant==1)
         mask=dataset.time>dataset.time(1)+rData(1) & dataset.time<dataset.time(1)+rData(2);
         dataset=applyMask(dataset,mask);
     end

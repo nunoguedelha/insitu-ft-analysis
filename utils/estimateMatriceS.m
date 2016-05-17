@@ -9,7 +9,7 @@ for i=n:size(ftNames,1)
     rawNoMean=rawData.(ftNames{i})-repmat(meanFt,size(rawData.(ftNames{i}),1),1);
     estNoMean=estimatedFtData.(ftNames{i})-repmat(meanEst,size(estimatedFtData.(ftNames{i}),1),1);
 %[calibMatrices.(ftNames{i}),fullscale.(ftNames{i})]=estimateCalibMatrix(rawNoMean,estNoMean.(ftNames{i}));
-[calibMatrices.(ftNames{i}),fullscale.(ftNames{i})]=estimateCalibMatrixWithReg(rawNoMean,estNoMean.(ftNames{i}),cMat.(ftNames{i}),lambda);
+[calibMatrices.(ftNames{i}),fullscale.(ftNames{i})]=estimateCalibMatrixWithReg(rawNoMean,estNoMean,cMat.(ftNames{i}),lambda);
 
-offset.(ftNames{i})=estNoMean-calibMatrices.(ftNames{i})*rawNoMean;
+offset.(ftNames{i})=meanEst'-calibMatrices.(ftNames{i})*meanFt';
 end

@@ -8,16 +8,28 @@ onlyWSpace=true;
 i0=4;%start from
 ie=4;%until
 %numbered as the filed in input.ftData
+
+if(noOffset)
+    for i=1:size(ftNames,1)
+        [ftDataNoOffset.(ftNames{i}),offset.(ftNames{i})]=removeOffset(dataset.ftData.(ftNames{i}),dataset.estimatedFtData.(ftNames{i}));
+    end
+    dataset.ftDataNoOffset=ftDataNoOffset;
+    
+    for i=1:size(ftNames,1)
+        [filteredNoOffset.(ftNames{i}),filteredOffset.(ftNames{i})]=removeOffset(dataset.filteredFtData.(ftNames{i}),dataset.estimatedFtData.(ftNames{i}));
+    end
+    dataset.filteredNoOffset=filteredNoOffset;
+    dataset.filteredOffset=filteredOffset;
+end
+
+
 if(~onlyWSpace || all)
     
     if(~noOffset || all)
         % Plot ftDataNoOffset and/vs estimatedFtData
         for i=i0:ie
-            %     for i=1:size(ftNames,1)
             FTplots(struct(ftNames{i},dataset.ftData.(ftNames{i}),strcat('estimated',ftNames{i}),dataset.estimatedFtData.(ftNames{i})),dataset.time);
-        end
-        for i=i0:ie
-            %     for i=1:size(ftNames,1)
+       
             FTplots(struct(ftNames{i},filterd.(ftNames{i}),strcat('estimated',ftNames{i}),dataset.estimatedFtData.(ftNames{i})),dataset.time);
         end
        
@@ -25,8 +37,8 @@ if(~onlyWSpace || all)
     if(noOffset || all)
          % Plot ftDataNoOffset and/vs estimatedFtData
         for i=i0:ie
-            %     for i=1:size(ftNames,1)
             FTplots(struct(ftNames{i},dataset.ftDataNoOffset.(ftNames{i}),strcat('estimated',ftNames{i}),dataset.estimatedFtData.(ftNames{i})),dataset.time);
+            FTplots(struct(ftNames{i},dataset.filteredOffset.(ftNames{i}),strcat('estimated',ftNames{i}),dataset.estimatedFtData.(ftNames{i})),dataset.time);
         end
         
     end
