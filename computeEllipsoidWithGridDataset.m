@@ -22,11 +22,13 @@ addpath utils
 % name and paths of the data files
 
 % experimentName='icub-insitu-ft-analysis-big-datasets/2016_04_21/extendedYoga4StandingOnLeft';% Name of the experiment;
-experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_06';% Name of the experiment;
+experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_09/darmstadt';% Name of the experiment;
+% experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_09/LeftLTorazzasInertial';
+% experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_09/LeftLegTorazzas';
 
 % Script options, meant to control the behavior of this script 
 scriptOptions = {};
-scriptOptions.forceCalculation=true;%false;
+scriptOptions.forceCalculation=false;%false;
 scriptOptions.printPlots=true;%true
 
 % Script of the mat file used for save the intermediate results 
@@ -154,7 +156,7 @@ if(scriptOptions.printPlots)
         plot3_matrix(dataset.estimatedFtData.(ft)(:,1:3))
         title(escapeUnderscores(ft));
     end
-    suptitle('Force estimated from the model and force measured (with offset removed)');
+    % subtitle('Force estimated from the model and force measured (with offset removed)');
 
     
     % Plot sensor vs estimated (with offset computed the minimum distance
@@ -168,7 +170,7 @@ if(scriptOptions.printPlots)
         plot(dataset.estimatedFtData.(ft)(:,1:3));
         title(escapeUnderscores(ft));
     end
-    suptitle('Force estimated from the model and force measured (with offset removed)');
+    % subtitle('Force estimated from the model and force measured (with offset removed)');
 
     figure;
     for ftIdx =1:length(sensorsToAnalize)
@@ -178,7 +180,7 @@ if(scriptOptions.printPlots)
         plot(normOfError);
         title(escapeUnderscores(ft));
     end
-    suptitle('Error in norm between the force estimated from the model and the one measured (with offset removed)');
+    % subtitle('Error in norm between the force estimated from the model and the one measured (with offset removed)');
 end
 
 %% Check ellipsoid 
@@ -198,8 +200,27 @@ for ftIdx =1:length(sensorsToAnalize)
      intersections = ellipsoid_intersectionWithAxis(fittedEllipsoid_im);
      g = 9.81;
      masses = intersections/g;
-     fprintf('The apparent mass attach at the sensor %s for axis x,y,z are (%f,%f,%f)\n',ft,masses(1),masses(2),masses(3));
+     fprintf('The apparent mass attached (using gravity from kinematics) at the sensor %s for axis x,y,z are (%f,%f,%f)\n',ft,masses(1),masses(2),masses(3));
+     
+     figure
+     plot3_matrix_aspoints(dataset.estimatedFtData.(ft)(:,1:3));
+     plot3(dataset.ftDataNoOffset.(ft)(:,1),dataset.ftDataNoOffset.(ft)(:,2),dataset.ftDataNoOffset.(ft)(:,3),'b.');
+     plot_ellipsoid_im(fittedEllipsoid_im);
+     axis equal;
+     
+     % We do the same computation, but using the best fitt that does not
+     % use the data on gravity (to avoid relyng on anything)
+     fittedEllipsoid_noGravity = ellipsoidfit_leastsquares(dataset.ftDataNoOffset.(ft)(:,1),dataset.ftDataNoOffset.(ft)(:,2),dataset.ftDataNoOffset.(ft)(:,3));
 
+     intersections_noGravity = ellipsoid_intersectionWithAxis(fittedEllipsoid_noGravity);
+     g = 9.81;
+     masses_noGravity = intersections_noGravity/g;
+     fprintf('The apparent mass attached (without using the model) at the sensor %s for axis x,y,z are (%f,%f,%f)\n',ft,masses_noGravity(1),masses_noGravity(2),masses_noGravity(3));
+    
+     figure
+     plot3(dataset.ftDataNoOffset.(ft)(:,1),dataset.ftDataNoOffset.(ft)(:,2),dataset.ftDataNoOffset.(ft)(:,3),'b.');
+     plot_ellipsoid_im(fittedEllipsoid_noGravity);
+     axis equal;
 end
 
 
