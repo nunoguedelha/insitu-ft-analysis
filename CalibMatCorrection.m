@@ -3,21 +3,19 @@
 % assuming is run at the end of main, or after main
 %script options
 saveMat=true;
-usingInsitu=false;
+usingInsitu=true;
 plot=true;
 %using insitu
 % NOTE: only use when position of center of mass is constant
 %TODO: procedure for choosing when to use insitu or not required
 if(usingInsitu)
           [calibMatrices,offset,fullscale]=estimateMatrices(dataset.rawData,dataset.estimatedFtData);
-    %
-    %     % with regularization
-    %     [calibMatrices,offset,fullscale]=estimateMatricesReg(dataset.rawData,dataset.estimatedFtData,cMat);
-    %
-    for i=3:6
-        for j=1:size(dataset.rawData.(ftNames{i}),1)
-            reCalibData.(ftNames{i})(j,:)=calibMatrices.(ftNames{i})*(dataset.rawData.(ftNames{i})(j,:)'-offset.(ftNames{i})');
-            offsetInsitu.(ftNames{i})=calibMatrices.(ftNames{i})*offset.(ftNames{i})';
+  
+    for ftIdx =1:length(sensorsToAnalize)
+        ft = sensorsToAnalize{ftIdx};
+        for j=1:size(dataset.rawData.(ft),1)
+            reCalibData.(ft)(j,:)=calibMatrices.(ft)*(dataset.rawData.(ft)(j,:)'-offset.(ft)');
+            offsetInsitu.(ft)=calibMatrices.(ft)*offset.(ft)';
         end
     end
     reCabData.offsetInsitu=offsetInsitu;
@@ -44,17 +42,19 @@ reCabData.fullscale=fullscale;
 %% write calibration matrices file
 
 if(saveMat)
-    for i=3:6
+     for ftIdx =1:length(sensorsToAnalize)
+        ft = sensorsToAnalize{ftIdx};
         
         filename=strcat('data/',experimentName,'/calibrationMatrices/',dataset.calibMatFileNames{i});
-        writeCalibMat(calibMatrices.(ftNames{i}), fullscale.(ftNames{i}), filename)
+        writeCalibMat(calibMatrices.(ft), fullscale.(ft), filename)
     end
 end
 %% generate wrenches with new calibration matrix
 
-for i=3:6
-    for j=1:size(dataset.rawData.(ftNames{i}),1)
-        reCalibData.(ftNames{i})(j,:)=calibMatrices.(ftNames{i})*(dataset.rawData.(ftNames{i})(j,:)')+offsetC.(ftNames{i});
+ for ftIdx =1:length(sensorsToAnalize)
+        ft = sensorsToAnalize{ftIdx};
+    for j=1:size(dataset.rawData.(ft),1)
+        reCalibData.(ft)(j,:)=calibMatrices.(ft)*(dataset.rawData.(ft)(j,:)')+offsetC.(ft);
     end
 end
 reCabData.reCalibData=reCalibData;
@@ -69,24 +69,26 @@ reCabData.calibMatFileNames=dataset.calibMatFileNames;
 if(plot)
     
     %% plot 3D graph
-    for i=3:4
-            [filteredNoOffset.(ftNames{i}),filteredOffset.(ftNames{i})]=removeOffset(dataset.filteredFtData.(ftNames{i}),dataset.estimatedFtData.(ftNames{i}));
+     for ftIdx =1:length(sensorsToAnalize)
+        ft = sensorsToAnalize{ftIdx};
+            [filteredNoOffset.(ft),filteredOffset.(ft)]=removeOffset(dataset.filteredFtData.(ft),dataset.estimatedFtData.(ft));
 
         
         figure,
-         plot3_matrix(filteredNoOffset.(ftNames{i})(:,1:3)); grid on;hold on;
-        plot3_matrix(dataset.estimatedFtData.(ftNames{i})(:,1:3)); grid on;hold on;
-        plot3_matrix(reCalibData.(ftNames{i})(:,1:3));
+         plot3_matrix(filteredNoOffset.(ft)(:,1:3)); grid on;hold on;
+        plot3_matrix(dataset.estimatedFtData.(ft)(:,1:3)); grid on;hold on;
+        plot3_matrix(reCalibData.(ft)(:,1:3));
         
         legend('measuredDataNoOffset','estimatedData','reCalibratedData','Location','west');
-        title(strcat({'Wrench space '},(ftNames{i})));
+        title(strcat({'Wrench space '},(ft)));
         xlabel('F_{x}');
         ylabel('F_{y}');
         zlabel('F_{z}');
     end
     
     
-    for i=4:4
-        FTplots(struct(ftNames{i},reCalibData.(ftNames{i}),strcat('estimated',ftNames{i}),dataset.estimatedFtData.(ftNames{i})),dataset.time);
+    for ftIdx =1:length(sensorsToAnalize)
+        ft = sensorsToAnalize{ftIdx};
+        FTplots(struct(ft,reCalibData.(ft),strcat('estimated',ft),dataset.estimatedFtData.(ft)),dataset.time);
     end
 end

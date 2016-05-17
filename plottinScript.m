@@ -4,54 +4,53 @@
 all=false;
 noOffset=true;
 onlyWSpace=true;
+filtered=true;
 
-i0=4;%start from
-ie=4;%until
 %numbered as the filed in input.ftData
 
-if(noOffset)
-    for i=1:size(ftNames,1)
-        [ftDataNoOffset.(ftNames{i}),offset.(ftNames{i})]=removeOffset(dataset.ftData.(ftNames{i}),dataset.estimatedFtData.(ftNames{i}));
+if(noOffset || all)
+    for ftIdx =1:length(sensorsToAnalize)
+        ft = sensorsToAnalize{ftIdx};
+        [ftDataNoOffset.(ft),offset.(ft)]=removeOffset(dataset.ftData.(ft),dataset.estimatedFtData.(ft));
+        
+        [filteredNoOffset.(ft),filteredOffset.(ft)]=removeOffset(dataset.filteredFtData.(ft),dataset.estimatedFtData.(ft));
     end
     dataset.ftDataNoOffset=ftDataNoOffset;
-    
-    for i=1:size(ftNames,1)
-        [filteredNoOffset.(ftNames{i}),filteredOffset.(ftNames{i})]=removeOffset(dataset.filteredFtData.(ftNames{i}),dataset.estimatedFtData.(ftNames{i}));
-    end
     dataset.filteredNoOffset=filteredNoOffset;
-    dataset.filteredOffset=filteredOffset;
+    
 end
 
 
 if(~onlyWSpace || all)
-    
-    if(~noOffset || all)
-        % Plot ftDataNoOffset and/vs estimatedFtData
-        for i=i0:ie
-            FTplots(struct(ftNames{i},dataset.ftData.(ftNames{i}),strcat('estimated',ftNames{i}),dataset.estimatedFtData.(ftNames{i})),dataset.time);
-       
-            FTplots(struct(ftNames{i},filterd.(ftNames{i}),strcat('estimated',ftNames{i}),dataset.estimatedFtData.(ftNames{i})),dataset.time);
+    for ftIdx =1:length(sensorsToAnalize)
+        ft = sensorsToAnalize{ftIdx};
+        if(~noOffset || all)
+            % Plot ftDataNoOffset and/vs estimatedFtData
+            if(~filtered ||all)
+                FTplots(struct(ft,dataset.ftData.(ft),strcat('estimated',ft),dataset.estimatedFtData.(ft)),dataset.time);
+            else
+                FTplots(struct(ft,dataset.filteredFtData.(ft),strcat('estimated',ft),dataset.estimatedFtData.(ft)),dataset.time);
+            end
         end
-       
-    end
-    if(noOffset || all)
-         % Plot ftDataNoOffset and/vs estimatedFtData
-        for i=i0:ie
-            FTplots(struct(ftNames{i},dataset.ftDataNoOffset.(ftNames{i}),strcat('estimated',ftNames{i}),dataset.estimatedFtData.(ftNames{i})),dataset.time);
-            FTplots(struct(ftNames{i},dataset.filteredOffset.(ftNames{i}),strcat('estimated',ftNames{i}),dataset.estimatedFtData.(ftNames{i})),dataset.time);
+        if(noOffset || all)
+            % Plot ftDataNoOffset and/vs estimatedFtData
+            if(~filtered ||all)
+                FTplots(struct(ft,dataset.ftDataNoOffset.(ft),strcat('estimated',ft),dataset.estimatedFtData.(ft)),dataset.time);
+            else
+                FTplots(struct(ft,dataset.filteredNoOffset.(ft),strcat('estimated',ft),dataset.estimatedFtData.(ft)),dataset.time);
+            end
         end
-        
     end
-    
 end
 if(onlyWSpace || all)
     % Plot forces in wrench space
     if(~noOffset || all)
         % %with offset
-        for i=i0:ie
-            %     for i=1:size(ftNames,1)
-            figure,plot3_matrix(dataset.ftData.(ftNames{i})(:,1:3));hold on;
-            plot3_matrix(dataset.estimatedFtData.(ftNames{i})(:,1:3)); grid on;
+       for ftIdx =1:length(sensorsToAnalize)
+           ft = sensorsToAnalize{ftIdx};
+
+            figure,plot3_matrix(dataset.ftData.(ft)(:,1:3));hold on;
+            plot3_matrix(dataset.estimatedFtData.(ft)(:,1:3)); grid on;
         end
         legend('measuredData','estimatedData','Location','west');
         title('Wrench space');
@@ -62,10 +61,11 @@ if(onlyWSpace || all)
     
     if(noOffset || all)
         %without offset
-        for i=i0:ie
-            %     for i=1:size(ftNames,1)
-            figure,plot3_matrix(dataset.ftDataNoOffset.(ftNames{i})(:,1:3));hold on;
-            plot3_matrix(dataset.estimatedFtData.(ftNames{i})(:,1:3)); grid on;
+       for ftIdx =1:length(sensorsToAnalize)
+           ft = sensorsToAnalize{ftIdx};
+
+            figure,plot3_matrix(dataset.ftDataNoOffset.(ft)(:,1:3));hold on;
+            plot3_matrix(dataset.estimatedFtData.(ft)(:,1:3)); grid on;
         end
         legend('measuredDataNoOffset','estimatedData','Location','west');
         title('Wrench space');

@@ -1,5 +1,4 @@
-function  [calibMatrices,offset,fullscale]=estimateMatrices(rawData,estimatedFtData,cMat)
-lambda=.5
+function  [calibMatrices,offset,fullscale]=estimateMatrices(rawData,estimatedFtData)
 ftNames=fieldnames(estimatedFtData);
 n=3; %n=3 usually start from 3rd, start from first
 %add offset removal here? estimateOffsetusingInsitu(rawData(:,1:3), estimatedFtData(:.1:3))

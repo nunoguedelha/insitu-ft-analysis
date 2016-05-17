@@ -30,13 +30,13 @@ scriptOptions.matFileName='ftDataset';
     
   
 
+% We carry the analysis just for a subset of the sensors
+sensorsToAnalize = {'left_leg'};%,'right_leg'};
 
 if( scriptOptions.printPlots )
 run('plottinScript.m')
 end
 
-% We carry the analysis just for a subset of the sensors
-sensorsToAnalize = {'left_leg','right_leg'};
 
 run('CalibMatCorrection.m')
 
