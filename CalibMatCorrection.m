@@ -28,18 +28,12 @@ else
     lambda=.5;
     n=1; %n=3 usually start from 3rd, start from first
     
-    for i=n:6
-        [calibMatrices.(ftNames{i}),fullscale.(ftNames{i}),offsetC.(ftNames{i})]=...
-            estimateCalibMatrixWithRegAndOff(...
-            dataset.rawData.(ftNames{i}),... %raw data input
-            dataset.estimatedFtData.(ftNames{i}),...% estimated wrenches as reference
-            dataset.cMat.(ftNames{i}),...% previous calibration matrix for regularization
-            lambda,...% weighting coefficient
-            [0;0;0;0;0;0]);% reference offset
-        % offsetX.(ftNames{i})');% reference offset
-        
-    end
-    
+   [calibMatrices,offsetC,fullscale]=...
+            estimateMatriceS(...
+            dataset.rawData,... %raw data input
+            dataset.estimatedFtData,...% estimated wrenches as reference
+            dataset.cMat,...% previous calibration matrix for regularization
+            lambda);% weighting coefficient
 end
 reCabData.calibMatrices=calibMatrices;
 reCabData.offset=offsetC;
@@ -73,8 +67,12 @@ reCabData.calibMatFileNames=dataset.calibMatFileNames;
     end
 
 if(plot)
+    
     %% plot 3D graph
     for i=3:4
+            [filteredNoOffset.(ftNames{i}),filteredOffset.(ftNames{i})]=removeOffset(dataset.filteredFtData.(ftNames{i}),dataset.estimatedFtData.(ftNames{i}));
+
+        
         figure,
          plot3_matrix(filteredNoOffset.(ftNames{i})(:,1:3)); grid on;hold on;
         plot3_matrix(dataset.estimatedFtData.(ftNames{i})(:,1:3)); grid on;hold on;
