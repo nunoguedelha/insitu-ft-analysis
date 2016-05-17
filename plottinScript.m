@@ -9,6 +9,9 @@ filtered=true;
 %numbered as the filed in input.ftData
 
 if(noOffset || all)
+       % compute the offset that minimizes the difference with 
+    % the estimated F/T (so if the estimates are wrong, the offset
+    % estimated in this way will be totally wrong) 
     for ftIdx =1:length(sensorsToAnalize)
         ft = sensorsToAnalize{ftIdx};
         [ftDataNoOffset.(ft),offset.(ft)]=removeOffset(dataset.ftData.(ft),dataset.estimatedFtData.(ft));

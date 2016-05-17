@@ -3,7 +3,7 @@
 % assuming is run at the end of main, or after main
 %script options
 saveMat=true;
-usingInsitu=true;
+usingInsitu=false;
 plot=true;
 %using insitu
 % NOTE: only use when position of center of mass is constant

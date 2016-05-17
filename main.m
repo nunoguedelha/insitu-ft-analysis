@@ -20,18 +20,8 @@ scriptOptions.raw=true;
 scriptOptions.matFileName='ftDataset';
 
   [dataset]=read_estimate_experimentData(experimentName,scriptOptions);
-  
-  
-    ftNames=fieldnames(dataset.ftData);
- 
-    % compute the offset that minimizes the difference with 
-    % the estimated F/T (so if the estimates are wrong, the offset
-    % estimated in this way will be totally wrong) 
-    
-  
-
-% We carry the analysis just for a subset of the sensors
-sensorsToAnalize = {'left_leg'};%,'right_leg'};
+ % We carry the analysis just for a subset of the sensors
+sensorsToAnalize = {'left_leg','right_leg'};
 
 if( scriptOptions.printPlots )
 run('plottinScript.m')
