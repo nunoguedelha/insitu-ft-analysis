@@ -1,7 +1,7 @@
 %% Plotting script
 %assumes is run as part of main, having params and dataset already loaded.
 %script options
-all=false;
+all=true;
 noOffset=true;
 onlyWSpace=true;
 filtered=true;
@@ -60,6 +60,7 @@ if(onlyWSpace || all)
         xlabel('F_{x}');
         ylabel('F_{y}');
         zlabel('F_{z}');
+        axis equal;
     end
     
     if(noOffset || all)
@@ -75,5 +76,6 @@ if(onlyWSpace || all)
         xlabel('F_{x}');
         ylabel('F_{y}');
         zlabel('F_{z}');
+        axis equal;
     end
 end
