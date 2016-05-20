@@ -22,11 +22,13 @@ addpath utils
 % name and paths of the data files
 
 % experimentName='icub-insitu-ft-analysis-big-datasets/2016_04_21/extendedYoga4StandingOnLeft';% Name of the experiment;
-  experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_09/darmstadt';% Name of the experiment;
+%    experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_09/darmstadt';% Name of the experiment;
 % experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_12/LeftLegTsensor';% Name of the experiment;
-%   experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_17/slowBlack';% Name of the experiment;
+%    experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_17/slowBlack';% Name of the experiment;
 %  experimentName='icub-insitu-ft-analysis-big-datasets/16_03_2016/leftRightLegsGrid';
 %  experimentName='icub-insitu-ft-analysis-big-datasets/2016_04_19/blackUsingOldSensor';% Name of the experiment;
+   experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_19/blackBothLegs';% Name of the experiment;
+
 % Script options, meant to control the behavior of this script 
 scriptOptions = {};
 scriptOptions.forceCalculation=false;%false;
@@ -180,17 +182,24 @@ if(scriptOptions.printPlots)
        
     end
     % subtitle('Force estimated from the model and force measured (with offset removed)');
-
+ax=[];
+lim=zeros(1,4);
     figure;
     for ftIdx =1:length(sensorsToAnalize)
         ft = sensorsToAnalize{ftIdx};
-        subplot(2,1,ftIdx);
+       tax=  subplot(2,1,ftIdx);
         normOfError = normOfRows(dataset.ftDataNoOffset.(ft)(:,1:3)-dataset.estimatedFtData.(ft)(:,1:3));
-        plot(normOfError);
+       plot(normOfError);
+       ax=[ax tax];
         title(strcat({'Data no Offset - estimated data norm '},escapeUnderscores(ft)));
          legend('Norm','Location','west');
-        
+        limt=axis;
+       if limt(4)>lim(4)
+           lim=limt;
+       end
     end
+      
+    axis(ax,lim)
     % subtitle('Error in norm between the force estimated from the model and the one measured (with offset removed)');
 end
 
