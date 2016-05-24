@@ -1,5 +1,9 @@
 
-function  [calibMatrices,offset,fullscale]=estimateMatriceS(rawData,estimatedFtData,cMat,lambda)
+function  [calibMatrices,offset,fullscale]=estimateMatricesAndOffset(rawData,estimatedFtData,cMat,lambda)
+%Does the estimation of the calibration matrix on the centered data. This
+%is done by substracting the mean value to all samples. The offset is then
+%calculated on the means with the new calculated calibration matrix
+
 ftNames=fieldnames(estimatedFtData);
 n=3; %n=3 usually start from 3rd, start from first
 %add offset removal here? estimateOffsetusingInsitu(rawData(:,1:3), estimatedFtData(:.1:3))

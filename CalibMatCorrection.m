@@ -27,7 +27,7 @@ else
     n=1; %n=3 usually start from 3rd, start from first
     
    [calibMatrices,offsetC,fullscale]=...
-            estimateMatriceS(...
+            estimateMatricesAndOffset(...
             dataset.rawData,... %raw data input
             dataset.estimatedFtData,...% estimated wrenches as reference
             dataset.cMat,...% previous calibration matrix for regularization
@@ -44,7 +44,7 @@ reCabData.fullscale=fullscale;
 if(saveMat)
      for ftIdx =1:length(sensorsToAnalize)
         ft = sensorsToAnalize{ftIdx};
-        
+        i=find(strcmp(ft, names));
         filename=strcat('data/',experimentName,'/calibrationMatrices/',dataset.calibMatFileNames{i});
         writeCalibMat(calibMatrices.(ft), fullscale.(ft), filename)
     end
