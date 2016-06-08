@@ -42,6 +42,7 @@ reCabData.fullscale=fullscale;
 %% write calibration matrices file
 
 if(saveMat)
+    names=fieldnames(dataset.ftData);
      for ftIdx =1:length(sensorsToAnalize)
         ft = sensorsToAnalize{ftIdx};
         i=find(strcmp(ft, names));
@@ -80,7 +81,7 @@ if(plot)
         plot3_matrix(reCalibData.(ft)(:,1:3));
         
         legend('measuredDataNoOffset','estimatedData','reCalibratedData','Location','west');
-        title(strcat({'Wrench space '},(ft)));
+        title(strcat({'Wrench space '},escapeUnderscores(ft)));
         xlabel('F_{x}');
         ylabel('F_{y}');
         zlabel('F_{z}');

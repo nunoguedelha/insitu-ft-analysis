@@ -1,9 +1,9 @@
 %% Plotting script
 %assumes is run as part of main, having params and dataset already loaded.
 %script options
-all=true;
-noOffset=true;
-onlyWSpace=true;
+all=false;
+noOffset=false;
+onlyWSpace=false;
 filtered=true;
 
 %numbered as the filed in input.ftData
@@ -56,7 +56,7 @@ if(onlyWSpace || all)
             plot3_matrix(dataset.estimatedFtData.(ft)(:,1:3)); grid on;
         end
         legend('measuredData','estimatedData','Location','west');
-        title('Wrench space');
+        title(strcat({'Wrench space '},escapeUnderscores(ft)));
         xlabel('F_{x}');
         ylabel('F_{y}');
         zlabel('F_{z}');
@@ -72,7 +72,7 @@ if(onlyWSpace || all)
             plot3_matrix(dataset.estimatedFtData.(ft)(:,1:3)); grid on;
         end
         legend('measuredDataNoOffset','estimatedData','Location','west');
-        title('Wrench space');
+        title(strcat({'Wrench space '},escapeUnderscores(ft)));
         xlabel('F_{x}');
         ylabel('F_{y}');
         zlabel('F_{z}');
