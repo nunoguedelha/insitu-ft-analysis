@@ -85,11 +85,28 @@ else
     end
     dataset.estimatedFtData=estimatedFtData;
     
+    if(input.hangingInit==1)
+        dataDir=strcat('data/',experimentName,'/icub/inertial/data.log');
+        mask=dataset.time>dataset.time(1)+input.hangingInterval(1) & dataset.time<dataset.time(1)+input.hangingInterval(2);
+        datasetInertial=applyMask(dataset,mask);
+        [inertialEstimatedFtData]=obtainEstimatedWrenchesIMU(dataDir,input.robotName,datasetInertial.time,datasetInertial);
+        
+        inertial.ftData=datasetInertial.ftData;
+        inertial.time=datasetInertial.time;
+        
+         %replace the estored estimatedFtData for one with the same order as the
+        %ftData
+        for i=1:size(input.ftNames,1)
+            inertial.estimatedFtData.(input.ftNames{i})=inertialEstimatedFtData.(sensorNames{matchup(i)});
+        end
+       
+    end
+    
     if (relevant==1)
         mask=dataset.time>dataset.time(1)+rData(1) & dataset.time<dataset.time(1)+rData(2);
         dataset=applyMask(dataset,mask);
     end
-    
+     
     %% Filter data
     % filtered ft data
     [filteredFtData,mask]=filterFtData(dataset.ftData);
@@ -103,6 +120,12 @@ else
         [dataset.rawData,cMat]=getRawData(dataset.filteredFtData,input.calibMatPath,input.calibMatFileNames);
         dataset.cMat=cMat;
         dataset.calibMatFileNames=input.calibMatFileNames;
+    end
+    
+     if(input.hangingInit==1)
+      
+        dataset.inertial=inertial;
+        
     end
     %% Save the workspace
     %     %save ft measurements, filtered measurements, raw measurements,

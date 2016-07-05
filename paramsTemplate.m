@@ -9,6 +9,8 @@ input.contactFrameName=''; %name of the frame which is in contact
 %can start being a simple matrix where first colum menas right leg in
 %contact ture/false and second column left leg in contact ture/false
 
+input.hangingInit=0;% in case the robot starts from a hanging position, and offset calibration wants to be done through IMU
+input.hangingInterval=[,] % initial and final time in which the offset estimation will be done, this is the time it is hanging
 
 %create input parameter
 % input.experimentName='dumperRightLegNoIMU';% Name of the experiment

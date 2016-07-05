@@ -4,19 +4,27 @@
 % clear all;
 addpath ../utils
 addpath ../external/quadfit
-serialNumber='SN026';
 
+
+serialNumber='SN192';%from iCubGenova05
+sensorName='r_leg_ft_sensor';
 %Use only datasets where the same sensor is used
+% experimentNames={
+%     'icub-insitu-ft-analysis-big-datasets/16_03_2016/leftRightLegsGrid';...% Name of the experiment;
+%     'icub-insitu-ft-analysis-big-datasets/21_03_2016/yogaLeft1';...% Name of the experiment;
+%     'icub-insitu-ft-analysis-big-datasets/2016_04_21/extendedYoga4StandingOnLeft';...% Name of the experiment;
+%     }; %this set is from iCubGenova02
 experimentNames={
-    'icub-insitu-ft-analysis-big-datasets/16_03_2016/leftRightLegsGrid';...% Name of the experiment;
-    'icub-insitu-ft-analysis-big-datasets/21_03_2016/yogaLeft1';...% Name of the experiment;
-    'icub-insitu-ft-analysis-big-datasets/2016_04_21/extendedYoga4StandingOnLeft';...% Name of the experiment;
-    };
-names2use={'Workbench','Grid','Yoga','ExtendedYoga'};% except for the first one all others are short names for the expermients in experimentNames
-toCompareWith='ExtendedYoga'; %choose in which experiment will comparison be made
+    'icub-insitu-ft-analysis-big-datasets/2016_06_08/yoga';...% Name of the experiment;
+  'icub-insitu-ft-analysis-big-datasets/2016_06_17/normal';% Name of the experiment;
+ 'icub-insitu-ft-analysis-big-datasets/2016_06_17/fast';% Name of the experiment; 
+ 'icub-insitu-ft-analysis-big-datasets/2016_07_04/normal';% Name of the experiment;
+ };%this set is form iCubGenova05
+names2use={'Workbench','Yoga','Yogapp1st','fastYogapp','Yogapp2nd'};% except for the first one all others are short names for the expermients in experimentNames
+%toCompareWith='Yogapp2nd'; %choose in which experiment will comparison be made
 
 scriptOptions.matFileName='ftDataset';
-
+scriptOptions.printAll=false;
 %% Load matrices and rawData
 cMat.(names2use{1}) = readCalibMat(strcat('../data/sensorCalibMatrices/matrix_',serialNumber,'.txt'));
 
@@ -25,6 +33,14 @@ for i=1:length(experimentNames)
     load(strcat('../data/',experimentNames{i},'/',scriptOptions.matFileName,'.mat'),'dataset');
    [data.(names2use{i+1})]=dataset;
     
+end
+for toCompare=2:length(names2use)
+    toCompareWith=names2use{toCompare}; %choose in which experiment will comparison be made
+    
+inertiaOffset=0;
+nametemp=fieldnames(data.(toCompareWith));
+if(sum(strcmp(nametemp,'inertial'))==1)
+  inertiaOffset=1;
 end
 
 index=0;
@@ -40,24 +56,34 @@ if (index~=0)
     sensorsToAnalize=ftNames{index};
     
     for i=1:length(names2use)
-        
+         if (inertiaOffset==0)
         for j=1:size(data.(toCompareWith).rawData.( sensorsToAnalize),1)
             reCalibData.(names2use{i})(j,:)=cMat.(names2use{i})*(data.(toCompareWith).rawData.( sensorsToAnalize)(j,:)');
         end
-        
+        %remove offset
+       
         ftDataNoOffset.(names2use{i})=removeOffset(reCalibData.(names2use{i}),data.(toCompareWith).estimatedFtData.(sensorsToAnalize));
-        
+        else
+            [inerOffset,inertialRaw]=calculateOffset(sensorsToAnalize,data.(toCompareWith).inertial.ftData,data.(toCompareWith).inertial.estimatedFtData,data.(toCompareWith).cMat,cMat.(names2use{i}));
+            for j=1:size(data.(toCompareWith).rawData.( sensorsToAnalize),1)
+                reCalibData.(names2use{i})(j,:)=cMat.(names2use{i})*(data.(toCompareWith).rawData.( sensorsToAnalize)(j,:)');
+                ftDataNoOffset.(names2use{i})(j,:)=  reCalibData.(names2use{i})(j,:)+inerOffset.(sensorsToAnalize)';
+            end
+            
+         end
+         
     end
     
-    %remove offset
+    if(scriptOptions.printAll)
     for i=2:length(names2use)
         figure,plot3_matrix( ftDataNoOffset.(names2use{i})(:,1:3));hold on;
         plot3_matrix(data.(toCompareWith).estimatedFtData.(sensorsToAnalize)(:,1:3)); grid on;
         legend(names2use{i},'estimatedData','Location','west');
-        title('Wrench space');
+    title(strcat('Wrench space on ',toCompareWith));
         xlabel('F_{x}');
         ylabel('F_{y}');
         zlabel('F_{z}');
+    end
     end
     figure,
     plot3_matrix(data.(toCompareWith).estimatedFtData.(sensorsToAnalize)(:,1:3)); grid on;  hold on;
@@ -66,31 +92,24 @@ if (index~=0)
     end
     legend([{'estimatedData'},names2use],'Location','west');
     
-    title('Wrench space');
+    title(strcat('Wrench space on ',toCompareWith));
     xlabel('F_{x}');
     ylabel('F_{y}');
     zlabel('F_{z}');
     
-    %error calculation
-    %
-    %     dif1=data.(names2use{i}).estimatedFtData.(ftNames{4})(:,1:3)-ftDataNoOffset1(:,1:3);
-    %     dif2=data.(names2use{i}).estimatedFtData.(ftNames{4})(:,1:3)-ftDataNoOffset2(:,1:3);
-    %     dif3=data.(names2use{i}).estimatedFtData.(ftNames{4})(:,1:3)-ftDataNoOffset3(:,1:3);
-    %     dif4=data.(names2use{i}).estimatedFtData.(ftNames{4})(:,1:3)-ftDataNoOffset4(:,1:3);
-    %
-    %     figure, plot(dif1);
-    %     figure, plot(dif2);
-    %     figure, plot(dif3);
-    %     figure, plot(dif4);
-    %
-    %     sum(sum(abs(dif1)))
-    %     sum(sum(abs(dif2)))
-    %     sum(sum(abs(dif3)))
-    %     sum(sum(abs(dif4)))
-    %
-    %     sum(abs(dif1))
-    %     sum(abs(dif2))
-    %     sum(abs(dif3))
-    %     sum(abs(dif4))
+      for i=1:length(names2use)
+       error(i,toCompare-1)=sum(sum(abs(data.(toCompareWith).estimatedFtData.(sensorsToAnalize)(:,1:3)-ftDataNoOffset.(names2use{i})(:,1:3))));
+    end
+    
+    clear ftDataNoOffset reCalibData
+   
     
 end
+
+end
+ totalerror=sum(error');
+ [minErr,minInd]=min(totalerror);
+ disp(sprintf('The calibration matrix with least error among all datasets is from %s , with a total of %d',names2use{minInd}, minErr));
+ sCalibMat=cMat.(names2use{minInd})/(cMat.Workbench);%calculate secondary calibration matrix 
+ cMat2xml(sCalibMat,sensorName)% print in required format to use by WholeBodyDynamics
+ 
