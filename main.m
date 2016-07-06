@@ -14,11 +14,14 @@ addpath utils
 %      experimentName='icub-insitu-ft-analysis-big-datasets/2016_06_08/yoga';% Name of the experiment;
 %  experimentName='icub-insitu-ft-analysis-big-datasets/2016_06_17/normal';% Name of the experiment;
 % experimentName='icub-insitu-ft-analysis-big-datasets/2016_06_17/fast';% Name of the experiment;
- experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_04/normal';% Name of the experiment;
+% experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_04/fast';% Name of the experiment;
+  experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin30';% Name of the experiment;
+%  experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin45';% Name of the experiment;
+
 
 
 scriptOptions = {};
-scriptOptions.forceCalculation=false;%false;
+scriptOptions.forceCalculation=true;%false;
 scriptOptions.printPlots=false;%true
 scriptOptions.saveData=true;%true
 scriptOptions.raw=true;% to calculate the raw data, for recalibration always true

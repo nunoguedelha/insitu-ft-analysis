@@ -1,4 +1,4 @@
-function [xmlStr,bestCMat,bestName,sCalibMat]=crossValidation(serialNumber,sensorName,experimentNames,names2use)
+function [xmlStr,bestCMat,bestName,sCalibMat]=crossValidation(serialNumber,sensorName,experimentNames,names2use,comparisonList)
 %% Test calibration matrices obtained from different datasets
 %use from test directory
 %load calibration matrices to compare with workbench calibration matrix
@@ -17,8 +17,8 @@ for i=1:length(experimentNames)
    [data.(names2use{i+1})]=dataset;
     
 end
-for toCompare=2:length(names2use)
-    toCompareWith=names2use{toCompare}; %choose in which experiment will comparison be made
+for toCompare=1:length(comparisonList)
+    toCompareWith=comparisonList{toCompare}; %choose in which experiment will comparison be made
     
 inertiaOffset=0;
 nametemp=fieldnames(data.(toCompareWith));
@@ -73,15 +73,16 @@ if (index~=0)
     for i=1:length(names2use)
         plot3_matrix( ftDataNoOffset.(names2use{i})(:,1:3));hold on;
     end
-    legend([{'estimatedData'},names2use],'Location','west');
+    legend([{'estimatedData'};names2use],'Location','west');
     
     title(strcat('Wrench space on ',toCompareWith));
     xlabel('F_{x}');
     ylabel('F_{y}');
     zlabel('F_{z}');
     
-      for i=1:length(names2use)
-       error(i,toCompare-1)=sum(sum(abs(data.(toCompareWith).estimatedFtData.(sensorsToAnalize)(:,1:3)-ftDataNoOffset.(names2use{i})(:,1:3))));
+    for i=1:length(names2use)
+        error(i,toCompare)=sum(sum(abs(data.(toCompareWith).estimatedFtData.(sensorsToAnalize)(:,1:3)-ftDataNoOffset.(names2use{i})(:,1:3))));
+         errorXaxis(i,toCompare,:)=sum(abs(data.(toCompareWith).estimatedFtData.(sensorsToAnalize)-ftDataNoOffset.(names2use{i})));
     end
     
     clear ftDataNoOffset reCalibData
@@ -90,10 +91,26 @@ if (index~=0)
 end
 
 end
- totalerror=sum(error');
+for i=1:size(error,2)
+    errorP(i,:)=(error(:,i)/error(1,i))';
+    for axis=1:6
+    errorPaxis(i,:,axis)=(errorXaxis(:,i,axis)/errorXaxis(1,i,axis))';
+    end
+end
+ totalerror=mean(errorP);
+ totalerrorXaxis=mean(errorPaxis);
  [minErr,minInd]=min(totalerror);
- fprintf('The calibration matrix with least error among all datasets is from %s , with a total of %d',names2use{minInd}, minErr);
+ fprintf('The calibration matrix with least error among all datasets is from %s , with a total of %d percentage on average \n',names2use{minInd}, minErr);
  sCalibMat=cMat.(names2use{minInd})/(cMat.Workbench);%calculate secondary calibration matrix 
  xmlStr=cMat2xml(sCalibMat,sensorName);% print in required format to use by WholeBodyDynamics
  bestCMat=cMat.(names2use{minInd});
  bestName=names2use{minInd};
+ axisName={'fx','fy','fz','tx','ty','tz'};
+  for axis=1:6
+    errorPaxis(i,:,axis)=(errorXaxis(:,i,axis)/errorXaxis(1,i,axis))';
+     [minErr,minInd]=min(totalerrorXaxis(:,:,axis));
+ fprintf('The calibration matrix with least error on %s among all datasets is from %s , with a total of %d percentage on average \n',axisName{axis},names2use{minInd}, minErr);
+ frankieMatrix(axis,:)=cMat.(names2use{minInd})(axis,:);
+    end
+ fCalibMat=frankieMatrix/(cMat.Workbench);%calculate secondary calibration matrix 
+ xmlStr=cMat2xml(fCalibMat,sensorName);% print in required format to use by WholeBodyDynamics

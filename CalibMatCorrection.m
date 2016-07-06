@@ -3,22 +3,14 @@
 % assuming is run at the end of main, or after main
 %script options
 saveMat=true;
-usingInsitu=false;
+usingInsitu=true;
 plot=true;
 %using insitu
 % NOTE: only use when position of center of mass is constant
 %TODO: procedure for choosing when to use insitu or not required
 if(usingInsitu)
-          [calibMatrices,offset,fullscale]=estimateMatrices(dataset.rawData,dataset.estimatedFtData);
+          [calibMatrices,offset,fullscale]=estimateMatrices(dataset.rawData,dataset.estimatedFtData,sensorsToAnalize);
   
-    for ftIdx =1:length(sensorsToAnalize)
-        ft = sensorsToAnalize{ftIdx};
-        for j=1:size(dataset.rawData.(ft),1)
-            reCalibData.(ft)(j,:)=calibMatrices.(ft)*(dataset.rawData.(ft)(j,:)'-offset.(ft)');
-            offsetInsitu.(ft)=calibMatrices.(ft)*offset.(ft)';
-        end
-    end
-    reCabData.offsetInsitu=offsetInsitu;
     
 else
     %not using insitu
@@ -32,9 +24,10 @@ else
             dataset.estimatedFtData,...% estimated wrenches as reference
             dataset.cMat,...% previous calibration matrix for regularization
             lambda);% weighting coefficient
+        reCabData.offset=offsetC;
 end
 reCabData.calibMatrices=calibMatrices;
-reCabData.offset=offsetC;
+
 reCabData.fullscale=fullscale;
 
 
@@ -51,12 +44,23 @@ if(saveMat)
     end
 end
 %% generate wrenches with new calibration matrix
-
+if(usingInsitu)
+    
+    for ftIdx =1:length(sensorsToAnalize)
+        ft = sensorsToAnalize{ftIdx};
+        for j=1:size(dataset.rawData.(ft),1)
+            reCalibData.(ft)(j,:)=calibMatrices.(ft)*(dataset.rawData.(ft)(j,:)'-offset.(ft)');
+            offsetInsitu.(ft)=calibMatrices.(ft)*offset.(ft)';
+        end
+    end
+    reCabData.offsetInsitu=offsetInsitu;
+else
  for ftIdx =1:length(sensorsToAnalize)
         ft = sensorsToAnalize{ftIdx};
     for j=1:size(dataset.rawData.(ft),1)
         reCalibData.(ft)(j,:)=calibMatrices.(ft)*(dataset.rawData.(ft)(j,:)')+offsetC.(ft);
     end
+ end
 end
 reCabData.reCalibData=reCalibData;
 reCabData.calibMatFileNames=dataset.calibMatFileNames;
@@ -64,7 +68,11 @@ reCabData.calibMatFileNames=dataset.calibMatFileNames;
     %     %save recalibrated matrices, offsets, new wrenches, sensor serial
     %     numbers
     if(scriptOptions.saveData)
+        if (usingInsitu)
+             save(strcat('data/',experimentName,'/reCabDataInsitu.mat'),'reCabData')
+        else
     save(strcat('data/',experimentName,'/reCabData.mat'),'reCabData')
+        end
     end
 
 if(plot)

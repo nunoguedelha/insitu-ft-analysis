@@ -2,8 +2,8 @@
 %assumes is run as part of main, having params and dataset already loaded.
 %script options
 all=false;
-noOffset=false;
-onlyWSpace=false;
+noOffset=true;
+onlyWSpace=true;
 filtered=true;
 
 %numbered as the filed in input.ftData
