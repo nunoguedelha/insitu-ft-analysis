@@ -15,9 +15,18 @@ function [str]=cMat2xml(cMat,sensorName)
 % + *                                            0.0,0.0,0.0,0.0,0.0,0.001)</param>
 % + *      </group>
 
-cMat=cMat';%to easily print in the right order
+%cMat=cMat';%to easily print in the right order
 str=sprintf(' <group name="FT_SECONDARY_CALIBRATION"> \n  <param name="%s"> (',sensorName);
-for i=1:length(cMat(:))-1
-str=strcat(str,sprintf('%d,',cMat(i)));
+for i=1:size(cMat,1)
+    for j=1:size(cMat,2)
+        if(j==1)
+            str=strcat(str,sprintf('%d',cMat(i,j)));
+        else
+            str=strcat(str,sprintf(',%d',cMat(i,j)));
+        end
+    end
+    if (i~=size(cMat,1))
+        str=strcat(str,sprintf(' \n ,'));
+    end
 end
-str=strcat(str,sprintf('%d)</param> \n </group>',cMat(end)));
+str=strcat(str,sprintf('</param> \n </group>'));

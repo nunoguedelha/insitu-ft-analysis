@@ -66,6 +66,9 @@ else
     %% load state and calculate estimated wrenches for comparison
     [dataset]=obtainEstimatedWrenches(dataStateDirs,input.stateNames,input.robotName,time,contactFrameName);
     
+%     inertialDir=strcat('data/',experimentName,'/icub/inertial/data.log');
+%      [dataset]=obtainEstimatedWrenchesFloatingBase(dataStateDirs,input.stateNames,input.robotName,time,contactFrameName,inertialDir);
+     
     dataset.time=time;
     dataset.ftData=ftData;
     

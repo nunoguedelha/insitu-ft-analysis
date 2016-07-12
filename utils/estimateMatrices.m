@@ -1,5 +1,5 @@
 function  [calibMatrices,offset,fullscale]=estimateMatrices(rawData,estimatedFtData,sensorsToAnalize)
-ftNames=fieldnames(estimatedFtData);
+
  for ftIdx =1:length(sensorsToAnalize)
         ft = sensorsToAnalize{ftIdx};
     offset.(ft)=estimateOffsetUsingInSitu(rawData.(ft), estimatedFtData.(ft)(:,1:3));

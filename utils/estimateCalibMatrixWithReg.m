@@ -1,9 +1,9 @@
 function [calibM,full_scale]=estimateCalibMatrixWithReg(rawData,expectedWrench,C_w,lambda)
 
 kIA = kron(eye(6), rawData);
-
-A=kIA'*kIA+lambda*eye(36);
-b=kIA'*expectedWrench(:)+lambda*C_w(:);
+n=size(kIA,1);
+A=(kIA'*kIA)/n+lambda*eye(36);
+b=(kIA'*expectedWrench(:))/n+lambda*C_w(:);
 vec_x=pinv(A)*b;
 X = reshape(vec_x, 6, 6);
 B_pred = rawData*X;
