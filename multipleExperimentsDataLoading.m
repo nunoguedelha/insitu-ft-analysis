@@ -1,13 +1,18 @@
 % obtain data from all listed experiments
 experimentNames={
-    'icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin30';% Name of the experiment;
-  'icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin45'% Name of the experiment;
+%    'icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin30';% Name of the experiment;
+%  'icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin45'% Name of the experiment;
+    'icub-insitu-ft-analysis-big-datasets/2016_06_08/yoga';% Name of the experiment;
+'icub-insitu-ft-analysis-big-datasets/2016_06_17/normal';% Name of the experiment;
+'icub-insitu-ft-analysis-big-datasets/2016_06_17/fast';% Name of the experiment;
+
+ 'icub-insitu-ft-analysis-big-datasets/2016_07_04/normal';% Name of the experiment;
+ 'icub-insitu-ft-analysis-big-datasets/2016_07_04/fast';% Name of the experiment;
     };
 scriptOptions = {};
-scriptOptions.forceCalculation=false;%false;
-scriptOptions.printPlots=true;%true
-scriptOptions.saveData=true;%true
-scriptOptions.raw=true;
+scriptOptions.forceCalculation=true;%false;
+scriptOptions.printPlots=false;%true
+scriptOptions.saveData=true;%trueriptOptions.raw=true;
 % Script of the mat file used for save the intermediate results
 scriptOptions.matFileName='ftDataset';
 
@@ -26,6 +31,8 @@ for i=1:length(experimentNames)
         run('plottinScript.m')
     end
     
+    lambda=10;
+lambdaName='';
     
     run('CalibMatCorrection.m')
     clear dataset;
