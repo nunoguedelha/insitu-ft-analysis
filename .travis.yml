@@ -20,7 +20,7 @@ before_script:
   # Install MOxUnit
   - git clone https://github.com/MOxUnit/MOxUnit
   - cd MOxUnit
-  - make install 
+  - make install-octave 
   - cd ..
 
 script:
