@@ -1,0 +1,33 @@
+sudo: required
+dist: trusty
+
+# For consistency with other projects, we usa language cpp 
+language: cpp
+cache: ccache 
+os:
+  - linux 
+  - osx 
+
+before_script:
+  # Update repositories
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get update -qq; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; fi
+  
+  # Install octave 
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install -y octave; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install ccache; fi
+  
+  # Install MOxUnit
+  - git clone https://github.com/MOxUnit/MOxUnit
+  - cd MOxUnit
+  - make install 
+  - cd ..
+
+script:
+  # Run Octave tests 
+  - make test-octave
+
+notifications:
+  email:
+    - pegua1@gmail.com
+    - FranciscoJavier.AndradeChavez@iit.it
