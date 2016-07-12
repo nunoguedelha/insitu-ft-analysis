@@ -1,20 +1,32 @@
 function [calibM,full_scale,offset]=estimateCalibMatrixAndOff(rawData,expectedWrench)
-[mb, nb] = size(expectedWrench);
+%ESTIMATEDCALIBMATRIXANDOFF Estimate joint the calibration matrix and
+%offset
+% The input are:
+%  rawData (R) a n \times 6 matrix of the raw values 
+%  expectedWrench (W) a n \times 6 matrix of wrenches 
+% We can write the optimization problem as 
+% A x = b 
+% Where x \in \mathbb{R}^{36+6} 
+%       is x = \vec{C}
+%              offset 
+% \overline{R} = [R ones(n,1)]
+% A = kron(\overline{R},eye(6,6)) 
+% b = vec(W') 
 
-kIA = kron(eye(6), rawData);
-kI=repmat(eye(6),size(rawData,1),1);
-kIA=[kIA,kI];
-A=kIA'*kIA;
-b=kIA'*expectedWrench(:);
-vec_x=pinv(A)*b;
-X = reshape(vec_x(1:36), 6, 6);
-offset=vec_x(37:42);
-B_pred = rawData*X;
-%Br_pred = Ar*X;
 
-calibM = X';
+[n,wrenchSize] = size(expectedWrench);
 
-eLS = (expectedWrench - B_pred);
+R = rawData;
+W = expectedWrench;
+overlineR = [R ones(n,1)];
+Wtrans = W';
+b = Wtrans(:);
+A = kron(overlineR,eye(6,6));
+
+x = pinv(A)*b;
+
+calibM = reshape(x(1:36), 6, 6);
+offset=x(37:42);
 
 % calculate full scale range
 maxs = sign(calibM)*32767;

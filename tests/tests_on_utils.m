@@ -19,7 +19,7 @@ function test_estimateCalibMatrixAndOff()
     % w' = r'*C' + offset' 
     % stacking the row vectors w,r in the datset matrices 
     % of dimension nSamples \times 6 we have: 
-    % W = R*C'  + repmat(nSamples,offset',1)
+    % W = R*C'  + repmat(offset',nSamples,1)
     % From which we get, given that C is invertible and inv(C)' = inv(C')
     % R = (W-repmat(offset',nSamples,1))*(inv(C)') 
     R = (W-repmat(offset',nSamples,1))*(inv(C)');
