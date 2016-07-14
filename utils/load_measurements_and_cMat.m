@@ -1,4 +1,4 @@
-function [dataset]=load_measurements_and_cMat(experimentName,scriptOptions)
+function [dataset,cMat]=load_measurements_and_cMat(experimentName,scriptOptions,dofs)
 % This function is meant to read all info available in a dataset obtained
 % from analog and stateExt ports. It also estimates forces and torques and
 % calculates the raw measurments of ft sensors
@@ -20,7 +20,13 @@ function [dataset]=load_measurements_and_cMat(experimentName,scriptOptions)
 
 
 % load the script of parameters relative
-paramScript=strcat('data/',experimentName,'/params.m');
+if(scriptOptions.testDir==false)
+    prefixDir='';
+
+else
+   prefixDir='../';
+end
+ paramScript=strcat(prefixDir,'data/',experimentName,'/params.m');
 run(paramScript)
 
 % This script will produce dataset (containing the raw data) and dataset2
@@ -33,12 +39,12 @@ run(paramScript)
     
     
     for i=1:size(input.ftNames,1)
-        dataFTDirs{i}=strcat('data/',experimentName,'/icub/',input.ftNames{i},'/',ftDataName);
+        dataFTDirs{i}=strcat(prefixDir,'data/',experimentName,'/icub/',input.ftNames{i},'/',ftDataName);
         
     end
     stateNames=fieldnames(input.stateNames);
     for i=1:size(stateNames,1)
-        dataStateDirs{i}=strcat('data/',experimentName,'/icub/',stateNames{i},'/',stateDataName);
+        dataStateDirs{i}=strcat(prefixDir,'data/',experimentName,'/icub/',stateNames{i},'/',stateDataName);
     end
     %TODO: replace "icub" for robot model? so that it can be used for other
     %robots, although this is dependent on the output kind of the data dumper
@@ -60,9 +66,9 @@ run(paramScript)
     estimator = iDynTree.ExtWrenchesAndJointTorquesEstimator();
     
     % Load model and sensors from the URDF file
-    estimator.loadModelAndSensorsFromFile(strcat('./',input.robotName,'.urdf'));
+    %estimator.loadModelAndSensorsFromFile(strcat('./',input.robotName,'.urdf'));
     
-    dofs = estimator.model().getNrOfDOFs();
+   % dofs = estimator.model().getNrOfDOFs();
     qj_all = zeros(dofs,size(time,1));
     dqj_all = zeros(dofs,size(time,1));
     ddqj_all = zeros(dofs,size(time,1));
@@ -114,15 +120,15 @@ run(paramScript)
     filterd=applyMask(filteredFtData,mask);
     dataset.filteredFtData=filterd;
     
-    %getting raw data
+    %getting workbench Calibration matrix
     
         ftNames=fieldnames(ftData);
 
     for i=1:size(input.calibMatFileNames,1)
-           cMat.(ftNames{i})=getWorkbenchCalibMat(input.calibMatPath,input.calibMatFileNames{i});
+           cMat.(ftNames{i})=getWorkbenchCalibMat(strcat(prefixDir,input.calibMatPath),input.calibMatFileNames{i});
            
     end
 
-        dataset.cMat=cMat;
+        %dataset.cMat=cMat;
         dataset.calibMatFileNames=input.calibMatFileNames;
     end 

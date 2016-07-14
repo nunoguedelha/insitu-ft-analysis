@@ -87,7 +87,10 @@ else
         estimatedFtData.(input.ftNames{i})=dataset.estimatedFtData.(sensorNames{matchup(i)});
     end
     dataset.estimatedFtData=estimatedFtData;
-    
+%     if(scriptOptions.saveDataAll)
+%         allData=dataset;
+%         save(strcat('data/',experimentName,'/all',scriptOptions.matFileName,'.mat'),'allData')
+%     end
     if(input.hangingInit==1)
         dataDir=strcat('data/',experimentName,'/icub/inertial/data.log');
         mask=dataset.time>dataset.time(1)+input.hangingInterval(1) & dataset.time<dataset.time(1)+input.hangingInterval(2);

@@ -1,4 +1,4 @@
-function [externalWrenches]= obtainExternalForces(robotName,dataset,secMat,sensorNames,contactFrameName,timeFrame)
+function [externalWrenches,time]= obtainExternalForces(robotName,dataset,secMat,sensorNames,contactFrameName,timeFrame,framesNames,offset)
 
 %resize data to desired timeFrame
    mask=dataset.time>dataset.time(1)+timeFrame(1) & dataset.time<dataset.time(1)+timeFrame(2);
@@ -47,22 +47,25 @@ fullBodyUnknownsExtWrenchEst = iDynTree.LinkUnknownWrenchContacts(estimator.mode
 % of the frames in which this wrenches are expressed (to see the link and frames of a model,
 % just type idyntree-model-info -m nameOfUrdfFile.urdf -p in a terminal 
 
-% Foot contacts
-fullBodyUnknownsExtWrenchEst.addNewUnknownFullWrenchInFrameOrigin(estimator.model(),estimator.model().getFrameIndex('l_sole'));
-fullBodyUnknownsExtWrenchEst.addNewUnknownFullWrenchInFrameOrigin(estimator.model(),estimator.model().getFrameIndex('r_sole'));
-
-% Knee contacts
-fullBodyUnknownsExtWrenchEst.addNewUnknownFullWrenchInFrameOrigin(estimator.model(),estimator.model().getFrameIndex('l_lower_leg'));
-fullBodyUnknownsExtWrenchEst.addNewUnknownFullWrenchInFrameOrigin(estimator.model(),estimator.model().getFrameIndex('r_lower_leg'));
-
-% Contact on the central body
-fullBodyUnknownsExtWrenchEst.addNewUnknownFullWrenchInFrameOrigin(estimator.model(),estimator.model().getFrameIndex('root_link'));
-
-% Contacts on the hands
-fullBodyUnknownsExtWrenchEst.addNewUnknownFullWrenchInFrameOrigin(estimator.model(),estimator.model().getFrameIndex('l_elbow_1'));
-fullBodyUnknownsExtWrenchEst.addNewUnknownFullWrenchInFrameOrigin(estimator.model(),estimator.model().getFrameIndex('r_elbow_1'));
-%
-framesNames={'l_sole','r_sole','l_lower_leg','r_lower_leg','root_link','l_elbow_1','r_elbow_1'};
+% % Foot contacts
+% fullBodyUnknownsExtWrenchEst.addNewUnknownFullWrenchInFrameOrigin(estimator.model(),estimator.model().getFrameIndex('l_sole'));
+% fullBodyUnknownsExtWrenchEst.addNewUnknownFullWrenchInFrameOrigin(estimator.model(),estimator.model().getFrameIndex('r_sole'));
+% 
+% % Knee contacts
+% fullBodyUnknownsExtWrenchEst.addNewUnknownFullWrenchInFrameOrigin(estimator.model(),estimator.model().getFrameIndex('l_lower_leg'));
+% fullBodyUnknownsExtWrenchEst.addNewUnknownFullWrenchInFrameOrigin(estimator.model(),estimator.model().getFrameIndex('r_lower_leg'));
+% 
+% % Contact on the central body
+% fullBodyUnknownsExtWrenchEst.addNewUnknownFullWrenchInFrameOrigin(estimator.model(),estimator.model().getFrameIndex('root_link'));
+% 
+% % Contacts on the hands
+% fullBodyUnknownsExtWrenchEst.addNewUnknownFullWrenchInFrameOrigin(estimator.model(),estimator.model().getFrameIndex('l_elbow_1'));
+% fullBodyUnknownsExtWrenchEst.addNewUnknownFullWrenchInFrameOrigin(estimator.model(),estimator.model().getFrameIndex('r_elbow_1'));
+% %
+% framesNames={'l_sole','r_sole','l_lower_leg','r_lower_leg','root_link','l_elbow_1','r_elbow_1'};
+for frame=1:length(framesNames) 
+    fullBodyUnknownsExtWrenchEst.addNewUnknownFullWrenchInFrameOrigin(estimator.model(),estimator.model().getFrameIndex(framesNames{frame}));
+end
 
 % We also need to allocate the output of the estimation: a class for estimated contact wrenches and one for joint torques
 dofs = estimator.model().getNrOfDOFs();
@@ -81,7 +84,7 @@ for ftIndex = 0:(nrOfFTSensors-1)
     matchup(ftIndex+1) = find(strcmp(sensorNames,sens ));
 end
 
-sNames=fieldnames(dataset.estimatedFtData);
+sNames=fieldnames(dataset.ftData);
 sensorsToAnalize=fieldnames(secMat);
 
 %size of array with the expected Data
@@ -108,9 +111,9 @@ for t=1:length(dataset.time)
        sIndx= find(strcmp(sensorsToAnalize,sNames(matchup(ftIndex+1))));
        
         if(~isempty(sIndx))
-        wrench_idyn.fromMatlab( secMat.(sensorsToAnalize{sIndx})*dataset.ftData.(sNames{matchup(ftIndex+1)})(t,:));
+        wrench_idyn.fromMatlab( secMat.(sensorsToAnalize{sIndx})*dataset.ftData.(sNames{matchup(ftIndex+1)})(t,:)'+offset.(sNames{matchup(ftIndex+1)}));
         else
-        wrench_idyn.fromMatlab( dataset.ftData.(sNames{matchup(ftIndex+1)})(t,:));
+        wrench_idyn.fromMatlab( dataset.ftData.(sNames{matchup(ftIndex+1)})(t,:)');
         end
         ok = estFTmeasurements.setMeasurement(iDynTree.SIX_AXIS_FORCE_TORQUE,ftIndex,wrench_idyn);
         
@@ -148,4 +151,4 @@ for i=1:length(framesNames)
     
    externalWrenches.(framesNames{i})=squeeze(ftData(i,:,:));
 end
-
+time=dataset.time;
