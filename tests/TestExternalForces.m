@@ -1,12 +1,7 @@
-%  experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_04/normal';% Name of the experiment;
-%  experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin30';% Name of the experiment;
-%  experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin45';% Name of the experiment;
-
-
-
 scriptOptions = {};
 scriptOptions.testDir=true;% to calculate the raw data, for recalibration always true
 scriptOptions.matFileName='ftDataset';
+scriptOptions.insituVar='reCabDataInsitu';
 scriptOptions.printAll=true;
 % Script of the mat file used for save the intermediate results 
 %scriptOptions.saveDataAll=true;
@@ -14,8 +9,6 @@ scriptOptions.printAll=true;
 addpath ../utils
 addpath ../external/quadfit
 
-%  serialNumber='SN192';%from iCubGenova05
-%  sensorName='r_leg_ft_sensor';
 %Use only datasets where the same sensor is used
 % experimentNames={
 %     'icub-insitu-ft-analysis-big-datasets/16_03_2016/leftRightLegsGrid';...% Name of the experiment;
@@ -41,8 +34,6 @@ names2use={'Workbench';
     'gridMin45'};% except for the first one all others are short names for the expermients in experimentNames
 toCompareWith='Yogapp2nd'; %choose in which experiment will comparison be made, it must have inertial data stored
 
- % [dataset]=load_measurements_and_cMat(experimentName,scriptOptions)
-  
   paramScript=strcat('..//data/',experimentNames{1},'/params.m');
 run(paramScript)
   ftNames=input.ftNames;
@@ -50,6 +41,8 @@ run(paramScript)
 sensorsToAnalize = {'right_foot','right_leg'};  %load the new calibration matrices
 %framesNames={'l_sole','r_sole','l_lower_leg','r_lower_leg','root_link','l_elbow_1','r_elbow_1'};
 framesNames={'r_sole','r_lower_leg','root_link'};
+%load the experiment measurements
+
 for i=1:length(experimentNames)
     paramScript=strcat('..//data/',experimentNames{i},'/params.m');
     run(paramScript)
@@ -65,9 +58,13 @@ for i=1:length(experimentNames)
         load(strcat('../data/',experimentNames{i},'/',scriptOptions.matFileName,'.mat'),'dataset');
         [inertialData.(names2use{i+1})]=dataset.inertial;
     end
-    %     timeFrame=[0,30];
-    %    [data.(names2use{i+1}).externalForces,data.(names2use{i+1}).eForcesTime]=obtainExternalForces(input.robotName,data.(names2use{i+1}),secMat.(names2use{i+1}),input.sensorNames,input.contactFrameName,timeFrame) ;
+%     if   (exist(strcat('../data/',experimentNames{i},'/',scriptOptions.matFileName,'.mat'),'file')==2)
+%          recabInsitu=load(strcat('../data/',experimentNames{i},'/',scriptOptions.matFileName,'.mat'));
+%     end
+    
 end
+%set worbench calibration matrix information to general format
+
 for j=1:length(sensorsToAnalize)
     
     cMat.(names2use{1}).(sensorsToAnalize{j}) =WorkbenchMat.(sensorsToAnalize{j});
@@ -77,27 +74,48 @@ end
 
 %% Start comparison
 
-timeFrame=[10,160];%this time is where we will assume that the external force should be 0, will be use to calculate the error of the calibration matrix
+timeFrame=[10,300];%this time is where we will assume that the external force should be 0, will be use to calculate the error of the calibration matrix
 for i=1:length(names2use)
       [Offset.(names2use{i}),~]=calculateOffset(sensorsToAnalize,inertialData.(toCompareWith).ftData,inertialData.(toCompareWith).estimatedFtData,WorkbenchMat, cMat.(names2use{i}));
-      [tF.(names2use{i}).externalForces,tF.(names2use{i}).eForcesTime]=obtainExternalForces(input.robotName,data.(toCompareWith),secMat.(names2use{i}),input.sensorNames,input.contactFrameName,timeFrame,framesNames,Offset.(names2use{i})) ;
+      [tF_general.(names2use{i}).externalForces,tF_general.(names2use{i}).eForcesTime]=obtainExternalForces(input.robotName,data.(toCompareWith),secMat.(names2use{i}),input.sensorNames,input.contactFrameName,timeFrame,framesNames,Offset.(names2use{i})) ;
 end
-for frN=1:length(framesNames)
+%filter data
+for i=1:length(names2use)
+     
+   
+[filteredFtData.(names2use{i}),mask]=filterFtData(tF_general.(names2use{i}).externalForces);
+
+    tF.(names2use{i})=applyMask(tF_general.(names2use{i}),mask);
+    filteredFtData.(names2use{i})=applyMask(filteredFtData.(names2use{i}),mask);
+    tF.(names2use{i}).filtered= filteredFtData.(names2use{i});
+ end
+
+%re frame the time if desired
+timeFrame=[0,70];
+
+mask=tF.(names2use{i}).eForcesTime>tF.(names2use{i}).eForcesTime(1)+timeFrame(1) & tF.(names2use{i}).eForcesTime<tF.(names2use{i}).eForcesTime(1)+timeFrame(2);
+        tF=applyMask(tF,mask);
+      
+for frN=2:length(framesNames)-1
     if(scriptOptions.printAll)
         for i=1:length(names2use)
-            figure,plot3_matrix( tF.(names2use{i}).externalForces.(framesNames{frN})(:,1:3));hold on;
+           % figure,plot3_matrix( tF.(names2use{i}).externalForces.(framesNames{frN})(:,1:3));hold on;
+            figure,plot3_matrix( tF.(names2use{i}).filtered.(framesNames{frN})(:,1:3));hold on;
             legend(names2use{i},'Location','west');
-            title(strcat('Wrench space on ',toCompareWithWith,' frame ', escapeUnderscores(framesNames{frN})));
+            title(strcat('Wrench space on ',toCompareWith,' frame ', escapeUnderscores(framesNames{frN})));
             xlabel('F_{x}');
             ylabel('F_{y}');
             zlabel('F_{z}');
               grid on;
+           %          FTplots(struct(strcat(framesNames{frN},'_',names2use{i}),tF.(names2use{i}).externalForces.(framesNames{frN})),tF.(names2use{i}).eForcesTime);
+          FTplots(struct(strcat(framesNames{frN},'_',names2use{i}),tF.(names2use{i}).filtered.(framesNames{frN})),tF.(names2use{i}).eForcesTime);
         end
-          FTplots(struct(strcat(framesNames{frN},'_',names2use{i}),tF.(names2use{i}).externalForces.(framesNames{frN})),tF.(names2use{i}).eForcesTime);
+         
     end
     figure,grid on;
     for i=1:length(names2use)
-        plot3_matrix( tF.(names2use{i}).externalForces.(framesNames{frN})(:,1:3));hold on;
+      %  plot3_matrix( tF.(names2use{i}).externalForces.(framesNames{frN})(:,1:3));hold on;
+         plot3_matrix( tF.(names2use{i}).filtered.(framesNames{frN})(:,1:3));hold on;
     end
     legend(names2use,'Location','west');
     
