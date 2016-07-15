@@ -14,8 +14,9 @@ addpath ../external/quadfit
 %     'icub-insitu-ft-analysis-big-datasets/16_03_2016/leftRightLegsGrid';...% Name of the experiment;
 %     'icub-insitu-ft-analysis-big-datasets/21_03_2016/yogaLeft1';...% Name of the experiment;
 %     'icub-insitu-ft-analysis-big-datasets/2016_04_21/extendedYoga4StandingOnLeft';...% Name of the experiment;
-%     }; %this set is from iCubGenova02
-experimentName=('icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin45');%this set is form iCubGenova05
+%     }; %this set is from iCubGenova02 'icub-insitu-ft-analysis-big-datasets/2016_06_17/normal';
+%experimentName=('icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin45');%this set is form iCubGenova05
+experimentName=('icub-insitu-ft-analysis-big-datasets/2016_07_04/normal');%this set is form iCubGenova05
 names2use={'Estimated';
 %    'Yoga';
 %    'Yogapp1st';
@@ -26,7 +27,7 @@ names2use={'Estimated';
     'gridMin45'};% except for the first one all others are short names for the expermients in experimentNames
 toCompareWith='gridMin45'; %choose in which experiment will comparison be made, it must have inertial data stored
 
-  paramScript=strcat('..//data/',experimentName,'/params.m');
+  paramScript=strcat('../data/',experimentName,'/params.m');
 run(paramScript)
   ftNames=input.ftNames;
 
@@ -45,18 +46,21 @@ for i=1:size(input.calibMatFileNames,1)
     
 end
 
-paramScript=strcat('..//data/',experimentName,'/params.m');
+paramScript=strcat('../data/',experimentName,'/params.m');
 run(paramScript)
 data= load(strcat('../data/',experimentName,'/',scriptOptions.matFileName,'.mat'),'dataset');
 i=1;
-load(strcat('../data/',experimentName,'/',scriptOptions.insituVar,'.mat'));
+%load(strcat('../data/',experimentName,'/',scriptOptions.insituVar,'.mat'));
 for j=1:length(sensorsToAnalize)
     sIndx= find(strcmp(ftNames,sensorsToAnalize{j}));
     cMat.(names2use{i+1}).(sensorsToAnalize{j}) = readCalibMat(strcat('../data/',experimentName,'/calibrationMatrices/',input.calibMatFileNames{sIndx}));
     secMat.(names2use{i+1}).(sensorsToAnalize{j})= cMat.(names2use{i+1}).(sensorsToAnalize{j})/Workbench.(sensorsToAnalize{j});
     
 end
-
+if(input.hangingInit==1)
+    load(strcat('../data/',experimentName,'/',scriptOptions.matFileName,'.mat'),'dataset');
+    [inertialData]=dataset.inertial;
+end
 %set worbench calibration matrix information to general format
 
 for j=1:length(sensorsToAnalize)
@@ -69,14 +73,17 @@ end
 %% Start comparison
 %before going on variable cMat from dataset should be eliminated or it will
 %give error
-timeFrame=[0,160];%this time is where we will assume that the external force should be 0, will be use to calculate the error of the calibration matrix
+timeFrame=[0,60];%this time is where we will assume that the external force should be 0, will be use to calculate the error of the calibration matrix
 i=2
-     reCabData.offsetInsitu.(sensorsToAnalize{2})=reCabData.offsetInsitu.(sensorsToAnalize{2})*-1;
-      [tF_general.(names2use{i}).externalForces,tF_general.(names2use{i}).eForcesTime]=obtainExternalForces(input.robotName,data.dataset,secMat.(names2use{i}),input.sensorNames,input.contactFrameName,timeFrame,framesNames,reCabData.offsetInsitu) ;
-i=1
+%      reCabData.offsetInsitu.(sensorsToAnalize{2})=reCabData.offsetInsitu.(sensorsToAnalize{2})*-1;
+%       [tF_general.(names2use{i}).externalForces,tF_general.(names2use{i}).eForcesTime]=obtainExternalForces(input.robotName,data.dataset,secMat.(names2use{i}),input.sensorNames,input.contactFrameName,timeFrame,framesNames,reCabData.offsetInsitu) ;
+[Offset.(names2use{i}),~]=calculateOffset(sensorsToAnalize,inertialData.ftData,inertialData.estimatedFtData,Workbench, cMat.(names2use{i}));        
+[tF_general.(names2use{i}).externalForces,tF_general.(names2use{i}).eForcesTime]=obtainExternalForces(input.robotName,data.dataset,secMat.(names2use{i}),input.sensorNames,input.contactFrameName,timeFrame,framesNames,Offset.(names2use{i})) ;
+      i=1
 data.dataset.ftData=data.dataset.estimatedFtData;
-reCabData2=reCabData;
+%reCabData2=reCabData;
 reCabData2.offsetInsitu.(sensorsToAnalize{2})=zeros(6,1);
+reCabData2.offsetInsitu.(sensorsToAnalize{i})=zeros(6,1);
       [tF_general.(names2use{i}).externalForces,tF_general.(names2use{i}).eForcesTime]=obtainExternalForces(input.robotName,data.dataset,secMat.(names2use{i}),input.sensorNames,input.contactFrameName,timeFrame,framesNames,reCabData2.offsetInsitu) ;
 
 %re frame the time if desired
@@ -85,7 +92,7 @@ reCabData2.offsetInsitu.(sensorsToAnalize{2})=zeros(6,1);
 % mask=tF.(names2use{i}).eForcesTime>tF.(names2use{i}).eForcesTime(1)+timeFrame(1) & tF.(names2use{i}).eForcesTime<tF.(names2use{i}).eForcesTime(1)+timeFrame(2);
 %         tF=applyMask(tF,mask);
      tF=tF_general;
-for frN=4:length(framesNames)-1
+for frN=1:length(framesNames)-2
     if(scriptOptions.printAll)
         for i=1:length(names2use)
            figure,plot3_matrix( tF.(names2use{i}).externalForces.(framesNames{frN})(:,1:3));hold on;

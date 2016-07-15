@@ -66,7 +66,7 @@ run(paramScript)
     estimator = iDynTree.ExtWrenchesAndJointTorquesEstimator();
     
     % Load model and sensors from the URDF file
-    %estimator.loadModelAndSensorsFromFile(strcat('./',input.robotName,'.urdf'));
+    estimator.loadModelAndSensorsFromFile(strcat('./',input.robotName,'.urdf'));
     
    % dofs = estimator.model().getNrOfDOFs();
     qj_all = zeros(dofs,size(time,1));

@@ -8,7 +8,7 @@ function [filteredFtData,mask]=filterFtData(ftData)
 
 ftNames=fieldnames(ftData);
 N=2;
-F=201;
+F=101;
 for i=1:size(ftNames,1)
     filteredFtData.(ftNames{i})=zeros(size(ftData.(ftNames{i})));
     for channel=1:size(ftData.(ftNames{i}),2)
