@@ -22,7 +22,7 @@ experimentNames={
     'icub-insitu-ft-analysis-big-datasets/2016_07_04/normal';% Name of the experiment;
 %    'icub-insitu-ft-analysis-big-datasets/2016_07_04/fast';% Name of the experiment;
 %    'icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin30';% Name of the experiment;
-    'icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin45'% Name of the experiment;
+%    'icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin45'% Name of the experiment;
     };%this set is form iCubGenova05
 names2use={'Workbench';
 %    'Yoga';
@@ -31,7 +31,8 @@ names2use={'Workbench';
     'Yogapp2nd';
 %    'fastYogapp2';
 %    'gridMin30';
-    'gridMin45'};% except for the first one all others are short names for the expermients in experimentNames
+%    'gridMin45'
+};% except for the first one all others are short names for the expermients in experimentNames
 toCompareWith='Yogapp2nd'; %choose in which experiment will comparison be made, it must have inertial data stored
 
   paramScript=strcat('..//data/',experimentNames{1},'/params.m');
@@ -39,8 +40,8 @@ run(paramScript)
   ftNames=input.ftNames;
 
 sensorsToAnalize = {'right_foot','right_leg'};  %load the new calibration matrices
-%framesNames={'l_sole','r_sole','l_lower_leg','r_lower_leg','root_link','l_elbow_1','r_elbow_1'};
-framesNames={'r_sole','r_lower_leg','root_link'};
+framesNames={'l_sole','r_sole','l_lower_leg','r_lower_leg','root_link','l_elbow_1','r_elbow_1'}; %there has to be atleast 6
+%framesNames={'r_sole','r_lower_leg','root_link'};
 %load the experiment measurements
 
 for i=1:length(experimentNames)
@@ -91,12 +92,12 @@ for i=1:length(names2use)
  end
 
 %re frame the time if desired
-timeFrame=[0,70];
+timeFrame=[70,180];
 
 mask=tF.(names2use{i}).eForcesTime>tF.(names2use{i}).eForcesTime(1)+timeFrame(1) & tF.(names2use{i}).eForcesTime<tF.(names2use{i}).eForcesTime(1)+timeFrame(2);
         tF=applyMask(tF,mask);
       
-for frN=2:length(framesNames)-1
+for frN=2:length(framesNames)-2
     if(scriptOptions.printAll)
         for i=1:length(names2use)
            % figure,plot3_matrix( tF.(names2use{i}).externalForces.(framesNames{frN})(:,1:3));hold on;
