@@ -1,4 +1,4 @@
-# insitu-ft-analysis
+# insitu-ft-analysis [![Build Status](https://travis-ci.org/robotology-playground/insitu-ft-analysis.svg?branch=master)](https://travis-ci.org/robotology-playground/insitu-ft-analysis)
 Data and code for analysis of the [FTSens](http://wiki.icub.org/wiki/FT_sensor) iCub Facility Force/Torque sensor. 
 
 
