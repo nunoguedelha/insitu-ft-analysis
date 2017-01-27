@@ -67,9 +67,9 @@ if (size(fields,1)==2)
     end
     for  i=1:2:size(fields,1)-1
         figure,
-        plot(time-timeStampinit,data.(fields{i})(:,1)-data.(fields{i+1})(:,1),xPlotOptions);hold on;
-        plot(time-timeStampinit,data.(fields{i})(:,2)-data.(fields{i+1})(:,2),yPlotOptions);hold on;
-        plot(time-timeStampinit,data.(fields{i})(:,3)-data.(fields{i+1})(:,3),zPlotOptions);hold on;
+        plot(time-timeStampinit,abs(data.(fields{i})(:,1))-abs(data.(fields{i+1})(:,1)),xPlotOptions);hold on;
+        plot(time-timeStampinit,abs(data.(fields{i})(:,2))-abs(data.(fields{i+1})(:,2)),yPlotOptions);hold on;
+        plot(time-timeStampinit,abs(data.(fields{i})(:,3))-abs(data.(fields{i+1})(:,3)),zPlotOptions);hold on;
         legend('F_{x}','F_{y}','F_{z}','Location','west');
         title(escapeUnderscores( strcat((fields{i}),{' VS  '},(fields{i+1}))));
         xlabel('TimeStamp');
@@ -78,9 +78,9 @@ if (size(fields,1)==2)
     if(~onlyForce)
         for  i=1:2:size(fields,1)-1
             figure,
-            plot(time-timeStampinit,data.(fields{i})(:,4)-data.(fields{i+1})(:,4),xPlotOptions);hold on;
-            plot(time-timeStampinit,data.(fields{i})(:,5)-data.(fields{i+1})(:,5),yPlotOptions);hold on;
-            plot(time-timeStampinit,data.(fields{i})(:,6)-data.(fields{i+1})(:,6),zPlotOptions);hold on;
+            plot(time-timeStampinit,abs(data.(fields{i})(:,4))-abs(data.(fields{i+1})(:,4)),xPlotOptions);hold on;
+            plot(time-timeStampinit,abs(data.(fields{i})(:,5))-abs(data.(fields{i+1})(:,5)),yPlotOptions);hold on;
+            plot(time-timeStampinit,abs(data.(fields{i})(:,6))-abs(data.(fields{i+1})(:,6)),zPlotOptions);hold on;
             legend('\tau_{x}','\tau_{y}','\tau_{z}','Location','west');
             title(escapeUnderscores( strcat((fields{i}),{' VS  '},(fields{i+1}))));
             xlabel('TimeStamp');
