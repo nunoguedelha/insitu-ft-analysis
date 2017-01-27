@@ -1,4 +1,9 @@
 function [ intersections ] = ellipsoid_intersectionWithAxis( ellipsoid_im )
+% Expecting ellipsoid in implicit form
+% Forcing the ellipse to be centered.
+ [center,radii,~,R]=ellipsoid_im2ex(ellipsoid_im);
+ center=zeros(size(center));
+ellipsoid_im=ellipsoid_ex2im(center,radii,R);
 %ellipsoid_intersectionWithAxis Get the intersection of an ellipsodi 
   % x interesection
   Qxx = ellipsoid_im(1);

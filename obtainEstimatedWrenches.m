@@ -1,10 +1,9 @@
- function [dataset]=obtainEstimatedWrenches(dataStateDirs,stateExtNames,robotName,resampledTime,contactFrameName)
+ function [dataset]=obtainEstimatedWrenches(estimator,resampledTime,contactFrameName,dataset)
 % OBTAINESTIMATEDWRENCH Get (model) estimated wrenches for a iCub dataset
-%   dataStateDirs  : ??
-%   stateExtNames  : ?? 
-%   robotName      : the YARP_ROBOT_NAME (iCubCity01 style) name of the
-%                    robot, used to load the correct model.
-%   resampleTime   : 
+%   estimator       : variable which contains the model of the robot
+%   dataset         : contains the joint position velocities and
+%   accelerations
+%   resampleTime   : time that will be used as reference time
 %   contactFrameName : the name of the frame on which it is assumed that an 
 %                      external contact is (tipically the
 %                      root_link, r_sole or l_sole)
@@ -14,84 +13,22 @@
 % for now assuming contact doesnt change
 % 
 
-%% Load the estimator
+% Take the used position from the dataset
+qj_all=dataset.qj';
+dqj_all=dataset.dqj';
+ddqj_all=dataset.ddqj';
 
-% Create estimator class
-estimator = iDynTree.ExtWrenchesAndJointTorquesEstimator();
+dofs = estimator.model().getNrOfDOFs();
 
-% Load model and sensors from the URDF file
-estimator.loadModelAndSensorsFromFile(strcat('./',robotName,'.urdf'));
-
-% Check if the model was correctly created by printing the model
-%estimator.model().toString()
+grav_idyn = iDynTree.Vector3();
+grav = [0.0;0.0;-9.81];
+grav_idyn.fromMatlab(grav);
 
 %store number of sensors
 nrOfFTSensors = estimator.sensors().getNrOfSensors(iDynTree.SIX_AXIS_FORCE_TORQUE);
 
 %size of array with the expected Data
 ftData=zeros(nrOfFTSensors,size(resampledTime,1),6);
-
-%% Set kinematics information
-
-% Set kinematics information: for this example, we will assume
-% that the robot is balancing on the left foot. We can then
-% compute the kinematics information necessary for the FT sensor
-% measurements estimation using the knowledge of the gravity on a
-% a frame fixed to the l_foot link (for convenience we use the l_sole
-% frame). For more info on iCub frames check: http://wiki.icub.org/wiki/ICub_Model_naming_conventions
-grav_idyn = iDynTree.Vector3();
-grav = [0.0;0.0;-9.81];
-grav_idyn.fromMatlab(grav);
-
-% Get joint information.
-% Warning!! iDynTree takes in input **radians** based units,
-% while the iCub port stream **degrees** based units.
-dofs = estimator.model().getNrOfDOFs();
-qj_all = zeros(dofs,size(resampledTime,1));
-dqj_all = zeros(dofs,size(resampledTime,1));
-ddqj_all = zeros(dofs,size(resampledTime,1));
-
-% convert also to radians
-deg2rad = pi/180.0;
-%get the names of the model to match the names from the data file read
-for i=0:dofs-1
-    % disp(strcat('name=',estimator.model().getJointName(i),' , index=',num2str(i)))
-    names{i+1}=estimator.model().getJointName(i);
-end
-fNames=fieldnames(stateExtNames);
-%to iterate through a struct do the following
-% stateExtNames.(fNames{i})
-%for the first elment in the first field it would be
-%stateExtnames.(fNames{1}){1}
-dataset.jointNames = {};
-
-fprintf('obtainEstimatedWrenches: Resampling the state\n');
-for i=1:size(fNames)
-    Dof=size(stateExtNames.(fNames{i}));
-    [qj_temp,dqj_temp,ddqj_temp,time_temp]=readStateExt(Dof(1),dataStateDirs{i});
-    %store only the ones that have a degree of freedom (the names of the joint
-    %should match one of the names stored in the model of the robot
-    % we resample joint encoders on the timestamp of the FT sensors
-    fprintf('obtainEstimatedWrenches: Resampling the state for the part %s\n',fNames{i});
-    [qj_temp,dqj_temp,ddqj_temp] = resampleState(resampledTime, time_temp, qj_temp, dqj_temp, ddqj_temp);
-    
-    for j=1:Dof
-        index = find(strcmp(names, stateExtNames.(fNames{i}){j}));
-        if(isempty(index)==0)
-            dataset.jointNames{index} = stateExtNames.(fNames{i}){j};
-            qj_all(index,:) = deg2rad*qj_temp(j,:);
-            dqj_all(index,:) =deg2rad* dqj_temp(j,:);
-            ddqj_all(index,:) =deg2rad* ddqj_temp(j,:);
-        end
-    end
-end
-
-% Store the used position in the returned dataset
-dataset.qj = qj_all';
-dataset.dqj = dqj_all';
-dataset.ddqj = ddqj_all';
-
-
 %% Specify unknown wrenches
 
 % We need to set the location of the unknown wrench. For the time being it
@@ -99,9 +36,7 @@ dataset.ddqj = ddqj_all';
 % so it is only defined once.
 %TODO: recognize when the feet are in contact either left or right or both
 %and establish the unkown wrench accordingly
-% Set the contact information in the estimator
 
-contact_index = estimator.model().getFrameIndex(contactFrameName);
 
 
 unknownWrench = iDynTree.UnknownWrenchContact();
@@ -115,8 +50,11 @@ unknownWrench.contactPoint.zero();
 fullBodyUnknowns = iDynTree.LinkUnknownWrenchContacts(estimator.model());
 fullBodyUnknowns.clear();
 
+if (length(contactFrameName)==1)
+% Set the contact information in the estimator
+contact_index = estimator.model().getFrameIndex(char(contactFrameName));
 fullBodyUnknowns.addNewContactInFrame(estimator.model(),contact_index,unknownWrench);
-
+end
 % Print the unknowns to make sure that everything is properly working
 %fullBodyUnknowns.toString(estimator.model())
 
@@ -162,6 +100,13 @@ for t=1:length(resampledTime)
     qj_idyn.fromMatlab(qj);
     dqj_idyn.fromMatlab(dqj);
     ddqj_idyn.fromMatlab(ddqj);
+    
+    if(length(contactFrameName)>1)
+        fullBodyUnknowns.clear();
+        contact_index = estimator.model().getFrameIndex(char(contactFrameName(t)));
+fullBodyUnknowns.addNewContactInFrame(estimator.model(),contact_index,unknownWrench);
+        
+    end
     
     % Set the kinematics information in the estimator
     ok = estimator.updateKinematicsFromFixedBase(qj_idyn,dqj_idyn,ddqj_idyn,contact_index,grav_idyn);

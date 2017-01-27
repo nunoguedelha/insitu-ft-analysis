@@ -12,30 +12,32 @@ experimentNames={
 scriptOptions = {};
 scriptOptions.forceCalculation=true;%false;
 scriptOptions.printPlots=false;%true
-scriptOptions.saveData=true;%trueriptOptions.raw=true;
+scriptOptions.saveData=true;%
+scriptOptions.raw=true;
 % Script of the mat file used for save the intermediate results
+scriptOptions.saveDataAll=true;
 scriptOptions.matFileName='ftDataset';
 
-calculate=true;
+calculate=false;
 for i=1:length(experimentNames)
     
     [data.(strcat('e',num2str(i)))]=read_estimate_experimentData(experimentNames{i},scriptOptions);
     
     if(calculate)
-    dataset=data.(strcat('e',num2str(i)));
-    experimentName=experimentNames{i};
-    % We carry the analysis just for a subset of the sensors
-    sensorsToAnalize = {'right_leg','right_foot'};
-    
-    if( scriptOptions.printPlots )
-        run('plottinScript.m')
-    end
-    
-    lambda=10;
-lambdaName='';
-    
-    run('CalibMatCorrection.m')
-    clear dataset;
-    clear reCalibData;
+        dataset=data.(strcat('e',num2str(i)));
+        experimentName=experimentNames{i};
+        % We carry the analysis just for a subset of the sensors
+        sensorsToAnalize = {'right_leg','right_foot'};
+        
+        if( scriptOptions.printPlots )
+            run('plottinScript.m')
+        end
+        
+        lambda=10;
+        lambdaName='';
+        
+        run('CalibMatCorrection.m')
+        clear dataset;
+        clear reCalibData;
     end
 end
