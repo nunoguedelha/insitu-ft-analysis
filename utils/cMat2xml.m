@@ -29,4 +29,4 @@ for i=1:size(cMat,1)
         str=strcat(str,sprintf(' \n ,'));
     end
 end
-str=strcat(str,sprintf('</param> \n </group>'));
+str=strcat(str,sprintf(')</param> \n </group>'));

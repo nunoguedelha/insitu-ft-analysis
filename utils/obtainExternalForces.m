@@ -28,7 +28,10 @@ qj_all=dataset.qj;
 dqj_all=dataset.dqj;
 ddqj_all=dataset.ddqj;
 
-contact_index = estimator.model().getFrameIndex(contactFrameName);
+if (length(contactFrameName)==1)
+% Set the contact information in the estimator
+contact_index = estimator.model().getFrameIndex(char(contactFrameName));
+end
 
 % The estimated FT sensor measurements
 estFTmeasurements = iDynTree.SensorsMeasurements(estimator.sensors());
@@ -90,7 +93,7 @@ sensorsToAnalize=fieldnames(secMat);
 %size of array with the expected Data
 ftData=zeros(length(framesNames),size(dataset.time,1),6);
 %% For each time instant
-fprintf('obtainEstimatedWrenchesIMU: Computing the estimated wrenches\n');
+fprintf('obtainedExternalForces: Computing the estimated wrenches\n');
 for t=1:length(dataset.time)
     tic 
     qj=qj_all(t,:);
@@ -101,6 +104,10 @@ for t=1:length(dataset.time)
     qj_idyn.fromMatlab(qj);
     dqj_idyn.fromMatlab(dqj);
     ddqj_idyn.fromMatlab(ddqj);
+    
+    if(length(contactFrameName)>1)
+        contact_index = estimator.model().getFrameIndex(char(contactFrameName(t)));
+    end
     
     % print progress test 
     if( mod(t,10000) == 0 ) 
@@ -113,7 +120,7 @@ for t=1:length(dataset.time)
         if(~isempty(sIndx))
         wrench_idyn.fromMatlab( secMat.(sensorsToAnalize{sIndx})*dataset.ftData.(sNames{matchup(ftIndex+1)})(t,:)'+offset.(sNames{matchup(ftIndex+1)}));
         else
-        wrench_idyn.fromMatlab( dataset.ftData.(sNames{matchup(ftIndex+1)})(t,:)');
+        wrench_idyn.fromMatlab( dataset.ftData.(sNames{matchup(ftIndex+1)})(t,:)'+offset.(sNames{matchup(ftIndex+1)}));
         end
         ok = estFTmeasurements.setMeasurement(iDynTree.SIX_AXIS_FORCE_TORQUE,ftIndex,wrench_idyn);
         

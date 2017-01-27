@@ -1,5 +1,5 @@
 function [calibM,full_scale]=estimateCalibMatrixWithReg(rawData,expectedWrench,C_w,lambda)
-
+C_w=C_w'; 
 kIA = kron(eye(6), rawData);
 n=size(kIA,1);
 A=(kIA'*kIA)/n+lambda*eye(36);

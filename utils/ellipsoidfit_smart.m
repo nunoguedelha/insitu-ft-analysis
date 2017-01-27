@@ -1,4 +1,4 @@
-function [ p_implicit, output_data_refitted ] = ellipsoidfit_smart( output_elliptic_data, input_circular_data )
+function [ p_implicit, output_data_refitted, o ] = ellipsoidfit_smart( output_elliptic_data, input_circular_data )
 %% ELLIPSOIDFIT_SMART Fit a series of 3D data assuming that they are the affine function of a series of circular data 
 % This functions has the format of the ellipsoidfit_* function find in
 % quadfit (it also output the fitted ellipsoid in the same implicit format 

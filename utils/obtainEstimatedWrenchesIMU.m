@@ -1,4 +1,4 @@
- function [estimatedFtData]=obtainEstimatedWrenchesIMU(dataDir,robotName,resampledTime,dataset)
+ function [estimatedFtData]=obtainEstimatedWrenchesIMU(dataDir,estimator,resampledTime,dataset)
 % OBTAINESTIMATEDWRENCH Get (model) estimated wrenches for a iCub dataset
 %   dataStateDirs  : address to find the files
 %   stateExtNames  : sensor names
@@ -9,15 +9,6 @@
 
 
 %% Load the estimator
-
-% Create estimator class
-estimator = iDynTree.ExtWrenchesAndJointTorquesEstimator();
-
-% Load model and sensors from the URDF file
-estimator.loadModelAndSensorsFromFile(strcat('./',robotName,'.urdf'));
-
-% Check if the model was correctly created by printing the model
-%estimator.model().toString()
 
 %store number of sensors
 nrOfFTSensors = estimator.sensors().getNrOfSensors(iDynTree.SIX_AXIS_FORCE_TORQUE);
