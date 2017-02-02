@@ -38,18 +38,40 @@ addpath utils
 %experimentName='icub-insitu-ft-analysis-big-datasets/ati_on_Icub/ati_on_iCub/fifthTrial'; % in this experiment x and y axis are rotated 180 degrees
 %experimentName='icub-insitu-ft-analysis-big-datasets/ati_on_Icub/ati_on_iCub/sixthTrial'; % in this experiment x and y axis are rotated 180 degrees
 % experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_25';% 2nm frist sample some forces outside sphere;
-eNames={'icub-insitu-ft-analysis-big-datasets/2017_01_18/GreenRobotTests/Left_leg';
-        'icub-insitu-ft-analysis-big-datasets/2017_01_25';
-    'icub-insitu-ft-analysis-big-datasets/2017_01_26/2Nm_1';
-       'icub-insitu-ft-analysis-big-datasets/2017_01_26/2Nm_2'};
-%         
-%         eNames={'icub-insitu-ft-analysis-big-datasets/ati_on_Icub/ati_on_iCub/secondTrial';
+% eNames={'icub-insitu-ft-analysis-big-datasets/2017_01_18/GreenRobotTests/Left_leg';
+%         'icub-insitu-ft-analysis-big-datasets/2017_01_25';
+%     'icub-insitu-ft-analysis-big-datasets/2017_01_26/2Nm_1';
+%        'icub-insitu-ft-analysis-big-datasets/2017_01_26/2Nm_2'};
+% %         
+%         eNames={'icub-insitu-ft-analysis-big-datasets/2017_01_18/GreenRobotTests/Left_leg';
+%             'icub-insitu-ft-analysis-big-datasets/ati_on_Icub/ati_on_iCub/secondTrial';
 %                        'icub-insitu-ft-analysis-big-datasets/ati_on_Icub/ati_on_iCub/fourthTrial';
 %             'icub-insitu-ft-analysis-big-datasets/ati_on_Icub/ati_on_iCub/fifthTrial';
 %        'icub-insitu-ft-analysis-big-datasets/ati_on_Icub/ati_on_iCub/sixthTrial'};
+% names={'Original';
+%       'secondTrial';
+%       'fourthTrial';
+%       'fifthTrial';
+%       'sixthTrial';
+%     };
 
-for i=1:length(eNames)
- experimentName=(eNames{i});% first sample with cable corrected ;
+       eNames={'icub-insitu-ft-analysis-big-datasets/2017_01_26/2nm_4_2legs';
+%             'icub-insitu-ft-analysis-big-datasets/2017_01_31/1_5Nm_1';
+%                        'icub-insitu-ft-analysis-big-datasets/2017_01_31/1_5Nm_2';
+%             'icub-insitu-ft-analysis-big-datasets/2017_01_31/1_5Nm_3';
+%        'icub-insitu-ft-analysis-big-datasets/2017_01_31/1_5Nm_4';
+       'icub-insitu-ft-analysis-big-datasets/2017_02_01/1Nm_1';
+       %'icub-insitu-ft-analysis-big-datasets/2017_02_01/1Nm_2';
+       'icub-insitu-ft-analysis-big-datasets/2017_02_01/1Nm_3';
+       'icub-insitu-ft-analysis-big-datasets/2017_02_01/1Nm_4'};
+names={'Original';
+      'firstTrial';
+      'secondTrial';
+      'thirdTrial';
+      'fourthTrial';
+    };
+for n=1:length(eNames)
+ experimentName=(eNames{n});% first sample with cable corrected ;
   
  
 
@@ -57,12 +79,12 @@ for i=1:length(eNames)
 % Script options, meant to control the behavior of this script 
 scriptOptions = {};
 scriptOptions.forceCalculation=false;%false;
-scriptOptions.printPlots=true;%true
+scriptOptions.printPlots=false;%true
 scriptOptions.raw=false;
 scriptOptions.saveData=true;
 % Script of the mat file used for save the intermediate results 
-%scriptOptions.matFileName='dataEllipsoidAnalysis'; newName
-scriptOptions.matFileName='datasetEllipsoidAnalys';
+scriptOptions.matFileName='dataEllipsoidAnalysis'; %newName
+%scriptOptions.matFileName='datasetEllipsoidAnalys';
 [dataset]=read_estimate_experimentData2(experimentName,scriptOptions);
 % % load the script of parameters relative 
 paramScript=strcat('data/',experimentName,'/params.m');
@@ -75,8 +97,8 @@ dataset=dataSampling(dataset,5);
 %             dataset=applyMask(dataset,mask);
 
 % We carry the analysis just for a subset of the sensors
-sensorsToAnalize = {'left_leg'};%,'right_leg'};
-%sensorsToAnalize = {'right_leg'};
+%sensorsToAnalize = {'left_leg'};%,'right_leg'};
+sensorsToAnalize = {'right_leg'};
 meanOffset=false;
 %% Remove offset (to check similarity by visual inspection)
 
@@ -189,7 +211,7 @@ for ftIdx =1:length(sensorsToAnalize)
      plot3_matrix(dataset.estimatedFtData.(ft)(:,1:3)); hold on;
      plot_ellipsoid_im(fittedEllipsoid_im);
        legend('measuredData','estimatedData','Location','west');
-        title(strcat({'Wrench space '},escapeUnderscores(ft)));
+        title(strcat({'Wrench space '},escapeUnderscores(ft),' ', (names(n))));
         xlabel('F_{x}');
         ylabel('F_{y}');
         zlabel('F_{z}');
@@ -208,7 +230,7 @@ for ftIdx =1:length(sensorsToAnalize)
      plot3(dataset.ftDataNoOffset.(ft)(:,1),dataset.ftDataNoOffset.(ft)(:,2),dataset.ftDataNoOffset.(ft)(:,3),'b.');
      plot_ellipsoid_im(fittedEllipsoid_noGravity);
       legend('measuredData','Location','west');
-        title(strcat({'Wrench space no gravity '},escapeUnderscores(ft)));
+        title(strcat({'Wrench space no gravity '},escapeUnderscores(ft),' ', (names(n))));
         xlabel('F_{x}');
         ylabel('F_{y}');
         zlabel('F_{z}');
@@ -231,11 +253,11 @@ for ftIdx =1:length(sensorsToAnalize)
     masses_estimated = intersections_circular/g;
     fprintf('The mass attached to the sensor %s (from the model) is (%f)\n',ft,masses_estimated(1));
 
-    error=masses-masses_estimated;
-    error_noGravity=masses_noGravity-masses_estimated;
+    error(n,:)=masses-masses_estimated;
+    error_noGravity(n,:)=masses_noGravity-masses_estimated;
     
-    stdMasses=std(masses)
-    stdMassesNoG=std(masses_noGravity)
+    stdMasses(n)=std(masses)
+    stdMassesNoG(n)=std(masses_noGravity)
 end
 
 

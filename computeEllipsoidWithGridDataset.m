@@ -27,7 +27,7 @@ addpath utils
 %    experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_17/slowBlack';% Name of the experiment;
 %  experimentName='icub-insitu-ft-analysis-big-datasets/16_03_2016/leftRightLegsGrid';
 %  experimentName='icub-insitu-ft-analysis-big-datasets/2016_04_19/blackUsingOldSensor';% Name of the experiment;
-%   experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_19/blackBothLegs';% Name of the experiment;
+   experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_19/blackBothLegs';% Name of the experiment;
 %  experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_18/GreenRobotTests/Left_leg';% Name of the experiment;
 %   experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_18/GreenRobotTests/Right_leg';% Name of the experiment;
 % experimentName='icub-insitu-ft-analysis-big-datasets/ati_on_Icub/ati_on_iCub/secondTrial'; % in this experiment x and y axis are rotated 180 degrees
@@ -38,7 +38,7 @@ addpath utils
 % experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_25';% 2nm frist sample some forces outside sphere;
 % experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_26/2Nm_1';% first sample with cable corrected ;
 % experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_26/2Nm_3';% first sample with cable corrected ;
- experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_26/2nm_4_2legs';% first sample with cable corrected ;
+% experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_26/2nm_4_2legs';% first sample with cable corrected ;
 
 
 
@@ -47,12 +47,12 @@ addpath utils
 % Script options, meant to control the behavior of this script 
 scriptOptions = {};
 scriptOptions.forceCalculation=false;%false;
-scriptOptions.printPlots=true;%true
+scriptOptions.printPlots=false;%true
 scriptOptions.raw=false;
 scriptOptions.saveData=true;
 % Script of the mat file used for save the intermediate results 
-scriptOptions.matFileName='dataEllipsoidAnalysis'; %newName
-%scriptOptions.matFileName='datasetEllipsoidAnalys';
+%scriptOptions.matFileName='dataEllipsoidAnalysis'; %newName
+scriptOptions.matFileName='datasetEllipsoidAnalys';
 [dataset]=read_estimate_experimentData2(experimentName,scriptOptions);
 % % load the script of parameters relative 
 paramScript=strcat('data/',experimentName,'/params.m');
