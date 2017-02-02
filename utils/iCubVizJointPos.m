@@ -1,4 +1,4 @@
-function [H]=iCubVizJointPos(q,robotName,fixedFrame)
+function []=iCubVizJointPos(q,robotName,fixedFrame)
 %Author: Francisco Andrade
 %% This function has the aim of been able to see the icub posture while seen the devolpment of the ft forces in the wrench space
 %Input
