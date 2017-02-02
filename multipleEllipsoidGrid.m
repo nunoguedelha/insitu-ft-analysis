@@ -22,21 +22,12 @@ addpath external/quadfit
 addpath utils
 % name and paths of the data files
 
-% experimentName='icub-insitu-ft-analysis-big-datasets/2016_04_21/extendedYoga4StandingOnLeft';% Name of the experiment;
 %    experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_09/darmstadt';% Name of the experiment;
 % experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_12/LeftLegTsensor';% Faulty;
 %    experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_17/slowBlack';% Name of the experiment;
 %  experimentName='icub-insitu-ft-analysis-big-datasets/16_03_2016/leftRightLegsGrid';
 %  experimentName='icub-insitu-ft-analysis-big-datasets/2016_04_19/blackUsingOldSensor';% Name of the experiment;
 %   experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_19/blackBothLegs';% Name of the experiment;
-%  experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_18/GreenRobotTests/Left_leg';% Name of the experiment;
-%   experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_18/GreenRobotTests/Right_leg';% Name of the experiment;
-% experimentName='icub-insitu-ft-analysis-big-datasets/ati_on_Icub/ati_on_iCub/secondTrial'; % in this experiment x and y axis are rotated 180 degrees
-% experimentName='icub-insitu-ft-analysis-big-datasets/ati_on_Icub/ati_on_iCub/thirdTrial';
-% % in this experiment x and y axis are rotated 180 degrees faulty
-% experimentName='icub-insitu-ft-analysis-big-datasets/ati_on_Icub/ati_on_iCub/fourthTrial'; % in this experiment x and y axis are rotated 180 degrees
-%experimentName='icub-insitu-ft-analysis-big-datasets/ati_on_Icub/ati_on_iCub/fifthTrial'; % in this experiment x and y axis are rotated 180 degrees
-%experimentName='icub-insitu-ft-analysis-big-datasets/ati_on_Icub/ati_on_iCub/sixthTrial'; % in this experiment x and y axis are rotated 180 degrees
 % experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_25';% 2nm frist sample some forces outside sphere;
 % eNames={'icub-insitu-ft-analysis-big-datasets/2017_01_18/GreenRobotTests/Left_leg';
 %         'icub-insitu-ft-analysis-big-datasets/2017_01_25';
@@ -55,38 +46,43 @@ addpath utils
 %       'sixthTrial';
 %     };
 
-       eNames={'icub-insitu-ft-analysis-big-datasets/2017_01_26/2nm_4_2legs';
-%             'icub-insitu-ft-analysis-big-datasets/2017_01_31/1_5Nm_1';
-%                        'icub-insitu-ft-analysis-big-datasets/2017_01_31/1_5Nm_2';
-%             'icub-insitu-ft-analysis-big-datasets/2017_01_31/1_5Nm_3';
-%        'icub-insitu-ft-analysis-big-datasets/2017_01_31/1_5Nm_4';
-       'icub-insitu-ft-analysis-big-datasets/2017_02_01/1Nm_1';
-       %'icub-insitu-ft-analysis-big-datasets/2017_02_01/1Nm_2';
-       'icub-insitu-ft-analysis-big-datasets/2017_02_01/1Nm_3';
-       'icub-insitu-ft-analysis-big-datasets/2017_02_01/1Nm_4'};
-names={'Original';
-      'firstTrial';
-      'secondTrial';
-      'thirdTrial';
-      'fourthTrial';
+%        eNames={'icub-insitu-ft-analysis-big-datasets/2017_01_26/2nm_4_2legs';
+% %             'icub-insitu-ft-analysis-big-datasets/2017_01_31/1_5Nm_1';
+% %                        'icub-insitu-ft-analysis-big-datasets/2017_01_31/1_5Nm_2';
+% %             'icub-insitu-ft-analysis-big-datasets/2017_01_31/1_5Nm_3';
+% %        'icub-insitu-ft-analysis-big-datasets/2017_01_31/1_5Nm_4';
+%        'icub-insitu-ft-analysis-big-datasets/2017_02_01/1Nm_1';
+%        %'icub-insitu-ft-analysis-big-datasets/2017_02_01/1Nm_2';
+%        'icub-insitu-ft-analysis-big-datasets/2017_02_01/1Nm_3';
+%        'icub-insitu-ft-analysis-big-datasets/2017_02_01/1Nm_4'};
+% names={'Original';
+%       'firstTrial';
+%       'secondTrial';
+%       'thirdTrial';
+%       'fourthTrial';
+%     };
+
+       eNames={'icub-insitu-ft-analysis-big-datasets/2016_05_09/darmstadt';
+        'icub-insitu-ft-analysis-big-datasets/2016_05_19/blackBothLegs';
+     };
+names={' Darmstadt';
+      ' ftD';
     };
 for n=1:length(eNames)
  experimentName=(eNames{n});% first sample with cable corrected ;
   
  
-
-
-% Script options, meant to control the behavior of this script 
+% Script options, meant to control the behavior of this script
 scriptOptions = {};
 scriptOptions.forceCalculation=false;%false;
-scriptOptions.printPlots=false;%true
+scriptOptions.printPlots=true;%true
 scriptOptions.raw=false;
 scriptOptions.saveData=true;
-% Script of the mat file used for save the intermediate results 
-scriptOptions.matFileName='dataEllipsoidAnalysis'; %newName
-%scriptOptions.matFileName='datasetEllipsoidAnalys';
+% Script of the mat file used for save the intermediate results
+%scriptOptions.matFileName='dataEllipsoidAnalysis'; %newName
+scriptOptions.matFileName='datasetEllipsoidAnalys';
 [dataset]=read_estimate_experimentData2(experimentName,scriptOptions);
-% % load the script of parameters relative 
+% % load the script of parameters relative
 paramScript=strcat('data/',experimentName,'/params.m');
 run(paramScript)
 % Sample to use less data
@@ -97,39 +93,112 @@ dataset=dataSampling(dataset,5);
 %             dataset=applyMask(dataset,mask);
 
 % We carry the analysis just for a subset of the sensors
-%sensorsToAnalize = {'left_leg'};%,'right_leg'};
-sensorsToAnalize = {'right_leg'};
+sensorsToAnalize = {'left_leg','right_leg'};
+%sensorsToAnalize = {'right_leg'};
 meanOffset=false;
+
+%% Check ellipsoid
+for ftIdx =1:length(sensorsToAnalize)
+    ft = sensorsToAnalize{ftIdx};
+    
+    % We don't have a direct measure of the gravity acceleration in the
+    % sensor, so we use the estimate FT as a undirected measure
+    fittedEllipsoid_im.(ft) = ellipsoidfit_smart(dataset.filteredFtData.(ft)(:,1:3),dataset.estimatedFtData.(ft)(:,1:3));
+    
+    % If the measure was perfect, the radius of the force measurements
+    % would be exactly m*|g| ~ m*9.81
+    % We then can print the "mass" as seen by the sensor axis, by
+    % computing the intersection of the ellipsoid with the x,y,z sensor
+    % axis (if the x,y,z axis of the sensor are also the principal axis
+    % of the ellipsoid, this are the radii of the ellipsoid in explicit form)
+    intersections.(ft) = ellipsoid_intersectionWithAxis(fittedEllipsoid_im.(ft));
+    g = 9.81;
+    masses = intersections.(ft)/g;
+    fprintf('The apparent mass attached (using gravity from kinematics) at the sensor %s for axis x,y,z are (%f,%f,%f)\n',ft,masses(1),masses(2),masses(3));
+    
+    
+    
+    % We do the same computation, but using the best fitt that does not
+    % use the data on gravity (to avoid relyng on anything)
+    fittedEllipsoid_noGravity.(ft) = ellipsoidfit_leastsquares(dataset.filteredFtData.(ft)(:,1),dataset.filteredFtData.(ft)(:,2),dataset.filteredFtData.(ft)(:,3));
+    
+    intersections_noGravity.(ft) = ellipsoid_intersectionWithAxis(fittedEllipsoid_noGravity.(ft));
+    g = 9.81;
+    masses_noGravity = intersections_noGravity.(ft)/g;
+    fprintf('The apparent mass attached (without using the model) at the sensor %s for axis x,y,z are (%f,%f,%f)\n',ft,masses_noGravity(1),masses_noGravity(2),masses_noGravity(3));
+    
+    
+    
+    %% We do exactly the same computation on the estimted FT data to get information on
+    % the assume attached mass in the model
+    % We don't have a direct measure of the gravity acceleration in the
+    % sensor, so we use the estimate FT as a undirected measure
+    fittedEllipsoid_im_circular.(ft) = ellipsoidfit_smart(dataset.estimatedFtData.(ft)(:,1:3),dataset.estimatedFtData.(ft)(:,1:3));
+    
+    % If the measure was perfect, the radius of the force measurements
+    % would be exactly m*|g| ~ m*9.81
+    % We then can print the "mass" as seen by the sensor axis, by
+    % computing the intersection of the ellipsoid with the x,y,z sensor
+    % axis (if the x,y,z axis of the sensor are also the principal axis
+    % of the ellipsoid, this are the radii of the ellipsoid in explicit form)
+    intersections_circular.(ft) = ellipsoid_intersectionWithAxis(fittedEllipsoid_im_circular.(ft));
+    g = 9.81;
+    masses_estimated = intersections_circular.(ft)/g;
+    fprintf('The mass attached to the sensor %s (from the model) is (%f)\n',ft,masses_estimated(1));
+    
+     
+    error.(ft)(n,:)=masses-masses_estimated;
+    error_noGravity.(ft)(n,:)=masses_noGravity-masses_estimated;
+    
+    stdMasses.(ft)(n)=std(masses)
+    stdMassesNoG.(ft)(n)=std(masses_noGravity)
+end
+
+
 %% Remove offset (to check similarity by visual inspection)
 
-% compute the offset that minimizes the difference with 
+% compute the offset that minimizes the difference with
 % the estimated F/T (so if the estimates are wrong, the offset
 % estimated in this way is wrong, its just for visualization purpose)
 
-for i=1:size(input.ftNames,1)
-    if(~strcmp(input.ftNames{i},sensorsToAnalize))
-        [ftDataNoOffset.(input.ftNames{i}),offsetX.(input.ftNames{i})]=removeOffset(dataset.filteredFtData.(input.ftNames{i}),dataset.estimatedFtData.(input.ftNames{i}));
-        
-    else
-        if (meanOffset)
-            [ftDataNoOffset.(input.ftNames{i}),offsetX.(input.ftNames{i})]=removeOffset(dataset.filteredFtData.(input.ftNames{i}),dataset.estimatedFtData.(input.ftNames{i}));
-            
-        else
-            fittedEllipsoid_im2 = ellipsoidfit_smart(dataset.filteredFtData.(input.ftNames{i})(:,1:3),dataset.estimatedFtData.(input.ftNames{i})(:,1:3));
-            [offset,~,~,~]=ellipsoid_im2ex(fittedEllipsoid_im2);
-            %TODO: should find also the offset for the torques, using the
-            %mean difference for now (this is wrong)
-            [~,offsetTau]=removeOffset(dataset.filteredFtData.(input.ftNames{i})(:,4:6),dataset.estimatedFtData.(input.ftNames{i})(:,4:6));
-            
-            ftDataNoOffset.(input.ftNames{i})= dataset.filteredFtData.(input.ftNames{i})-repmat([offset',offsetTau],size( dataset.filteredFtData.(input.ftNames{i}),1),1);
-        end
-    end
+for ftIdx =1:length(sensorsToAnalize)
+    ft = sensorsToAnalize{ftIdx};
+    %TODO: should find also the offset for the torques, using the
+    %mean difference for now (this is wrong)
+    [~,offsetTau]=removeOffset(dataset.filteredFtData.(ft)(:,4:6),dataset.estimatedFtData.(ft)(:,4:6));
+    
+    [offset,radii_m,~,R_m]=ellipsoid_im2ex(fittedEllipsoid_im.(ft));
+    model.ftDataNoOffset.(ft)= dataset.filteredFtData.(ft)-repmat([offset',offsetTau],size( dataset.filteredFtData.(ft),1),1);
+    center=zeros(size(offset));
+    model.ellipsoid_im.(ft)=ellipsoid_ex2im(center,radii_m,R_m);
+
+    [offset_noG,radii_noG,~,R_noG]=ellipsoid_im2ex(fittedEllipsoid_noGravity.(ft));
+   no_model.ftDataNoOffset.(ft)= dataset.filteredFtData.(ft)-repmat([offset_noG',offsetTau],size( dataset.filteredFtData.(ft),1),1);
+    no_model.ellipsoid_im.(ft)=ellipsoid_ex2im(center,radii_noG,R_noG);
+    
 end
-dataset.ftDataNoOffset=ftDataNoOffset;
+
+
 
 
 %% Some visual inspection
 if(scriptOptions.printPlots)
+    %% plot comparison using gravity (model)
+    for ftIdx =1:length(sensorsToAnalize)
+        ft = sensorsToAnalize{ftIdx};
+        figure,
+        plot3_matrix(model.ftDataNoOffset.(ft)(:,1:3),'b.'); hold on;
+        plot3_matrix(dataset.estimatedFtData.(ft)(:,1:3),'g.'); hold on;
+        plot_ellipsoid_im(model.ellipsoid_im.(ft));
+        plot_ellipsoid_im(fittedEllipsoid_im_circular.(ft));
+        legend('measuredData','estimatedData','Location','west');
+        title(strcat({'Wrench space '},escapeUnderscores(ft), ' ',names(n)));
+        xlabel('F_{x}');
+        ylabel('F_{y}');
+        zlabel('F_{z}');
+        axis equal;
+        
+    end
     
     % Plot sensor vs estimated (with offset computed the minimum distance
     % from estimated)
@@ -137,12 +206,12 @@ if(scriptOptions.printPlots)
     for ftIdx =1:length(sensorsToAnalize)
         ft = sensorsToAnalize{ftIdx};
         subplot(1,2,ftIdx);
-        plot3_matrix(dataset.ftDataNoOffset.(ft)(:,1:3));%5951:6208
+        plot3_matrix(model.ftDataNoOffset.(ft)(:,1:3));%5951:6208
         hold on;
         axis equal;
         plot3_matrix(dataset.estimatedFtData.(ft)(:,1:3));
-          legend('measuredData','estimatedData','Location','west');
-        title(strcat({'Wrench space '},escapeUnderscores(ft)));
+        legend('measuredData','estimatedData','Location','west');
+        title(strcat({'Wrench space '},escapeUnderscores(ft), ' ',names(n)));
         xlabel('F_{x}');
         ylabel('F_{y}');
         zlabel('F_{z}');
@@ -150,7 +219,7 @@ if(scriptOptions.printPlots)
         grid on;
     end
     % subtitle('Force estimated from the model and force measured (with offset removed)');
-
+    
     
     % Plot sensor vs estimated (with offset computed the minimum distance
     % from estimated)
@@ -158,107 +227,145 @@ if(scriptOptions.printPlots)
     for ftIdx =1:length(sensorsToAnalize)
         ft = sensorsToAnalize{ftIdx};
         subplot(2,1,ftIdx);
-        plot(dataset.ftDataNoOffset.(ft)(:,1:3));
+        plot(model.ftDataNoOffset.(ft)(:,1:3));
         hold on;
         plot(dataset.estimatedFtData.(ft)(:,1:3));
-        title(strcat({'Data no Offset vs estimated data '},escapeUnderscores(ft)));
-         legend('F_{x}','F_{y}','F_{z}','F_{x2}','F_{y2}','F_{z2}','Location','west');
-       
+        title(strcat({'Data no Offset vs estimated data '},escapeUnderscores(ft), ' ',names(n)));
+        legend('F_{x}','F_{y}','F_{z}','F_{x2}','F_{y2}','F_{z2}','Location','west');
+        
     end
     % subtitle('Force estimated from the model and force measured (with offset removed)');
-ax=[];
-lim=zeros(1,4);
+    ax=[];
+    lim=zeros(1,4);
     figure;
     for ftIdx =1:length(sensorsToAnalize)
         ft = sensorsToAnalize{ftIdx};
-       tax=  subplot(2,1,ftIdx);
-        normOfError = normOfRows(dataset.ftDataNoOffset.(ft)(:,1:3)-dataset.estimatedFtData.(ft)(:,1:3));
-       plot(normOfError);
-       ax=[ax tax];
-        title(strcat({'Data no Offset - estimated data norm '},escapeUnderscores(ft)));
-         legend('Norm','Location','west');
+        tax=  subplot(2,1,ftIdx);
+        normOfError = normOfRows(model.ftDataNoOffset.(ft)(:,1:3)-dataset.estimatedFtData.(ft)(:,1:3));
+        plot(normOfError);
+        ax=[ax tax];
+        title(strcat({'Data no Offset - estimated data norm '},escapeUnderscores(ft), ' ',names(n)));
+        legend('Norm','Location','west');
         limt=axis;
-       if limt(4)>lim(4)
-           lim=limt;
-       end
+        if ftIdx>1
+            if limt(4)>lim(4)
+                tmp=lim(3);
+                lim=limt;
+                if lim(3)>tmp
+                    lim(3)=tmp;
+                end
+            end
+        else
+            if limt(4)>lim(4)
+               
+                lim=limt;
+            end
+        end
     end
-      
+    
     axis(ax,lim);
     % subtitle('Error in norm between the force estimated from the model and the one measured (with offset removed)');
-end
-
-%% Check ellipsoid 
-for ftIdx =1:length(sensorsToAnalize)
-     ft = sensorsToAnalize{ftIdx};
-        
-     % We don't have a direct measure of the gravity acceleration in the 
-     % sensor, so we use the estimate FT as a undirected measure
-     fittedEllipsoid_im = ellipsoidfit_smart(dataset.ftDataNoOffset.(ft)(:,1:3),dataset.estimatedFtData.(ft)(:,1:3));
-        
-     % If the measure was perfect, the radius of the force measurements
-     % would be exactly m*|g| ~ m*9.81 
-     % We then can print the "mass" as seen by the sensor axis, by
-     % computing the intersection of the ellipsoid with the x,y,z sensor 
-     % axis (if the x,y,z axis of the sensor are also the principal axis
-     % of the ellipsoid, this are the radii of the ellipsoid in explicit form)
-     intersections = ellipsoid_intersectionWithAxis(fittedEllipsoid_im);
-     g = 9.81;
-     masses = intersections/g;
-     fprintf('The apparent mass attached (using gravity from kinematics) at the sensor %s for axis x,y,z are (%f,%f,%f)\n',ft,masses(1),masses(2),masses(3));
-     
-     figure,
-     plot3(dataset.ftDataNoOffset.(ft)(:,1),dataset.ftDataNoOffset.(ft)(:,2),dataset.ftDataNoOffset.(ft)(:,3),'g.'); hold on;
-     plot3_matrix(dataset.estimatedFtData.(ft)(:,1:3)); hold on;
-     plot_ellipsoid_im(fittedEllipsoid_im);
-       legend('measuredData','estimatedData','Location','west');
-        title(strcat({'Wrench space '},escapeUnderscores(ft),' ', (names(n))));
+    
+    %% plot not using gravity (model)
+    for ftIdx =1:length(sensorsToAnalize)
+        ft = sensorsToAnalize{ftIdx};
+        figure,
+        plot3_matrix(no_model.ftDataNoOffset.(ft)(:,1:3),'b.'); hold on;
+        plot3_matrix(dataset.estimatedFtData.(ft)(:,1:3),'g.'); hold on;
+        plot_ellipsoid_im(no_model.ellipsoid_im.(ft));
+        plot_ellipsoid_im(fittedEllipsoid_im_circular.(ft));
+        legend('measuredData','Location','west');
+        title(strcat({'Wrench space no gravity '},escapeUnderscores(ft), ' ',names(n)));
         xlabel('F_{x}');
         ylabel('F_{y}');
         zlabel('F_{z}');
         axis equal;
-     
-     % We do the same computation, but using the best fitt that does not
-     % use the data on gravity (to avoid relyng on anything)
-     fittedEllipsoid_noGravity = ellipsoidfit_leastsquares(dataset.ftDataNoOffset.(ft)(:,1),dataset.ftDataNoOffset.(ft)(:,2),dataset.ftDataNoOffset.(ft)(:,3));
-
-     intersections_noGravity = ellipsoid_intersectionWithAxis(fittedEllipsoid_noGravity);
-     g = 9.81;
-     masses_noGravity = intersections_noGravity/g;
-     fprintf('The apparent mass attached (without using the model) at the sensor %s for axis x,y,z are (%f,%f,%f)\n',ft,masses_noGravity(1),masses_noGravity(2),masses_noGravity(3));
+    end
     
-     figure
-     plot3(dataset.ftDataNoOffset.(ft)(:,1),dataset.ftDataNoOffset.(ft)(:,2),dataset.ftDataNoOffset.(ft)(:,3),'b.');
-     plot_ellipsoid_im(fittedEllipsoid_noGravity);
-      legend('measuredData','Location','west');
-        title(strcat({'Wrench space no gravity '},escapeUnderscores(ft),' ', (names(n))));
+    % Plot sensor vs estimated (with offset computed the minimum distance
+    % from estimated)
+    figure;
+    for ftIdx =1:length(sensorsToAnalize)
+        ft = sensorsToAnalize{ftIdx};
+        subplot(1,2,ftIdx);
+        plot3_matrix(no_model.ftDataNoOffset.(ft)(:,1:3));%5951:6208
+        hold on;
+        axis equal;
+        plot3_matrix(dataset.estimatedFtData.(ft)(:,1:3));
+        legend('measuredData','estimatedData','Location','west');
+        title(strcat({'Wrench space '},escapeUnderscores(ft), ' ',names(n)));
         xlabel('F_{x}');
         ylabel('F_{y}');
         zlabel('F_{z}');
         axis equal;
-     
-     %% We do exactly the same computation on the estimted FT data to get information on 
-% the assume attached mass in the model
-      % We don't have a direct measure of the gravity acceleration in the 
-    % sensor, so we use the estimate FT as a undirected measure
-    fittedEllipsoid_im_circular = ellipsoidfit_smart(dataset.estimatedFtData.(ft)(:,1:3),dataset.estimatedFtData.(ft)(:,1:3));
-        
-    % If the measure was perfect, the radius of the force measurements
-    % would be exactly m*|g| ~ m*9.81 
-    % We then can print the "mass" as seen by the sensor axis, by
-    % computing the intersection of the ellipsoid with the x,y,z sensor 
-    % axis (if the x,y,z axis of the sensor are also the principal axis
-    % of the ellipsoid, this are the radii of the ellipsoid in explicit form)
-    intersections_circular = ellipsoid_intersectionWithAxis(fittedEllipsoid_im_circular);
-    g = 9.81;
-    masses_estimated = intersections_circular/g;
-    fprintf('The mass attached to the sensor %s (from the model) is (%f)\n',ft,masses_estimated(1));
-
-    error(n,:)=masses-masses_estimated;
-    error_noGravity(n,:)=masses_noGravity-masses_estimated;
+        grid on;
+    end
+    % subtitle('Force estimated from the model and force measured (with offset removed)');
     
-    stdMasses(n)=std(masses)
-    stdMassesNoG(n)=std(masses_noGravity)
+    
+    % Plot sensor vs estimated (with offset computed the minimum distance
+    % from estimated)
+    figure;
+    for ftIdx =1:length(sensorsToAnalize)
+        ft = sensorsToAnalize{ftIdx};
+        subplot(2,1,ftIdx);
+        plot(no_model.ftDataNoOffset.(ft)(:,1:3));
+        hold on;
+        plot(dataset.estimatedFtData.(ft)(:,1:3));
+        title(strcat({'Data no Offset vs estimated data '},escapeUnderscores(ft), ' expName ',names(n)));
+        legend('F_{x}','F_{y}','F_{z}','F_{x2}','F_{y2}','F_{z2}','Location','west');
+        
+    end
+    % subtitle('Force estimated from the model and force measured (with offset removed)');
+    ax=[];
+    lim=zeros(1,4);
+    figure;
+    for ftIdx =1:length(sensorsToAnalize)
+        ft = sensorsToAnalize{ftIdx};
+        tax=  subplot(2,1,ftIdx);
+        normOfError = normOfRows(no_model.ftDataNoOffset.(ft)(:,1:3)-dataset.estimatedFtData.(ft)(:,1:3));
+        plot(normOfError);
+        ax=[ax tax];
+        title(strcat({'Data no Offset - estimated data norm '},escapeUnderscores(ft), ' ',names(n)));
+        legend('Norm','Location','west');
+        limt=axis;
+        if ftIdx>1
+            if limt(4)>lim(4)
+                tmp=lim(3);
+                lim=limt;
+                if lim(3)>tmp
+                    lim(3)=tmp;
+                end
+            end
+        else
+            if limt(4)>lim(4)
+                
+                lim=limt;
+            end
+        end
+    end
+    
+    axis(ax,lim);
+    % subtitle('Error in norm between the force estimated from the model and the one measured (with offset removed)');
+    
+    
+    for ftIdx =1:length(sensorsToAnalize)
+        ft = sensorsToAnalize{ftIdx};
+        figure,
+        plot3_matrix(model.ftDataNoOffset.(ft)(:,1:3),'b.'); hold on;
+        plot3_matrix(no_model.ftDataNoOffset.(ft)(:,1:3),'r.'); hold on;
+        plot_ellipsoid_im(model.ellipsoid_im.(ft),'EdgeColor','g');
+        plot_ellipsoid_im(no_model.ellipsoid_im.(ft),'EdgeColor','r');
+        legend('measuredData','estimatedData','Location','west');
+        title(strcat({'Wrench space '},escapeUnderscores(ft), ' ',names(n)));
+        xlabel('F_{x}');
+        ylabel('F_{y}');
+        zlabel('F_{z}');
+        axis equal;
+        
+    end
 end
+
 
 
 end
