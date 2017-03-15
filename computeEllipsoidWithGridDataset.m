@@ -22,7 +22,7 @@ addpath utils
 % name and paths of the data files
 
 % experimentName='icub-insitu-ft-analysis-big-datasets/2016_04_21/extendedYoga4StandingOnLeft';% Name of the experiment;
-    experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_09/darmstadt';% Name of the experiment;
+%    experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_09/darmstadt';% Name of the experiment;
 % experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_12/LeftLegTsensor';% Faulty;
 %    experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_17/slowBlack';% Name of the experiment;
 %  experimentName='icub-insitu-ft-analysis-big-datasets/16_03_2016/leftRightLegsGrid';
@@ -38,7 +38,7 @@ addpath utils
 % experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_25';% 2nm frist sample some forces outside sphere;
 % experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_26/2Nm_1';% first sample with cable corrected ;
 % experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_26/2Nm_3';% first sample with cable corrected ;
-% experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_26/2nm_4_2legs';% first sample with cable corrected ;
+ experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_26/2nm_4_2legs';% first sample with cable corrected ;
 
 
 
@@ -228,9 +228,11 @@ if(scriptOptions.printPlots)
         ft = sensorsToAnalize{ftIdx};
         figure,
         plot3_matrix(no_model.ftDataNoOffset.(ft)(:,1:3),'b.'); hold on;
-        plot3_matrix(dataset.estimatedFtData.(ft)(:,1:3),'g.'); hold on;
-        plot_ellipsoid_im(no_model.ellipsoid_im.(ft));
-        plot_ellipsoid_im(fittedEllipsoid_im_circular.(ft));
+        %plot3_matrix(dataset.estimatedFtData.(ft)(:,1:3),'g.'); hold on;
+        plot_ellipsoid_im(no_model.ellipsoid_im.(ft),'EdgeColor','m');
+        [~,radii,~,R]=ellipsoid_im2ex(no_model.ellipsoid_im.(ft));
+        [newSphere]=ellipsoid_ex2im([0,0,0],[min(radii),min(radii),min(radii)],R);
+        plot_ellipsoid_im(newSphere,'EdgeColor','k');
         legend('measuredData','Location','west');
         title(strcat({'Wrench space no gravity '},escapeUnderscores(ft)));
         xlabel('F_{x}');
