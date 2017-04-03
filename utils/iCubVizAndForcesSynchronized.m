@@ -117,9 +117,9 @@ for i=init_time:n:length(dataset.qj(:,1));
     for indx=1:length(sensorsToAnalize)
         ft =sensorsToAnalize{indx};
         subplot( H.(ft).sub)
-        h= plot3_matrix(dataset.(whichFtData).(ft)(1:i,1:3));%
+        h= plot3_matrix(dataset.(whichFtData).(ft)(1:i,1:3),'r');%
         hold on;
-        h2= plot3_matrix(dataset.estimatedFtData.(ft)(1:i,1:3));
+        h2= plot3_matrix(dataset.estimatedFtData.(ft)(1:i,1:3),'b');
         delete(H.(ft).old);
         H.(ft).old=h;
         delete(H.(ft).old2);
