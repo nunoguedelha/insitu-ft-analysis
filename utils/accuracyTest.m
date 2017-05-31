@@ -71,6 +71,13 @@ classdef accuracyTest
             forceMagnitude=norm(obj.meanVal(1:3));
         end
         
+        function [obj]=evaluateTest(obj)
+            obj.meanVal= mean(obj.sensor.data);
+            obj.stdVal= std(obj.sensor.data);
+            if ~isempty(obj.groundTruth)
+                obj.errorVal= obj.groundTruth- obj.meanVal;
+            end
+        end
        
     end
     

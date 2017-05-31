@@ -153,7 +153,7 @@ classdef benchmark
                     acc = subB(:,1:3)/F2;
                     titles=strcat(sNames{i} ,' Heavy weights sphere');
                 else
-                    loads = [1:4,13:24];
+                    loads = [1:4,13:30];
                     subB = B(loads,:);
                     acc = subB(:,1:3)/F1;
                     titles=strcat(sNames{i} ,' Light weights sphere');
@@ -173,10 +173,13 @@ classdef benchmark
                   ellipsoids.(sNames{i}).handle=figure;
                   plot3_matrix(sensorData(:,1:3),'b.'); hold on;
                   %  plot_ellipsoid_im(ellipsoids.(sNames{i}).implicit,'EdgeColor',rand(1,3));
-                    plot_ellipsoid_im(ellipsoids.(sNames{i}).implicit,'EdgeColor','k'); hold on;
-                    plot_ellipsoid_im(ellipsoids.(sNames{i}).groundtruth,'EdgeColor','m');  hold on;
+                    plot_ellipsoid_im(ellipsoids.(sNames{i}).implicit,'EdgeColor','m'); hold on;
+                    plot_ellipsoid_im(ellipsoids.(sNames{i}).groundtruth,'EdgeColor','k');  hold on;
                      axis equal;
                      title(titles);
+                     zlabel('Fz');
+                     ylabel('Fy');
+                     xlabel('Fx');
                 end
                 
             end
@@ -191,6 +194,17 @@ classdef benchmark
         end
         
         function [sphereFunction]=sphere()
+        end
+        
+         function [obj]=recalibrateTests(obj,sMat,direct,sensorName)
+             
+           sNames= fieldnames(obj.sensors);
+           index = find(strcmp(sNames,sensorName));
+             for j=1:obj.n
+                   obj.tests(j,index).sensor=recalibrate(obj.tests(j,index).sensor,sMat,direct);
+                   obj.tests(j,index)=evaluateTest(obj.tests(j,index));
+                end
+            
         end
         
     end
@@ -268,12 +282,22 @@ classdef benchmark
                 0.0 ,   F1  ,  0.0 , -F1 * d ,  0.0    , -F1 * b ; % 5 kg on x- (14
                 0.0 ,   F1  ,  0.0 , -F1 * c ,  0.0    ,  0.0    ; % 5 kg on z+ (15
                 0.0 ,   F1  ,  0.0 , -F1 * d ,  0.0    ,  F1 * b ; % 5 kg on x+  (16
+                % new positions axis z- load on 4 sides 5kg
+                 0.0 ,   0.0 ,  -F1  ,  0.0    ,  -F1 * a ,  0.0    ; %  5 kg on x- (4
+                0.0 ,   0.0 ,  -F1  ,  0.0    , F1 * a ,  0.0    ; %  5 kg on x+ (2  *
+                0.0 ,   0.0 ,  -F1  , F1 * a ,  0.0    ,  0.0    ; %  5 kg on y- (1  *
+                 0.0 ,   0.0 ,  -F1  ,  -F1 * a ,  0.0    ,  0.0    ; %  5 kg on y+ (3  *
+               % new positions load on y
+                0.0 , -F1 ,  0.0 , -F1 * d ,  0.0   ,  0.0    ; % 25 kg on x+ strain gauge axis 1  (19
+                0.0,  F1   ,  0.0 ,  F1 * d ,  0.0  ,  0.0    ; % 25 kg on x- strain gauge axis 1  (20
                ];
 
 
             B = B * 9.81;       % multiply the loads for the gravitational acceleration
             
         end
+        
+       
         
       
      end

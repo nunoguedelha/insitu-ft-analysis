@@ -1,17 +1,18 @@
 %requires utils from insitu-ft-analysis to be in the path
 classdef ftSensor
-   properties
-    rMatrix %rotation matrix, rotation usually around the z axis due to a difference required in the mounting of the sensor
-    data %actual force torque data
-    name %which type of sensor is it (ftsense, ATI, optoForce, AME )
-    technology % silicon strain gauge, metalic foil, optical 
-    time %time of the data
-    fData %filtered data using sgolay
-    cMatrix %calibration matrix of the sensor
-    rData %raw data 
-    offset% offset of the sensor also called bias, can be used for zeroing
-   end
-    methods 
+    properties
+        rMatrix %rotation matrix, rotation usually around the z axis due to a difference required in the mounting of the sensor
+        data %actual force torque data
+        name %which type of sensor is it (ftsense, ATI, optoForce, AME )
+        technology % silicon strain gauge, metalic foil, optical
+        time %time of the data
+        fData %filtered data using sgolay
+        cMatrix %calibration matrix of the sensor
+        rData %raw data
+        offset% offset of the sensor also called bias, can be used for zeroing
+        fullscale% the full scale of the sensor
+    end
+    methods
         %constructor
         function obj=ftSensor(varargin)
             if nargin>0
@@ -20,7 +21,7 @@ classdef ftSensor
                     obj.technology=varargin{2};
                     
                 end
-              
+                
                 
                 if nargin==4
                     obj.name=varargin{1};
@@ -52,16 +53,16 @@ classdef ftSensor
         
         %gets the data but premultiplies by the rotation matrix
         function data= getData(obj)
-        data=obj.data;% times the rotationMatrix or the rMatrix should go to constructor?
-        
+            data=obj.data;% times the rotationMatrix or the rMatrix should go to constructor?
+            
         end
         
         %gets the data without the offset
         function data= getDataNoOffset(obj)
             %TODO: should generalize what the offset is in case of insitu is + in
             %case of others is -
-        data=obj.data-repmat(obj.offset,size(obj.data,1),1);%  data - offset
-       % data=obj.data+repmat(obj.offset,size(obj.data,1),1);%  data + offset
+            data=obj.data-repmat(obj.offset,size(obj.data,1),1);%  data - offset
+            % data=obj.data+repmat(obj.offset,size(obj.data,1),1);%  data + offset
         end
         
         %filters the data using sgolay filter, can be forced to filter
@@ -109,14 +110,41 @@ classdef ftSensor
             [ftData] = resampleFt(time, obj.time, obj.data);
             obj.data=ftData;
         end
-       
+        
         function obj=zeroing(obj)
             if ~isempty(obj.offset)
-           obj.data=obj.data- repmat(obj.offset,size(obj.data,1),1);
+                obj.data=obj.data- repmat(obj.offset,size(obj.data,1),1);
             else
                 error('Can not apply zeroing when offset is empty, set offset first');
             end
         end
         
+        function obj=recalibrate(obj,sMat,direct)
+            if direct %can be premultiplied directly
+                for j=1:size(obj.data,1)
+                    obj.data(j,:)=sMat*(obj.data(j,:)'+obj.offset');
+                end
+                obj.offset=sMat*obj.offset';
+                obj.offset=obj.offset';
+                obj=zeroing(obj);
+                
+            else % assuming this a totally different calibration matrix
+                if ~isempty(obj.cMatrix) % if the calibration matrix is available
+                    smat=sMat/obj.cMatrix; %calculate the required matrix to premultiply to recalibrate data
+                    obj=recalibrate(obj,smat,true);
+                else
+                    if ~isempty(obj.rData) % if the raw data is available
+                        %it is assumed the raw data has no offset removal
+                        %required to be considered
+                        for j=1:size(obj.rData,1)
+                            obj.data(j,:)=sMat*(obj.rData(j,:)');
+                        end
+                    else
+                        error('There is no calibration matrix inserted or raw data to work with, not enough information to recalibrate');
+                    end
+                end
+                
+            end
+        end
     end
 end
