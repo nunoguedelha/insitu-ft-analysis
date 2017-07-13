@@ -2,8 +2,8 @@
 % estimate new calibration matrices
 % assuming is run at the end of main, or after main
 %script options
-saveMat=true;
-usingInsitu=false;
+saveMat=false;
+usingInsitu=true;
 plot=true;
 onlyWSpace=true;
 %using insitu

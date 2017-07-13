@@ -100,8 +100,14 @@ jointPos = iDynTree.JointPosDoubleArray(model);
 
 %% Plot and visualize at each time sample
 init_time = 1;
+  %create view vector for rotating the view on the plot figure
+  % 360 is a full turn default view starts at -37.5  322.5
+nViews= round(length(dataset.qj(:,1))-init_time)/n;
+views=-37.5:720/nViews:682.5;
 for i=init_time:n:length(dataset.qj(:,1));
     tic
+     
+       
        
      joints = dataset.qj(i,1:23)';
     jointPos.fromMatlab(joints);
@@ -132,9 +138,19 @@ for i=init_time:n:length(dataset.qj(:,1));
         axis(H.(ft).minMaxForces);
         %axis equal;
         grid on;
+        axis equal;
+        view(views(round(i/n)+1),30);
         drawnow;
-        
+        F(i) = getframe(gcf);
     end
     %pause(max(0,0.01-t))
     
 end
+
+%make the video of the plot.
+v = VideoWriter('forces.avi');
+open(v);
+for k = init_time:n:length(dataset.qj(:,1));
+  writeVideo(v,F(k));
+end
+close(v);

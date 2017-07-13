@@ -38,7 +38,9 @@ addpath utils
 % experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_25';% 2nm frist sample some forces outside sphere;
 % experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_26/2Nm_1';% first sample with cable corrected ;
 % experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_26/2Nm_3';% first sample with cable corrected ;
- experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_26/2nm_4_2legs';% first sample with cable corrected ;
+% experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_26/2nm_4_2legs';% first sample with cable corrected ;
+% experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin45';% Name of the experiment;
+experimentName='icub-insitu-ft-analysis-big-datasets/2017_06_14';% Name of the experiment;
 
 
 
@@ -65,8 +67,8 @@ dataset=dataSampling(dataset,5);
 %             dataset=applyMask(dataset,mask);
 
 % We carry the analysis just for a subset of the sensors
-sensorsToAnalize = {'left_leg','right_leg'};
-%sensorsToAnalize = {'right_leg'};
+%sensorsToAnalize = {'left_leg','right_leg'};
+sensorsToAnalize = {'left_arm'};
 meanOffset=false;
 
 %% Check ellipsoid

@@ -11,14 +11,17 @@
 ati_ethernet.name='ati_ethernet';
 ati_ethernet.technology='silicon strain gauge';
 ati_ethernet.benchInfo=[ 0.1475,0.140,0.187,0.00505];
+ati_ethernet.fullscale=[580,580,1160,20,20,20];
 
 ftsense.name='ftsense';
 ftsense.technology='silicon strain gauge';
 ftsense.benchInfo=[ 0.1475,0.140,0.187,0.00505];
+ftsense.fullscale=[1500,1500,2000,35,35,25];
 
 optoforce.name='optoforce';
 optoforce.technology='optical';
 optoforce.benchInfo=[ 0.1475,0.140,0.187,0.00516];
+optoforce.fullscale=[300,300,800,15,15,10];
 
 ame.name='ame';
 ame.technology='metalic foil';

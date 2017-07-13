@@ -16,7 +16,7 @@ addpath utils
 % experimentName='icub-insitu-ft-analysis-big-datasets/2016_06_17/fast';% Name of the experiment;
 % experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_04/normal';% Name of the experiment;
 %  experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin30';% Name of the experiment;
-%  experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin45';% Name of the experiment;
+  experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin45';% Name of the experiment;
 
 
 
@@ -24,7 +24,7 @@ addpath utils
 scriptOptions = {};
 scriptOptions.forceCalculation=false;%false;
 scriptOptions.printPlots=false;%true
-scriptOptions.saveData=true;%true
+scriptOptions.saveData=false;%true
 scriptOptions.raw=true;% to calculate the raw data, for recalibration always true
 % Script of the mat file used for save the intermediate results 
 %scriptOptions.saveDataAll=true;
@@ -40,7 +40,7 @@ if( scriptOptions.printPlots )
 run('plottinScript.m')
 end
 
-lambda=0;
+lambda=2;
 lambdaName='';
 
 run('CalibMatCorrection.m')

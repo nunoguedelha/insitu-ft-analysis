@@ -23,3 +23,16 @@ end
     bench.plots=true;
     [ellipsoids]=checkSphereBehaviour(bench,false);
      [ellipsoids]=checkSphereBehaviour(bench,true);
+     
+     averageError=sum(abs(r.errors))/size(r.errors,1);
+     averageStd=sum(abs(r.stds))/size(r.stds,1);
+     
+     %todo: include sensor full scale
+     for i=1:length(names)
+         fullScaleError(:,:,i)=r.errors(:,:,i)./repmat(sensors.(names{i}).fullscale,size(r.errors,1),1);
+         
+     end
+     
+     
+   
+     

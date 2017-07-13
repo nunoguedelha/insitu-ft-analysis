@@ -13,5 +13,5 @@ for ftIdx =1:length(sensorsToAnalize)
 %[calibMatrices.(ft),fullscale.(ft)]=estimateCalibMatrix(rawNoMean,estNoMean.(ft));
 [calibMatrices.(ft),fullscale.(ft)]=estimateCalibMatrixWithReg(rawNoMean,estNoMean,cMat.(ft),lambda);
 
-offset.(ft)=meanEst'-calibMatrices.(ft)*meanFt';
+offset.(ft)=meanEst'-calibMatrices.(ft)*meanFt'; %should I change it so that offset needs to be substracted?
 end
