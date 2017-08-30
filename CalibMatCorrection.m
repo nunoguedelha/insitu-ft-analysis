@@ -84,7 +84,16 @@ if(plot)
     if (onlyWSpace)
         for ftIdx =1:length(sensorsToAnalize)
             ft = sensorsToAnalize{ftIdx};
-            [filteredNoOffset.(ft),filteredOffset.(ft)]=removeOffset(dataset.filteredFtData.(ft),dataset.estimatedFtData.(ft));
+            if(usingInsitu)
+                filteredOffset.(ft)=reCabData.offsetInsitu;
+                 for j=1:size(dataset.rawData.(ft),1)
+                    filteredNoOffset.(ft)(j,:)= (dataset.cMat.(ft)*(dataset.rawData.(ft)(j,:)'-offset.(ft)'))';
+                 end
+            else
+                filteredOffset.(ft)=offsetC.(ft);
+                filteredNoOffset.(ft)=dataset.filteredFtData.(ft) -repmat(filteredOffset.(ft)',size(dataset.filteredFtData.(ft),1),1);
+            end
+            %[filteredNoOffset.(ft),filteredOffset.(ft)]=removeOffset(dataset.filteredFtData.(ft),dataset.estimatedFtData.(ft));
             
             
             figure,
