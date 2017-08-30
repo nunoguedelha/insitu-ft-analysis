@@ -35,12 +35,14 @@ addpath utils
 % experimentName='icub-insitu-ft-analysis-big-datasets/ati_on_Icub/ati_on_iCub/fourthTrial'; % in this experiment x and y axis are rotated 180 degrees
 %experimentName='icub-insitu-ft-analysis-big-datasets/ati_on_Icub/ati_on_iCub/fifthTrial'; % in this experiment x and y axis are rotated 180 degrees
 %experimentName='icub-insitu-ft-analysis-big-datasets/ati_on_Icub/ati_on_iCub/sixthTrial'; % in this experiment x and y axis are rotated 180 degrees
-% experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_25';% 2nm frist sample some forces outside sphere;
+% experimentName='icub-3-ft-analysis-big-datasets/2017_01_25';% 2nm frist sample some forces outside sphere;
 % experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_26/2Nm_1';% first sample with cable corrected ;
 % experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_26/2Nm_3';% first sample with cable corrected ;
 % experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_26/2nm_4_2legs';% first sample with cable corrected ;
 % experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin45';% Name of the experiment;
-experimentName='icub-insitu-ft-analysis-big-datasets/2017_06_14';% Name of the experiment;
+% experimentName='2017_05_31_3';% first sample with cable corrected ;
+experimentName='2017_08_29_2';% first sample with cable corrected ;
+
 
 
 
@@ -48,7 +50,7 @@ experimentName='icub-insitu-ft-analysis-big-datasets/2017_06_14';% Name of the e
 
 % Script options, meant to control the behavior of this script
 scriptOptions = {};
-scriptOptions.forceCalculation=false;%false;
+scriptOptions.forceCalculation=true;%false;
 scriptOptions.printPlots=true;%true
 scriptOptions.raw=false;
 scriptOptions.saveData=true;
@@ -67,8 +69,8 @@ dataset=dataSampling(dataset,5);
 %             dataset=applyMask(dataset,mask);
 
 % We carry the analysis just for a subset of the sensors
-%sensorsToAnalize = {'left_leg','right_leg'};
-sensorsToAnalize = {'left_arm'};
+%sensorsToAnalize = {'left_leg','right_leg','right_foot','left_foot'};
+sensorsToAnalize = {'left_leg','right_leg'};
 meanOffset=false;
 
 %% Check ellipsoid
@@ -159,7 +161,7 @@ if(scriptOptions.printPlots)
         figure,
         plot3_matrix(model.ftDataNoOffset.(ft)(:,1:3),'b.'); hold on;
         plot3_matrix(dataset.estimatedFtData.(ft)(:,1:3),'g.'); hold on;
-        plot_ellipsoid_im(model.ellipsoid_im.(ft));
+        plot_ellipsoid_im(model.ellipsoid_im.(ft),'EdgeColor','k');
         plot_ellipsoid_im(fittedEllipsoid_im_circular.(ft));
         legend('measuredData','estimatedData','Location','west');
         title(strcat({'Wrench space '},escapeUnderscores(ft)));

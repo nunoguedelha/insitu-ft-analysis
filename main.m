@@ -16,8 +16,8 @@ addpath utils
 % experimentName='icub-insitu-ft-analysis-big-datasets/2016_06_17/fast';% Name of the experiment;
 % experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_04/normal';% Name of the experiment;
 %  experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin30';% Name of the experiment;
-  experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin45';% Name of the experiment;
-
+%  experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin45';% Name of the experiment;
+experimentName='2017_08_29_2';% 
 
 
 
@@ -32,10 +32,8 @@ scriptOptions.matFileName='ftDataset';
 
   [dataset]=read_estimate_experimentData2(experimentName,scriptOptions);
  % We carry the analysis just for a subset of the sensors
-%sensorsToAnalize = {'left_leg','right_leg'};
-sensorsToAnalize = {'right_foot','right_leg'};
-sensorsToAnalize = {'right_leg'};
-
+sensorsToAnalize = {'left_leg','right_leg'};
+%sensorsToAnalize = {'left_leg','right_leg','right_foot','left_foot'};
 if( scriptOptions.printPlots )
 run('plottinScript.m')
 end

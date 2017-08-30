@@ -11,7 +11,7 @@ addpath ../external/quadfit
 
 %Use only datasets where the same sensor is used
  experimentNames={
-'icub-insitu-ft-analysis-big-datasets/2016_09_26/dumper2';% Name of the experiment;
+'2017_08_29_2';% Name of the experiment;
      }; %this set is from iCubGenova02
 names={'Workbench';
       'gridMin30'; 
@@ -46,11 +46,11 @@ names={'Workbench';
 %     '_l6';
 %     '_l8';
 %     '_l10'};
-lambdasNames={'';
+lambdaNames={'';
     '_l_5';
     '_l1';
     '_l2';
-    '_l4';
+    '_l5';
     '_l10';
     '_l30';
     '_l50';
@@ -75,11 +75,14 @@ paramScript=strcat('..//data/',experimentNames{1},'/params.m');
 run(paramScript)
 ftNames=input.ftNames;
 
-sensorsToAnalize2 = {'left_arm';'right_arm';'left_leg';'right_leg';'left_foot';'right_foot'};  %load the new calibration matrices
-sensorsToAnalize = {'right_foot','right_leg'};  %load the new calibration matrices
+%sensorsToAnalize2 = {'left_arm';'right_arm';'left_leg';'right_leg';'left_foot';'right_foot'};  %load the new calibration matrices
+%sensorsToAnalize = {'right_foot','right_leg'};  %load the new calibration matrices
+sensorsToAnalize2 = {'left_leg';'right_leg'};  %load the new calibration matrices
+sensorsToAnalize = {'left_leg','right_leg'};  %load the new calibration matrices
 framesNames={'l_sole','r_sole','l_lower_leg','r_lower_leg','root_link','l_elbow_1','r_elbow_1'}; %there has to be atleast 6
+framesToAnalize={'l_lower_leg','r_lower_leg'};
 % framesToAnalize={'r_sole','r_lower_leg'};
-framesToAnalize={'r_lower_leg'};
+%framesToAnalize={'r_lower_leg'};
 %load the experiment measurements
 sensorName='r_leg_ft_sensor';
 

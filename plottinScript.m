@@ -3,7 +3,7 @@
 %script options
 all=false;
 noOffset=false;
-onlyWSpace=false;
+onlyWSpace=true;
 filtered=true;
 
 %numbered as the filed in input.ftData

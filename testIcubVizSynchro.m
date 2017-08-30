@@ -1,7 +1,7 @@
 % minimal test for iCubVizAndForcesSynchronized
 addpath /external/quadfit
 addpath /utils 
-experimentName='icub-insitu-ft-analysis-big-datasets/2017_06_14';% Name of the experiment;
+experimentName='2017_08_29_2';
 
 scriptOptions = {};
 scriptOptions.forceCalculation=false;%false;
@@ -18,7 +18,7 @@ scriptOptions.matFileName='datasetEllipsoidAnalys';
   
   sensorsToAnalize = {'left_arm'};
   
-  robotName='iCubGenova05';
+  robotName='iCubGenova04';
   
    iCubVizAndForcesSynchronized(dataset,robotName,sensorsToAnalize,'root_link');
    

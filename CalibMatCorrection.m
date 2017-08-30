@@ -2,7 +2,8 @@
 % estimate new calibration matrices
 % assuming is run at the end of main, or after main
 %script options
-saveMat=false;
+
+saveMat=true;
 usingInsitu=true;
 plot=true;
 onlyWSpace=true;
@@ -105,3 +106,5 @@ if(plot)
         end
     end
 end
+
+

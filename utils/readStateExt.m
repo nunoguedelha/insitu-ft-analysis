@@ -5,6 +5,7 @@ format = '%d %f ';
 fid    = fopen(filename);
 
 for j = 1 : 11  %normal is 10 new is 11
+
    format = [format, '('];
    for i = 1 : n
       if j < 9

@@ -11,7 +11,7 @@ experimentNames={
 % 'icub-insitu-ft-analysis-big-datasets/2016_07_04/fast';% Name of the experiment;
 %   'icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin30';% Name of the experiment;
 % 'icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin45'% Name of the experiment;
- 'icub-insitu-ft-analysis-big-datasets/2016_09_26/dumper2';% Name of the experiment;
+ '2017_08_29_2';% Name of the experiment;
     };
 scriptOptions = {};
 scriptOptions.forceCalculation=false;%false;
@@ -20,46 +20,32 @@ scriptOptions.saveData=true;%true
 scriptOptions.raw=true;
 % Script of the mat file used for save the intermediate results
 scriptOptions.matFileName='ftDataset';
+lambdas=[0;
+    90000000000;
+    ];
+lambdasNames={'';
+    '_l100000';        
+    };
 % lambdas=[0;
 %     0.5;
 %     1;
-%     1.5;
 %     2;
-%     4;
-%     6;
-%     8;
+%     5;
 %     10;
+%     30;
+%     50;
+%     100;
 %     1000];
 % lambdasNames={'';
 %     '_l_5';
 %     '_l1';
-%     '_l1_5';
 %     '_l2';
-%     '_l4';
-%     '_l6';
-%     '_l8';
+%     '_l5';
 %     '_l10';
+%     '_l30';
+%     '_l50';
+%     '_l100';
 %     '_l1000'};
-lambdas=[0;
-    0.5;
-    1;
-    2;
-    4;
-    10;
-    30;
-    50;
-    100;
-    1000];
-lambdasNames={'';
-    '_l_5';
-    '_l1';
-    '_l2';
-    '_l4';
-    '_l10';
-    '_l30';
-    '_l50';
-    '_l100';
-    '_l1000'};
 
 calculate=true;
 for i=1:length(experimentNames)
@@ -70,7 +56,7 @@ for i=1:length(experimentNames)
         dataset=data.(strcat('e',num2str(i)));
         experimentName=experimentNames{i};
         % We carry the analysis just for a subset of the sensors
-         sensorsToAnalize = {'right_leg','right_foot'};
+         sensorsToAnalize = {'left_leg','right_leg'};% {'right_leg','right_foot'};
         %sensorsToAnalize = {'right_leg'};
         if( scriptOptions.printPlots )
             run('plottinScript.m')
