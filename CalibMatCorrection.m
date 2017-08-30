@@ -98,7 +98,7 @@ if(plot)
             plot3_matrix(reCalibData.(ft)(:,1:3));
             
             legend('measuredDataNoOffset','estimatedData','reCalibratedData','Location','west');
-            title(strcat({'Wrench space '},escapeUnderscores(ft)));
+            title(strcat({'Wrench space '},escapeUnderscores(ft),{' '},escapeUnderscores(lambdaName)));
             xlabel('F_{x}');
             ylabel('F_{y}');
             zlabel('F_{z}');

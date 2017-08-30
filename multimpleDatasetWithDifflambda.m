@@ -20,32 +20,51 @@ scriptOptions.saveData=true;%true
 scriptOptions.raw=true;
 % Script of the mat file used for save the intermediate results
 scriptOptions.matFileName='ftDataset';
-lambdas=[0;
-    90000000000;
-    ];
-lambdasNames={'';
-    '_l100000';        
-    };
+lambdas=[0;    
+    10000;
+    50000;
+    100000;
+    500000;
+    1000000;
+    5000000;
+    10000000];
+
+% Create appropiate names for the lambda variables
+for namingIndex=1:length(lambdas)
+    if (lambdas(namingIndex)==0)
+        lambdasNames{namingIndex}='';
+    else
+    lambdasNames{namingIndex}=strcat('_l',num2str(lambdas(namingIndex)));
+    end
+end
+lambdasNames=lambdasNames'
+
 % lambdas=[0;
 %     0.5;
-%     1;
-%     2;
-%     5;
-%     10;
-%     30;
-%     50;
 %     100;
-%     1000];
+%     200;
+%     500;
+%     1000;
+%     3000;
+%     5000;
+%     10000;
+%     15000;
+%     30000;
+%     50000;
+%     100000];
 % lambdasNames={'';
 %     '_l_5';
-%     '_l1';
-%     '_l2';
-%     '_l5';
-%     '_l10';
-%     '_l30';
-%     '_l50';
 %     '_l100';
-%     '_l1000'};
+%     '_l200';
+%     '_l500';
+%     '_l1000';
+%     '_l3000';
+%     '_l5000';
+%     '_l10000';
+%     '_l15000';
+%     '_l30000';
+%     '_l50000';
+%     '_l100000';};
 
 calculate=true;
 for i=1:length(experimentNames)
