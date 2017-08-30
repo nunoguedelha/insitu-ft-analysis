@@ -85,16 +85,12 @@ if(plot)
         for ftIdx =1:length(sensorsToAnalize)
             ft = sensorsToAnalize{ftIdx};
             if(usingInsitu)
-                filteredOffset.(ft)=reCabData.offsetInsitu;
-                 for j=1:size(dataset.rawData.(ft),1)
-                    filteredNoOffset.(ft)(j,:)= (dataset.cMat.(ft)*(dataset.rawData.(ft)(j,:)'-offset.(ft)'))';
-                 end
+                filteredOffset.(ft)=(dataset.cMat.(ft)*offset.(ft)')';               
             else
-                filteredOffset.(ft)=offsetC.(ft);
-                filteredNoOffset.(ft)=dataset.filteredFtData.(ft) -repmat(filteredOffset.(ft)',size(dataset.filteredFtData.(ft),1),1);
+                filteredOffset.(ft)=offsetC.(ft)';
             end
-            %[filteredNoOffset.(ft),filteredOffset.(ft)]=removeOffset(dataset.filteredFtData.(ft),dataset.estimatedFtData.(ft));
             
+            filteredNoOffset.(ft)=dataset.filteredFtData.(ft) -repmat(filteredOffset.(ft),size(dataset.filteredFtData.(ft),1),1);
             
             figure,
             plot3_matrix(filteredNoOffset.(ft)(:,1:3)); grid on;hold on;
