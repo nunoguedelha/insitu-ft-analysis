@@ -43,3 +43,8 @@ input.calibMatFileNames={}; % name of the files containing the calibration matri
 relevant=input.relevant;
 contactFrameName = {input.contactFrameName};
 
+% skin torque experiment variables
+% input.torquesPortName;
+% input.wbdPortNames;
+% input.wbdNames;
+% input.subModels;

@@ -1,4 +1,5 @@
 function [dataset,estimator,input]=readExperiment(experimentName,scriptOptions)
+
 % This function is meant to read all info available in a dataset obtained
 % from analog and stateExt ports. It also estimates forces and torques and
 % calculates the raw measurments of ft sensors
@@ -19,8 +20,7 @@ function [dataset,estimator,input]=readExperiment(experimentName,scriptOptions)
 %   scriptOptions should include :
 %       scriptOptions = {};
 %       scriptOptions.forceCalculation=true;%false;
-%       scriptOptions.saveData=true;%true
-%       scriptOptions.raw=true;
+%       scriptOptions.saveData=true;%true       
 % % Script of the mat file used for save the intermediate results 
 %       striptOptions.matFileName='iCubDataset';
 
@@ -31,6 +31,8 @@ function [dataset,estimator,input]=readExperiment(experimentName,scriptOptions)
 paramScript=strcat('data/',experimentName,'/params.m');
 run(paramScript)
 
+  % Create estimator class
+    estimator = iDynTree.ExtWrenchesAndJointTorquesEstimator();
 % This script will produce dataset (containing the raw data) and dataset2
 % (contained the original data and the filtered ft). 
 
@@ -38,6 +40,7 @@ if (exist(strcat('data/',experimentName,'/',scriptOptions.matFileName,'.mat'),'f
     %% Load from workspace
     %     %load meaninful data, estimated data, meaninful data no offset
     load(strcat('data/',experimentName,'/',scriptOptions.matFileName,'.mat'),'dataset')
+    
     
 else
     %% load FT data
@@ -86,20 +89,18 @@ else
     for i=1:size(stateNames,1)
         dataStateDirs{i}=strcat('data/',experimentName,'/icub/',stateNames{i},'/',stateDataName);
     end
-    %% Load the estimator and model information
+    %%% Load the estimator and model information
     
-    % Create estimator class
-    estimator = iDynTree.ExtWrenchesAndJointTorquesEstimator();
     
     % Load model and sensors from the URDF file
     estimator.loadModelAndSensorsFromFile(strcat('./',input.robotName,'.urdf'));
     
     % Check if the model was correctly created by printing the model
-    %estimator.model().toString()
+    estimator.model().toString()
     
     
     
-    %% Set model information   
+    %%% Set model information   
     % For more info on iCub frames check: http://wiki.icub.org/wiki/ICub_Model_naming_conventions    
     
     % Get joint information.
@@ -108,7 +109,8 @@ else
     dofs = estimator.model().getNrOfDOFs();
     qj_all = zeros(dofs,size(time,1));
     dqj_all = zeros(dofs,size(time,1));
-    ddqj_all = zeros(dofs,size(time,1));    
+    ddqj_all = zeros(dofs,size(time,1)); 
+    tau_all = zeros(dofs,size(time,1));
    
     %get the names of the model to match the names from the data file read
     for i=0:dofs-1
@@ -131,7 +133,7 @@ else
         % we resample joint encoders on the timestamp of the FT sensors
         fprintf('read_estimate_experimentData: Resampling the state for the part %s\n',fNames{i});
         [qj_temp,dqj_temp,ddqj_temp] = resampleState(time, time_temp, qj_temp, dqj_temp, ddqj_temp);
-        tau= interp1(time_temp, tau_temp'  , time)';
+        tau_temp= interp1(time_temp, tau_temp'  , time)';
         
         for j=1:Dof
             index = find(strcmp(names, input.stateNames.(fNames{i}){j}));
@@ -140,6 +142,7 @@ else
                 qj_all(index,:) = deg2rad*qj_temp(j,:);
                 dqj_all(index,:) =deg2rad* dqj_temp(j,:);
                 ddqj_all(index,:) =deg2rad* ddqj_temp(j,:);
+                tau_all(index,:) =tau_temp(j,:);
             end
         end
     end
@@ -148,7 +151,42 @@ else
     dataset.qj = qj_all';
     dataset.dqj = dqj_all';
     dataset.ddqj = ddqj_all';    
-    dataset.tau=tau;
+    dataset.tau=tau_all';
+    
+    %% Load skin events information
+     if (any(strcmp('skinEventsName', fieldnames(input))))
+    dataSkinDir=strcat('data/',experimentName,'/skinManager/',input.skinEventsName,'/data.log');
+      
+    %TODO: replace with appropiate information read from 
+    [s]=readSkinEvents(dataSkinDir);
+    %[linAcc_temp,angVel_temp, time_temp,euler_temp]=readSkinEvents(dataSkinDir);
+   
+    [linAcc,angVel_temp,~] = resampleState(time, time_temp, linAcc_temp',angVel_temp', euler_temp');
+    
+   %Convert to radians     
+    skinData.linAcc=linAcc';
+    skinData.angVel=angVel';  
+    
+    % Insert into final output
+    dataset.inertialData=skinData;
+     end
+     
+         %% Load wholeBodyDynamics torques information
+     if (any(strcmp('wbdPortNames', fieldnames(input))))
+    torquesPortName=strcat(input.torquesPortName,'/data.log'); % (arm, foot and leg have FT data)   
+    for p=1:size(input.wbdPortNames,1)
+        for i=1:size(input.subModels,1)           
+            dataTorqueDirs{i}=strcat('data/',experimentName,'/',input.wbdPortNames{p},'/',input.subModels{i},'/',torquesPortName);  
+            %read from dataDumper
+            [torqueData_temp,time_temp]=readDataDumper(dataFTDirs{i});
+            %resample FT data
+            torqueData.(input.subModels{i})=resampleFt(time,time_temp,torqueData_temp);
+        end
+        
+        % Insert into final output        
+        dataset.(input.wbdNames{p})=torqueData;
+    end
+     end
     
     
     %% Save the workspace
