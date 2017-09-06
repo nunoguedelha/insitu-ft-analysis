@@ -5,22 +5,35 @@ n=3;
 format = '%d %f (';
 fid    = fopen(filename);  
 
-for j = 1 : 10 
-   if ismember(j,[1:6])
+for j = 1 : 10
+    if ismember(j,[1:6])
         format = [format, '('];
-       if j==1
-           for i = 1 : n+1
-               format = [format, '%d '];
-           end
-       else
-           for i = 1 : n
-               format = [format, '%f '];
-           end
-       end
-       format = [format, ') '];
-   else
-       format = [format, '%*s '];
-   end
+        if j==1
+            for i = 1 : n+1
+                format = [format, '%d '];
+            end
+        else
+            for i = 1 : n
+                format = [format, '%f '];
+            end
+        end
+        format = [format, ') '];
+    else
+        if j==7
+            format = [format, '( '];
+            for ids=1:10 %find a better way to read the correct amount of ids even if changing
+                format = [format, '%d '];
+            end
+            format = [format, ') '];
+        else
+            if j==8
+                format = [format, '%f '];
+            else
+                
+                format = [format, '%*s '];
+            end
+        end
+    end
 end
 
 format = [format, ' %d) '];

@@ -158,14 +158,16 @@ else
     dataSkinDir=strcat('data/',experimentName,'/skinManager/',input.skinEventsName,'/data.log');
       
     %TODO: replace with appropiate information read from 
-    [s]=readSkinEvents(dataSkinDir);
+    [time_temp, cop_temp ,force_temp,torque_temp,normalDirection_temp,~, ~]=readSkinEvents(dataSkinDir);
     %[linAcc_temp,angVel_temp, time_temp,euler_temp]=readSkinEvents(dataSkinDir);
    
-    [linAcc,angVel_temp,~] = resampleState(time, time_temp, linAcc_temp',angVel_temp', euler_temp');
-    
+    [cop_temp ,force_temp,torque_temp] = resampleState(time, time_temp, cop_temp' ,force_temp',torque_temp');
+    normalDirection_temp= interp1(time_temp, normalDirection_temp'  , time)';
    %Convert to radians     
-    skinData.linAcc=linAcc';
-    skinData.angVel=angVel';  
+    skinData.cop=cop_temp';
+    skinData.force=force_temp';
+    skinData.torque=torque_temp';
+    skinData.normalDirection=normalDirection_temp';  
     
     % Insert into final output
     dataset.inertialData=skinData;
