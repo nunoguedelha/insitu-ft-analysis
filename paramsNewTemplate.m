@@ -15,6 +15,8 @@ input.contactFrameName='root_link'; %name of the frame which is in contact
 
 %create input parameter
 % input.experimentName='dumperRightLegNoIMU';% Name of the experiment
+%input.inertialName='inertial'; enable in case there is info read from the
+%IMU
 input.ftPortName=''; % (arm, foot and leg have FT data), usually is 'analog:o'
 input.statePortName=''; % (only foot has no state data), usually is 'stateExt:o'
 input.ftNames={}%usual values are {'left_arm';'right_arm';'left_leg';'right_leg';'left_foot';'right_foot'}; %name of folders that contain ft measures
@@ -40,3 +42,4 @@ input.calibMatFileNames={}; % name of the files containing the calibration matri
 % input structure 
 relevant=input.relevant;
 contactFrameName = {input.contactFrameName};
+
