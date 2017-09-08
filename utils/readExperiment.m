@@ -124,14 +124,14 @@ else
     %input.stateNames.(fNames{1}){1}
     dataset.jointNames = {};
     
-    fprintf('read_estimate_experimentData: Resampling the state\n');
+    fprintf('readExperiment: Resampling the state\n');
     for i=1:size(fNames)
         Dof=size(input.stateNames.(fNames{i}));
         [qj_temp,dqj_temp,ddqj_temp,time_temp, ~, ~, ~, tau_temp,]=readStateExt(Dof(1),dataStateDirs{i});
         %store only the ones that have a degree of freedom (the names of the joint
         %should match one of the names stored in the model of the robot
         % we resample joint encoders on the timestamp of the FT sensors
-        fprintf('read_estimate_experimentData: Resampling the state for the part %s\n',fNames{i});
+        fprintf('readExperiment: Resampling the state for the part %s\n',fNames{i});
         [qj_temp,dqj_temp,ddqj_temp] = resampleState(time, time_temp, qj_temp, dqj_temp, ddqj_temp);
         tau_temp= interp1(time_temp, tau_temp'  , time)';
         
@@ -160,17 +160,30 @@ else
     %TODO: replace with appropiate information read from 
     [time_temp, cop_temp ,force_temp,torque_temp,normalDirection_temp,~, ~]=readSkinEvents(dataSkinDir);
     %[linAcc_temp,angVel_temp, time_temp,euler_temp]=readSkinEvents(dataSkinDir);
-   
-    [cop_temp ,force_temp,torque_temp] = resampleState(time, time_temp, cop_temp' ,force_temp',torque_temp');
-    normalDirection_temp= interp1(time_temp, normalDirection_temp'  , time)';
-   %Convert to radians     
+    try
+        [cop_temp ,force_temp,torque_temp] = resampleState(time, time_temp, cop_temp' ,force_temp',torque_temp');
+        normalDirection_temp= interp1(time_temp, normalDirection_temp'  , time)';   
+    catch ME        
+         disp( 'readExperiment:loadSkinEvents:timeMismatch could not resample to default time, adding skin time ' )
+        if (strcmp(ME.identifier,'MATLAB:griddedInterpolant:CompVecValueMismatchErrId'))
+            msg = ['Can not resample to ft time frame: Initial time of ft is ', ...
+                num2str(time(1)),' while skin time initial time is ', ...
+                num2str(time_temp(1)),' difference (ft - skin) is ', num2str(time(1)-time_temp(1)), ' end times are ft=', num2str(time(end)),' skin= ', ...
+                num2str(time_temp(end)) ,' difference is ', num2str(time(end)-time_temp(end))];
+            causeException = MException('readExperiment:loadSkinEvents:timeMismatch',msg);
+            ME = addCause(ME,causeException);
+        end
+        skinData.time=time_temp';
+        %rethrow(ME)
+    end
+    %Convert to radians
     skinData.cop=cop_temp';
     skinData.force=force_temp';
     skinData.torque=torque_temp';
     skinData.normalDirection=normalDirection_temp';  
     
     % Insert into final output
-    dataset.inertialData=skinData;
+    dataset.skinData=skinData;
      end
      
          %% Load wholeBodyDynamics torques information
