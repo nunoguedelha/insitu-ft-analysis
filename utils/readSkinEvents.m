@@ -1,4 +1,4 @@
-function [time, cop ,force,torque,normalDirection,geomCenter, bodyparts]=readSkinEvents(filename)
+function [time, cop ,force,torque,normalDirection,geomCenter, bodyparts,wrench]=readSkinEvents(filename)
 %n i sthe number of degrees of freedom of the part of the robot
 %filename is the name of the file containing the data from stateEXT:o port
 n=3;
@@ -63,7 +63,7 @@ force             = force(iu, :)';
 torque            = torque(iu, :)';
 geomCenter        = geomCenter(iu, :)';
 normalDirection   = normalDirection(iu, :)';
-
+wrench=[force;torque];
 
 if fclose(fid) == -1
    error('[ERROR] there was a problem in closing the file')

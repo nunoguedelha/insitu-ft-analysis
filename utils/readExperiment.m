@@ -30,9 +30,17 @@ function [dataset,estimator,input]=readExperiment(experimentName,scriptOptions)
 % load the script of parameters relative 
 paramScript=strcat('data/',experimentName,'/params.m');
 run(paramScript)
-
   % Create estimator class
-    estimator = iDynTree.ExtWrenchesAndJointTorquesEstimator();
+  
+    %%% Load the estimator and model information
+      estimator = iDynTree.ExtWrenchesAndJointTorquesEstimator();
+    
+    % Load model and sensors from the URDF file
+    estimator.loadModelAndSensorsFromFile(strcat('./',input.robotName,'.urdf'));
+    
+    % Check if the model was correctly created by printing the model
+    %estimator.model().toString()
+    
 % This script will produce dataset (containing the raw data) and dataset2
 % (contained the original data and the filtered ft). 
 
@@ -88,17 +96,7 @@ else
         stateNames=fieldnames(input.stateNames);
     for i=1:size(stateNames,1)
         dataStateDirs{i}=strcat('data/',experimentName,'/icub/',stateNames{i},'/',stateDataName);
-    end
-    %%% Load the estimator and model information
-    
-    
-    % Load model and sensors from the URDF file
-    estimator.loadModelAndSensorsFromFile(strcat('./',input.robotName,'.urdf'));
-    
-    % Check if the model was correctly created by printing the model
-    estimator.model().toString()
-    
-    
+    end    
     
     %%% Set model information   
     % For more info on iCub frames check: http://wiki.icub.org/wiki/ICub_Model_naming_conventions    
@@ -158,11 +156,12 @@ else
     dataSkinDir=strcat('data/',experimentName,'/skinManager/',input.skinEventsName,'/data.log');
       
     %TODO: replace with appropiate information read from 
-    [time_temp, cop_temp ,force_temp,torque_temp,normalDirection_temp,~, ~]=readSkinEvents(dataSkinDir);
+    [time_temp, cop_temp ,force_temp,torque_temp,normalDirection_temp,~, ~,wrench_temp]=readSkinEvents(dataSkinDir);
     %[linAcc_temp,angVel_temp, time_temp,euler_temp]=readSkinEvents(dataSkinDir);
     try
         [cop_temp ,force_temp,torque_temp] = resampleState(time, time_temp, cop_temp' ,force_temp',torque_temp');
         normalDirection_temp= interp1(time_temp, normalDirection_temp'  , time)';   
+        wrench_temp= interp1(time_temp, wrench_temp'  , time)';
     catch ME        
          disp( 'readExperiment:loadSkinEvents:timeMismatch could not resample to default time, adding skin time ' )
         if (strcmp(ME.identifier,'MATLAB:griddedInterpolant:CompVecValueMismatchErrId'))
@@ -181,6 +180,7 @@ else
     skinData.force=force_temp';
     skinData.torque=torque_temp';
     skinData.normalDirection=normalDirection_temp';  
+    skinData.wrench=wrench_temp';
     
     % Insert into final output
     dataset.skinData=skinData;
@@ -193,9 +193,23 @@ else
         for i=1:size(input.subModels,1)           
             dataTorqueDirs{i}=strcat('data/',experimentName,'/',input.wbdPortNames{p},'/',input.subModels{i},'/',torquesPortName);  
             %read from dataDumper
-            [torqueData_temp,time_temp]=readDataDumper(dataFTDirs{i});
-            %resample FT data
-            torqueData.(input.subModels{i})=resampleFt(time,time_temp,torqueData_temp);
+            [torqueData_temp,time_temp]=readTorqueData(dataTorqueDirs{i});
+            %resample Torque data
+            try
+                torqueData.(input.subModels{i})=resampleFt(time,time_temp,torqueData_temp);
+            catch ME
+                disp( 'readExperiment:loadWBD:timeMismatch could not resample to default time, adding skin time ' )
+                if (strcmp(ME.identifier,'MATLAB:griddedInterpolant:CompVecValueMismatchErrId'))
+                    msg = ['Can not resample to ft time frame: Initial time of ft is ', ...
+                        num2str(time(1)),' while skin time initial time is ', ...
+                        num2str(time_temp(1)),' difference (ft - skin) is ', num2str(time(1)-time_temp(1)), ' end times are ft=', num2str(time(end)),' skin= ', ...
+                        num2str(time_temp(end)) ,' difference is ', num2str(time(end)-time_temp(end))];
+                    causeException = MException('readExperiment:loadWBD:timeMismatch',msg);
+                    ME = addCause(ME,causeException);
+                end
+                torqueData.(input.subModels{i})=torqueData_temp;
+               torqueData.time=time_temp;
+            end
         end
         
         % Insert into final output        
