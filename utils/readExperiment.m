@@ -196,7 +196,12 @@ else
             [torqueData_temp,time_temp]=readTorqueData(dataTorqueDirs{i});
             %resample Torque data
             try
-                torqueData.(input.subModels{i})=resampleFt(time,time_temp,torqueData_temp);
+                torqueData.(input.subModels{i})=torqueData_temp;
+                torqueData.time=time_temp;
+                %resampleFt(time,time_temp,torqueData_temp); need to match
+                %by time without interpolating since there is a mismatch
+                %between the time the skin event is registerd and the
+                %torque is evaluated
             catch ME
                 disp( 'readExperiment:loadWBD:timeMismatch could not resample to default time, adding skin time ' )
                 if (strcmp(ME.identifier,'MATLAB:griddedInterpolant:CompVecValueMismatchErrId'))

@@ -1,4 +1,4 @@
-function [externalWrenches,jointTorques]=estimateTorquesOneSample(estimator,q,dq,ddq,externalWrench,useSkin,input,ftData,framesNames,offset)
+function [externalWrenches,jointTorques,estimatedFT]=estimateTorquesOneSample(estimator,q,dq,ddq,externalWrench,useSkin,input,ftData,framesNames,offset,estimateFT)
 % OBTAINESTIMATEDWRENCH Get (model) estimated wrenches for a iCub dataset
 %   estimator       : variable which contains the model of the robot
 %   dataset         : contains the joint position velocities and
@@ -30,8 +30,16 @@ nrOfFTSensors = estimator.sensors().getNrOfSensors(iDynTree.SIX_AXIS_FORCE_TORQU
 
 unknownWrench = iDynTree.UnknownWrenchContact();
 
-unknownWrench.unknownType = iDynTree.NO_UNKNOWNS;
-% the position is the origin, so the conctact point wrt to l_sole is zero
+
+ if useSkin %TODO: input condition to select type of wrench   
+     unknownWrench.unknownType = iDynTree.NO_UNKNOWNS;
+     wrench_idyn.fromMatlab(externalWrench)
+     unknownWrench.knownWrench=wrench_idyn;
+    else        
+        unknownWrench.unknownType = iDynTree.FULL_WRENCH;
+ end      
+
+% the position is the origin, so the conctact point wrt to skin frame is zero
 unknownWrench.contactPoint.zero();
 
 % The fullBodyUnknowns is a class storing all the unknown external wrenches
@@ -39,7 +47,7 @@ unknownWrench.contactPoint.zero();
 fullBodyUnknowns = iDynTree.LinkUnknownWrenchContacts(estimator.model());
 fullBodyUnknowns.clear();
 contact_index = estimator.model().getLinkIndex(input.skinLinkFrame);
-fullBodyUnknowns.addNewContactForLink(estimator.model(),contact_index,unknownWrench);
+fullBodyUnknowns.addNewContactForLink(contact_index,unknownWrench);
 
 % Print the unknowns to make sure that everything is properly working
 fullBodyUnknowns.toString(estimator.model())
@@ -66,14 +74,7 @@ estFTmeasurements = iDynTree.SensorsMeasurements(estimator.sensors());
     dqj_idyn.fromMatlab(dq);
     ddqj_idyn.fromMatlab(ddq);
     
-    if useSkin %TODO: input condition to select type of wrench     
-        unknownWrench.knownWrench = externalWrench;
-    else        
-        unknownWrench.unknownType = iDynTree.FULL_WRENCH;
-    end
-    
-    contact_index = estimator.model().getLinkIndex(input.skinLinkFrame);
-fullBodyUnknowns.addNewContactForLink(estimator.model(),contact_index,unknownWrench);
+   
     %% Run the prediction of FT measurements
     
     % There are three output of the estimation, FT measurements, contact 
@@ -83,7 +84,8 @@ fullBodyUnknowns.addNewContactForLink(estimator.model(),contact_index,unknownWre
 for frame=1:length(framesNames) 
     fullBodyUnknowns.addNewUnknownFullWrenchInFrameOrigin(estimator.model(),estimator.model().getFrameIndex(framesNames{frame}));
 end
-
+% Print the unknowns to make sure that everything is properly working
+fullBodyUnknowns.toString(estimator.model())
 % The estimated external wrenches
 estContactForces = iDynTree.LinkContactWrenches(estimator.model());
 
@@ -99,19 +101,33 @@ for ftIndex = 0:(nrOfFTSensors-1)
     matchup(ftIndex+1) = find(strcmp(input.sensorNames,sens ));
 end
 
-  % store the estimated measurements
+  
+ contact_index = estimator.model().getLinkIndex('root_link');
+    ok = estimator.updateKinematicsFromFixedBase(qj_idyn,dqj_idyn,ddqj_idyn,contact_index,grav_idyn);  
+    if estimateFT
+        % Sensor wrench buffer 
+estimatedSensorWrench = iDynTree.Wrench();
+         % run the estimation
+    estimator.computeExpectedFTSensorsMeasurements(fullBodyUnknowns,estFTmeasurements,estContactForces,estJointTorques);
+   
+    % store the estimated measurements
+    for ftIndex = 0:(nrOfFTSensors-1)       
+        ok = estFTmeasurements.getMeasurement(iDynTree.SIX_AXIS_FORCE_TORQUE,ftIndex,estimatedSensorWrench);
+        estimatedFT.(sNames{matchup(ftIndex+1)})=estimatedSensorWrench.toMatlab()';
+    end
+     %estimatedFT
+    else
+    % store the measurements
     for ftIndex = 0:(nrOfFTSensors-1)   %TODO: how to get the offset used by wholebodydynamics or load the forces used by wbd
         wrench_idyn.fromMatlab(ftData.(sNames{matchup(ftIndex+1)})(:)'+offset.(sNames{matchup(ftIndex+1)}));        
         ok = estFTmeasurements.setMeasurement(iDynTree.SIX_AXIS_FORCE_TORQUE,ftIndex,wrench_idyn);
         
     end
- 
-    ok = estimator.updateKinematicsFromFixedBase(qj_idyn,dqj_idyn,ddqj_idyn,contact_index,grav_idyn);  
-    
-  
+    estimatedFT=ftData;
+    end
 fprintf('obtainEstimatedWrenches: Computing the estimated torques\n');
     % Now we can call the estimator
-estimator.estimateExtWrenchesAndJointTorques(fullBodyUnknownsExtWrenchEst,estFTmeasurements,estContactForces,estJointTorques);
+estimator.estimateExtWrenchesAndJointTorques(fullBodyUnknowns,estFTmeasurements,estContactForces,estJointTorques);
      
 linkNetExtWrenches = iDynTree.LinkWrenches(estimator.model());%
 estContactForces.computeNetWrenches(linkNetExtWrenches);
@@ -121,11 +137,14 @@ wrench = linkNetExtWrenches(estimator.model().getFrameLink(estimator.model().get
 %wrench.toMatlab();
 wrenchEst(i,:)=wrench.toMatlab();
 end 
-    
+  %  wrench = linkNetExtWrenches(estimator.model().getFrameLink(estimator.model().getLinkIndex(input.skinLinkFrame)));
+     wrench = linkNetExtWrenches(estimator.model().getFrameLink(estimator.model().getFrameIndex(input.skinFrame)));
+%wrench.toMatlab();
+wrenchEst(length(framesNames)+1,:)=wrench.toMatlab();
 for i=1:length(framesNames)
     
    externalWrenches.(framesNames{i})=squeeze(wrenchEst(i,:));
 end
-
+externalWrenches.(input.skinFrame)=squeeze(wrenchEst(i+1,:));
 jointTorques=estJointTorques.toMatlab();
 
