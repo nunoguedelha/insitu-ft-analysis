@@ -9,7 +9,8 @@ link_h_skinFrame=link_h_skinFrame_temp.asAdjointTransformWrench.toMatlab();
     
 end
 totalMass*9.81
-%  'Model: 
+
+%     'Model: 
 %        Links: 
 %          [0] root_link
 %          [1] r_hip_1

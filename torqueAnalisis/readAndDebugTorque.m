@@ -51,11 +51,11 @@ end
 
 [~,~,estimated]=estimateTorquesOneSample(estimator,q,dq,ddq,externalWrench,useSkin,input,ftData1,framesNames,offset,estimateFT);
 
-% for n=1:length(sNames)
-% offset.(sNames{n})=estimated.(sNames{n})-ftData1.(sNames{n});
-% end
+for n=1:length(sNames)
+offset.(sNames{n})=estimated.(sNames{n})-ftData1.(sNames{n});
+end
 %% do the torque calculation with skin
-skinSample= 2;
+skinSample= 3;
 contactIndex=estimator.model.getFrameIndex(input.skinFrame);
 link_h_skinFrame_temp=estimator.model.getFrameTransform(contactIndex);
 link_h_skinFrame=link_h_skinFrame_temp.asAdjointTransformWrench.toMatlab();
@@ -65,7 +65,7 @@ framesNames={'l_sole','r_sole','l_lower_leg','root_link','l_elbow_1','r_elbow_1'
 q=dataset.qj(sample,:);
 dq=zeros(size(dataset.dqj(sample,:)));
 ddq=dataset.ddqj(sample,:);
-externalWrench=link_h_skinFrame*dataset.skinData.wrench(skinSample,:)'*-1;
+externalWrench=link_h_skinFrame*dataset.skinData.wrench(skinSample,:)'%*-1;
 useSkin=true;
 estimateFT=false;
 for n=1:length(sNames)
@@ -73,17 +73,17 @@ for n=1:length(sNames)
 ftData.(sNames{n})=dataset.ftData.(sNames{n})(sample,:);
 end
 estimator.model.getFrameTransform(0);
-[a,b]=estimateTorquesOneSample(estimator,q,dq,ddq,externalWrench,useSkin,input,ftData,framesNames,offset,estimateFT);
+[extWrenchesSkin,skinTorques]=estimateTorquesOneSample(estimator,q,dq,ddq,externalWrench,useSkin,input,ftData,framesNames,offset,estimateFT);
 
 %% estimate torques without the skin
 useSkin=false;
-[aa,d]=estimateTorquesOneSample(estimator,q,dq,ddq,externalWrench,useSkin,input,ftData,framesNames,offset,estimateFT);
+[extWrenchesFt,ftTorques]=estimateTorquesOneSample(estimator,q,dq,ddq,externalWrench,useSkin,input,ftData,framesNames,offset,estimateFT);
 
 figure,plot (dataset.skinTau.right_leg(sample,4),'ro'); hold on;
 %figure,plot (dataset.skinTau.right_leg(sample-15000,4),'ro'); hold on;
 plot (dataset.ftTau.right_leg(sample,4),'b*'); hold on;
-plot (b(4),'go'); hold on;
-plot (d(4),'m*'); hold on;
+plot (skinTorques(4),'go'); hold on;
+plot (ftTorques(4),'m*'); hold on;
 legend ('skin torque ','ft torque ',' skin calculated torque','ft calculated torque');
 
 
