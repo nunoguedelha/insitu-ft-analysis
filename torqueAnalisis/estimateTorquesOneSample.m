@@ -101,9 +101,21 @@ for ftIndex = 0:(nrOfFTSensors-1)
     matchup(ftIndex+1) = find(strcmp(input.sensorNames,sens ));
 end
 
-  
- contact_index = estimator.model().getLinkIndex('root_link');
-    ok = estimator.updateKinematicsFromFixedBase(qj_idyn,dqj_idyn,ddqj_idyn,contact_index,grav_idyn);  
+%   estimator.model().toString()
+%contact_index = estimator.model().getLinkIndex('imu_frame');%'r_foot' 'root_link' 'imu_frame'
+%ok = estimator.updateKinematicsFromFixedBase(qj_idyn,dqj_idyn,ddqj_idyn,contact_index,grav_idyn);
+
+%% try with imu
+contact_index = estimator.model().getFrameIndex('imu_frame');%'r_foot' 'root_link' 'imu_frame'
+grav = [0.0;0.0;9.81];
+grav_idyn.fromMatlab(grav);
+angVel_idyn = iDynTree.Vector3();
+angAcc_idyn = iDynTree.Vector3();
+
+angVel_idyn.fromMatlab([0;0;0]);
+angAcc_idyn.fromMatlab([0;0;0]);
+ok = estimator.updateKinematicsFromFloatingBase(qj_idyn,dqj_idyn,ddqj_idyn,contact_index,grav_idyn,angVel_idyn,angAcc_idyn);
+
     if estimateFT
         % Sensor wrench buffer 
 estimatedSensorWrench = iDynTree.Wrench();
