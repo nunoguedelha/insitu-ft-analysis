@@ -158,8 +158,8 @@ for i=1:length(framesNames)
     %wrench.toMatlab();
     wrenchEst(i,:)=wrench.toMatlab();
 end
-%  wrench = linkNetExtWrenches(estimator.model().getFrameLink(estimator.model().getLinkIndex(input.skinLinkFrame)));
-wrench = linkNetExtWrenches(estimator.model().getFrameLink(estimator.model().getFrameIndex(input.skinFrame)));
+  wrench = linkNetExtWrenches(estimator.model().getFrameLink(estimator.model().getLinkIndex(input.skinLinkFrame)));
+%wrench = linkNetExtWrenches(estimator.model().getFrameLink(estimator.model().getFrameIndex(input.skinFrame)));
 %wrench.toMatlab();
 wrenchEst(length(framesNames)+1,:)=wrench.toMatlab();
 for i=1:length(framesNames)

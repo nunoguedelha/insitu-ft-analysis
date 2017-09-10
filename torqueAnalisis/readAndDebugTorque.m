@@ -44,7 +44,8 @@ useSkin=false;
 estimateFT=true;
 sNames=fieldnames(dataset.ftData);
 for n=1:length(sNames)
-%ftData1.(sNames{n})=dataset.ftData.(sNames{n})(sample,:)-dataset.ftData.(sNames{n})(1,:);
+%ftData1.(sNames{n})=dataset.ftData.(sNames{n})(sample,:)-dataset.ftData.(sNames{n})(1,:);%
+%to use with modelNoMasses
 ftData1.(sNames{n})=dataset.ftData.(sNames{n})(sample,:);
 offset.(sNames{n})=[0,0,0,0,0,0];
 end
@@ -55,32 +56,35 @@ for n=1:length(sNames)
 offset.(sNames{n})=estimated.(sNames{n})-ftData1.(sNames{n});
 end
 %% do the torque calculation with skin
-skinSample= 3;
+skinSample= 35;
 contactIndex=estimator.model.getFrameIndex(input.skinFrame);
 link_h_skinFrame_temp=estimator.model.getFrameTransform(contactIndex);
 link_h_skinFrame=link_h_skinFrame_temp.asAdjointTransformWrench.toMatlab();
-sample=298;
+sample=29800;
 % estimateTorquesOneSample variables
 framesNames={'l_sole','r_sole','l_lower_leg','root_link','l_elbow_1','r_elbow_1'}; %there has to be atleast 6
 q=dataset.qj(sample,:);
 dq=zeros(size(dataset.dqj(sample,:)));
 ddq=dataset.ddqj(sample,:);
-externalWrench=link_h_skinFrame*dataset.skinData.wrench(skinSample,:)'%*-1;
+externalWrench=link_h_skinFrame*dataset.skinData.wrench(skinSample,:)';
+%externalWrench=dataset.skinData.wrench(skinSample,:)'%*-1;
+
 useSkin=true;
 estimateFT=false;
 for n=1:length(sNames)
-%ftData.(sNames{n})=dataset.ftData.(sNames{n})(sample,:)-dataset.ftData.(sNames{n})(1,:);
+%ftData.(sNames{n})=dataset.ftData.(sNames{n})(sample,:)-dataset.ftData.(sNames{n})(1,:);%
+%to use with modelNoMasses
 ftData.(sNames{n})=dataset.ftData.(sNames{n})(sample,:);
 end
-estimator.model.getFrameTransform(0);
+
 [extWrenchesSkin,skinTorques]=estimateTorquesOneSample(estimator,q,dq,ddq,externalWrench,useSkin,input,ftData,framesNames,offset,estimateFT);
 
 %% estimate torques without the skin
 useSkin=false;
 [extWrenchesFt,ftTorques]=estimateTorquesOneSample(estimator,q,dq,ddq,externalWrench,useSkin,input,ftData,framesNames,offset,estimateFT);
 
-figure,plot (dataset.skinTau.right_leg(sample,4),'ro'); hold on;
-%figure,plot (dataset.skinTau.right_leg(sample-15000,4),'ro'); hold on;
+%figure,plot (dataset.skinTau.right_leg(sample,4),'ro'); hold on;
+figure,plot (dataset.skinTau.right_leg(sample-15000,4),'ro'); hold on;
 plot (dataset.ftTau.right_leg(sample,4),'b*'); hold on;
 plot (skinTorques(4),'go'); hold on;
 plot (ftTorques(4),'m*'); hold on;
