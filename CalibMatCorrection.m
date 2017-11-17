@@ -13,6 +13,20 @@ onlyWSpace=true;
 if(usingInsitu)
          % [calibMatrices,offset,fullscale]=estimateMatrices(dataset.rawData,dataset.estimatedFtData,sensorsToAnalize);
  [calibMatrices,offset,fullscale]= estimateMatricesWthReg(dataset.rawData,dataset.estimatedFtData,sensorsToAnalize, dataset.cMat,lambda);
+ 
+   if (isstruct(extraSample.right)||isstruct(extraSample.left))
+       tempCmat=dataset.cMat;
+         [calibMatrices,fullscale]= estimateMatricesWthRegExtraSamples(dataset,sensorsToAnalize, dataset.cMat,lambda...
+             ,extraSample,offset,calibMatrices);
+         if (isstruct(extraSample.right))
+         dataset=addDatasets(dataset,extraSample.right);
+         end
+          if (isstruct(extraSample.left))
+         dataset=addDatasets(dataset,extraSample.left);
+          end
+         
+          dataset.cMat=tempCmat;
+    end
     
 else
     %not using insitu

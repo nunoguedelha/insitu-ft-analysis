@@ -13,7 +13,7 @@ input.hangingInit=0;% in case the robot starts from a hanging position, and offs
 input.hangingInterval=[,] % initial and final time in which the offset estimation will be done, this is the time it is hanging
 
 %create input parameter
-% input.experimentName='dumperRightLegNoIMU';% Name of the experiment
+%input.inertialName='inertial'; %name of port containing inertial data
 input.ftPortName=''; % (arm, foot and leg have FT data), usually is 'analog:o'
 input.statePortName=''; % (only foot has no state data), usually is 'stateExt:o'
 input.ftNames={}%usual values are {'left_arm';'right_arm';'left_leg';'right_leg';'left_foot';'right_foot'}; %name of folders that contain ft measures
@@ -41,3 +41,19 @@ input.calibMatFileNames={}; % name of the files containing the calibration matri
 relevant=input.relevant;
 rData = input.rData;
 contactFrameName = input.contactFrameName;
+
+
+
+% for considering extra samples
+input.extraSampleRight='';  %input here the name of the other experiment from
+%which to take the samples
+input.extraSampleLeft='';
+
+
+%% Mini checks
+if(size (input.calibMatFileNames)~=size (input.ftNames))
+    disp('amount of calibration matrix files does not match the amount of sensors available in the dataset')
+end
+if(size (input.sensorNames)~=size (input.ftNames))
+    disp('amount of sensor names does not match the amount of sensors available in the dataset')
+end

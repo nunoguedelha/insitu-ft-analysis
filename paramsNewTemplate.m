@@ -48,3 +48,8 @@ contactFrameName = {input.contactFrameName};
 % input.wbdPortNames;
 % input.wbdNames;
 % input.subModels;
+
+% for considering extra samples
+%input.extraSampleRight  %input here the name of the other experimetn from
+%which to take the samples
+%input.extraSampleLeft

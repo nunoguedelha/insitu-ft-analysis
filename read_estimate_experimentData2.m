@@ -1,4 +1,4 @@
-function [dataset]=read_estimate_experimentData2(experimentName,scriptOptions)
+function [dataset,extraSample]=read_estimate_experimentData2(experimentName,scriptOptions)
 % This function is meant to read all info available in a dataset obtained
 % from analog and stateExt ports. It also estimates forces and torques and
 % calculates the raw measurments of ft sensors
@@ -25,6 +25,20 @@ function [dataset]=read_estimate_experimentData2(experimentName,scriptOptions)
 % load the script of parameters relative 
 paramScript=strcat('data/',experimentName,'/params.m');
 run(paramScript)
+input.ftPortName; %for some reason you can not die fieldnames to input until you used input somewhere
+%fieldnames(input)
+% load the extra sample first (might change this to later in the code)
+if (any(strcmp('extraSampleRight', fieldnames(input))))
+ [extraSample.right,~]=read_estimate_experimentData2(input.extraSampleRight,scriptOptions);
+else
+    extraSample.right=nan;
+end
+
+if (any(strcmp('extraSampleLeft', fieldnames(input))))
+ [extraSample.left,~]=read_estimate_experimentData2(input.extraSampleLeft,scriptOptions);
+else
+    extraSample.left=nan;
+end
 
 % This script will produce dataset (containing the raw data) and dataset2
 % (contained the original data and the filtered ft). 
