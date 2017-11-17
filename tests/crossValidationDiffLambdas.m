@@ -21,8 +21,11 @@ for i=2:length(serialNumbers)
     [data.(names2use{i+1})]=dataset;
     
 end
+
+%% start comparison
+toCompareWith=names2use{which}; %choose in which experiment will comparison be made    
 for toCompare=2:length(names2use)
-    toCompareWith=names2use{toCompare}; %choose in which experiment will comparison be made    
+    
 inertiaOffset=0;
 nametemp=fieldnames(data.(toCompareWith));
 if(sum(strcmp(nametemp,'inertial'))==1)

@@ -11,10 +11,12 @@ addpath ../external/quadfit
 
 %Use only datasets where the same sensor is used
  experimentNames={
-'2017_08_29_2';% Name of the experiment;
+'2017_10_31_3';
+ '2017_10_31_4'% Name of the experiment;
      }; %this set is from iCubGenova02
 names={'Workbench';
-      'gridMin30'; 
+      'bestleftleg'; 
+      'bestleftfoot';
     };% except for the first one all others are short names for the expermients in experimentNames
 % experimentNames={
 %     %    'icub-insitu-ft-analysis-big-datasets/2016_06_08/yoga';% Name of the experiment;
@@ -46,23 +48,24 @@ names={'Workbench';
 %     '_l6';
 %     '_l8';
 %     '_l10'};
-lambdasNames={'';
-    '_l_5';
-    '_l1';
-    '_l2';
-    '_l5';
-    '_l10';
-    '_l30';
-    '_l50';
-    '_l100';
-    '_l1000';
-    '_l1500';
-    '_l2000';
-    '_l3000';
-    '_l4000';
-    '_l10000';
-    '_l100000';
-    };
+%lambdasNames={'' };
+% lambdasNames={'';
+%     '_l_5';
+%     '_l1';
+%     '_l2';
+%     '_l5';
+%     '_l10';
+%     '_l30';
+%     '_l50';
+%     '_l100';
+%     '_l1000';
+%     '_l1500';
+%     '_l2000';
+%     '_l3000';
+%     '_l4000';
+%     '_l10000';
+%     '_l100000';
+%     };
 
 names2use{1}=names{1};
 num=2;
@@ -116,11 +119,6 @@ for i=1:length(experimentNames)
             secMat.(names2use{(i-1)*length(lambdasNames)+1+lam}).(sensorsToAnalize{j})= cMat.(names2use{(i-1)*length(lambdasNames)+1+lam}).(sensorsToAnalize{j})/WorkbenchMat.(sensorsToAnalize{j});
              xmlStr=cMat2xml(secMat.(names2use{(i-1)*length(lambdasNames)+1+lam}).(sensorsToAnalize{j}),sensorName{j})% print in required format to use by WholeBodyDynamics
         end 
-    end
-    
-    %     if   (exist(strcat('../data/',experimentNames{i},'/',scriptOptions.matFileName,'.mat'),'file')==2)
-    %          recabInsitu=load(strcat('../data/',experimentNames{i},'/',scriptOptions.matFileName,'.mat'));
-    %     end
-   
+    end 
     
 end

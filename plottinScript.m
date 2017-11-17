@@ -51,31 +51,39 @@ if(onlyWSpace || all)
         % %with offset
        for ftIdx =1:length(sensorsToAnalize)
            ft = sensorsToAnalize{ftIdx};
-
-            figure,plot3_matrix(dataset.ftData.(ft)(:,1:3));hold on;
-            plot3_matrix(dataset.estimatedFtData.(ft)(:,1:3)); grid on;
-        end
-        legend('measuredData','estimatedData','Location','west');
+           if(~filtered ||all)
+               figure,plot3_matrix(dataset.ftData.(ft)(:,1:3));hold on;
+           else               
+               figure,plot3_matrix(dataset.filteredFtData.(ft)(:,1:3));hold on;
+           end
+           plot3_matrix(dataset.estimatedFtData.(ft)(:,1:3)); grid on;
+            legend('measuredData','estimatedData','Location','west');
         title(strcat({'Wrench space '},escapeUnderscores(ft)));
         xlabel('F_{x}');
         ylabel('F_{y}');
         zlabel('F_{z}');
         axis equal;
+        end
+        
     end
     
     if(noOffset || all)
         %without offset
        for ftIdx =1:length(sensorsToAnalize)
            ft = sensorsToAnalize{ftIdx};
-
+ if(~filtered ||all)
             figure,plot3_matrix(dataset.ftDataNoOffset.(ft)(:,1:3));hold on;
+             else               
+               figure,plot3_matrix(dataset.filteredNoOffset.(ft)(:,1:3));hold on;
+           end
             plot3_matrix(dataset.estimatedFtData.(ft)(:,1:3)); grid on;
-        end
-        legend('measuredDataNoOffset','estimatedData','Location','west');
+            legend('measuredDataNoOffset','estimatedData','Location','west');
         title(strcat({'Wrench space '},escapeUnderscores(ft)));
         xlabel('F_{x}');
         ylabel('F_{y}');
         zlabel('F_{z}');
         axis equal;
+        end
+        
     end
 end
