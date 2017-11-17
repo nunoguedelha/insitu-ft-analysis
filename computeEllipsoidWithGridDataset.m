@@ -41,7 +41,7 @@ addpath utils
 % experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_26/2nm_4_2legs';% first sample with cable corrected ;
 % experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin45';% Name of the experiment;
 % experimentName='2017_05_31_3';% first sample with cable corrected ;
-experimentName='2017_08_29_2';% first sample with cable corrected ;
+experimentName='purpleGrid2017_11_12';% first sample with cable corrected ;
 
 
 
@@ -56,7 +56,7 @@ scriptOptions.raw=false;
 scriptOptions.saveData=true;
 % Script of the mat file used for save the intermediate results
 %scriptOptions.matFileName='dataEllipsoidAnalysis'; %newName
-scriptOptions.matFileName='datasetEllipsoidAnalys';
+scriptOptions.matFileName='ftDataset';
 [dataset]=read_estimate_experimentData2(experimentName,scriptOptions);
 % % load the script of parameters relative
 paramScript=strcat('data/',experimentName,'/params.m');
@@ -90,8 +90,9 @@ for ftIdx =1:length(sensorsToAnalize)
     intersections.(ft) = ellipsoid_intersectionWithAxis(fittedEllipsoid_im.(ft));
     g = 9.81;
     masses = intersections.(ft)/g;
+    std_masses= std(masses);
     fprintf('The apparent mass attached (using gravity from kinematics) at the sensor %s for axis x,y,z are (%f,%f,%f)\n',ft,masses(1),masses(2),masses(3));
-    
+   
     
     
     % We do the same computation, but using the best fitt that does not
@@ -101,6 +102,7 @@ for ftIdx =1:length(sensorsToAnalize)
     intersections_noGravity.(ft) = ellipsoid_intersectionWithAxis(fittedEllipsoid_noGravity.(ft));
     g = 9.81;
     masses_noGravity = intersections_noGravity.(ft)/g;
+    std_noGravity= std(masses_noGravity);
     fprintf('The apparent mass attached (without using the model) at the sensor %s for axis x,y,z are (%f,%f,%f)\n',ft,masses_noGravity(1),masses_noGravity(2),masses_noGravity(3));
     
     
@@ -122,8 +124,19 @@ for ftIdx =1:length(sensorsToAnalize)
     masses_estimated = intersections_circular.(ft)/g;
     fprintf('The mass attached to the sensor %s (from the model) is (%f)\n',ft,masses_estimated(1));
     
+    
+    fprintf('The standard deviation among the axis of %s sensor  is %f\n',ft,std_masses);
+    fprintf('The standard deviation among the axis (without using the model) of %s sensor  is %f\n',ft,std_noGravity);
+    
     error=masses-masses_estimated;
     error_noGravity=masses_noGravity-masses_estimated;
+    errorForces=error*9.81;
+    error_noGravity_forces=error_noGravity*9.81;
+    
+    fprintf('The error at the sensor %s for axis x,y,z are (%f N ,%f N ,%f N)\n',ft,errorForces(1),errorForces(2),errorForces(3));
+    
+    fprintf('The error (without using the model) at the sensor %s for axis x,y,z are (%f N ,%f N ,%f N)\n',ft,error_noGravity_forces(1),error_noGravity_forces(2),error_noGravity_forces(3));
+    
 end
 
 
@@ -204,7 +217,8 @@ if(scriptOptions.printPlots)
         plot(dataset.estimatedFtData.(ft)(:,1:3));
         title(strcat({'Data no Offset vs estimated data '},escapeUnderscores(ft)));
         legend('F_{x}','F_{y}','F_{z}','F_{x2}','F_{y2}','F_{z2}','Location','west');
-        
+         xlabel('Samples');
+        ylabel('N');
     end
     % subtitle('Force estimated from the model and force measured (with offset removed)');
     ax=[];
@@ -216,8 +230,10 @@ if(scriptOptions.printPlots)
         normOfError = normOfRows(model.ftDataNoOffset.(ft)(:,1:3)-dataset.estimatedFtData.(ft)(:,1:3));
         plot(normOfError);
         ax=[ax tax];
-        title(strcat({'Data no Offset - estimated data norm '},escapeUnderscores(ft)));
+        title(strcat({'norm (NoOffset - estimated data) '},escapeUnderscores(ft)));
         legend('Norm','Location','west');
+         xlabel('Samples');
+        ylabel('N');
         limt=axis;
         if limt(4)>lim(4)
             lim=limt;
@@ -256,7 +272,7 @@ if(scriptOptions.printPlots)
         axis equal;
         plot3_matrix(dataset.estimatedFtData.(ft)(:,1:3));
         legend('measuredData','estimatedData','Location','west');
-        title(strcat({'Wrench space '},escapeUnderscores(ft)));
+        title(strcat({'Wrench space no gravity '},escapeUnderscores(ft)));
         xlabel('F_{x}');
         ylabel('F_{y}');
         zlabel('F_{z}');
@@ -275,9 +291,10 @@ if(scriptOptions.printPlots)
         plot(no_model.ftDataNoOffset.(ft)(:,1:3));
         hold on;
         plot(dataset.estimatedFtData.(ft)(:,1:3));
-        title(strcat({'Data no Offset vs estimated data '},escapeUnderscores(ft)));
+        title(strcat({'Data no Offset vs estimated data no gravity '},escapeUnderscores(ft)));
         legend('F_{x}','F_{y}','F_{z}','F_{x2}','F_{y2}','F_{z2}','Location','west');
-        
+         xlabel('Samples');
+        ylabel('N');
     end
     % subtitle('Force estimated from the model and force measured (with offset removed)');
     ax=[];
@@ -289,8 +306,10 @@ if(scriptOptions.printPlots)
         normOfError = normOfRows(no_model.ftDataNoOffset.(ft)(:,1:3)-dataset.estimatedFtData.(ft)(:,1:3));
         plot(normOfError);
         ax=[ax tax];
-        title(strcat({'Data no Offset - estimated data norm '},escapeUnderscores(ft)));
+        title(strcat({'norm (NoOffset - estimated data) no gravity '},escapeUnderscores(ft)));
         legend('Norm','Location','west');
+         xlabel('Samples');
+        ylabel('N');
         limt=axis;
         if limt(4)>lim(4)
             lim=limt;

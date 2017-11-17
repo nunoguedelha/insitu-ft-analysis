@@ -17,28 +17,29 @@ addpath utils
 % experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_04/normal';% Name of the experiment;
 %  experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin30';% Name of the experiment;
 %  experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin45';% Name of the experiment;
-experimentName='2017_08_29_2';% 
+experimentName='2017_10_31_3';% 
+%experimentName='2017_08_29_2';% 
 
 
 
 scriptOptions = {};
 scriptOptions.forceCalculation=false;%false;
 scriptOptions.printPlots=false;%true
-scriptOptions.saveData=false;%true
+scriptOptions.saveData=true;%true
 scriptOptions.raw=true;% to calculate the raw data, for recalibration always true
 % Script of the mat file used for save the intermediate results 
 %scriptOptions.saveDataAll=true;
 scriptOptions.matFileName='ftDataset';
 
-  [dataset]=read_estimate_experimentData2(experimentName,scriptOptions);
+  [dataset,extraSample]=read_estimate_experimentData2(experimentName,scriptOptions);
  % We carry the analysis just for a subset of the sensors
-sensorsToAnalize = {'left_leg','right_leg'};
-%sensorsToAnalize = {'left_leg','right_leg','right_foot','left_foot'};
+%sensorsToAnalize = {'left_leg','right_leg'};
+sensorsToAnalize = {'left_leg','right_leg','right_foot','left_foot'};
 if( scriptOptions.printPlots )
 run('plottinScript.m')
 end
 
-lambda=2;
+lambda=0;
 lambdaName='';
 
 run('CalibMatCorrection.m')
