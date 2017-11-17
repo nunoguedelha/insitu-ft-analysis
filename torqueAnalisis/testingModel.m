@@ -10,6 +10,19 @@ link_h_skinFrame=link_h_skinFrame_temp.asAdjointTransformWrench.toMatlab();
 end
 totalMass*9.81
 
+% ft_h_rlowerl=[-0.0104501 9.58657e-05 0.999945 0.000101026 
+% -0.999945 -1.00186e-06 -0.0104501 0.00966697 
+% -5.11697e-14 -1 9.58709e-05 0.160225 
+% 0 0 0 1 ]
+% 
+% trans=estimator.model.getFrameTransform(contactIndex);
+% trans.asHomogeneousTransform.fromMatlab(ft_h_rlowerl)
+% trans.inverse.asAdjointTransformWrench.toMatlab()
+% trans.asAdjointTransformWrench.toMatlab()
+% ft_r_lower=[-10.885498353964621,0.996306589030697,1.636417306408418,0.044155257660605,-2.300017203968768,0.038598018747963]
+% 
+% trans.inverse.asAdjointTransformWrench.toMatlab()*ft_r_lower'
+
 %     'Model: 
 %        Links: 
 %          [0] root_link
