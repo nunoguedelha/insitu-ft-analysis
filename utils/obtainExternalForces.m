@@ -30,6 +30,7 @@ ddqj_all=dataset.ddqj;
 
 if (length(contactFrameName)==1)
 % Set the contact information in the estimator
+disp(strcat('using contact frame ',char(contactFrameName)));
 contact_index = estimator.model().getFrameIndex(char(contactFrameName));
 end
 
