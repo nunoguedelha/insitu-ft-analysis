@@ -1,4 +1,4 @@
-function [H]=iCubVizAndForcesSynchronized(dataset,robotName,sensorsToAnalize,fixedFrame)
+function [H]=iCubVizAndForcesSynchronized(dataset,robotName,sensorsToAnalize,fixedFrame,n)
 %Author: Francisco Andrade
 %% This function has the aim of been able to see the icub posture while seen the devolpment of the ft forces in the wrench space
 %Input
@@ -13,9 +13,13 @@ function [H]=iCubVizAndForcesSynchronized(dataset,robotName,sensorsToAnalize,fix
 %H: struct containing the plots handlers with their axis
 %Remark: install also the irrlicht library (sudo apt install
 %libirrlicht-dev ) required , and enable the `IDYNTREE_USES_MATLAB` and `IDYNTREE_USES_IRRLICHT`
-
+prefixOn=true; % true if in test directory
+if prefixOn
+ currentDir=pwd;
+ cd ('../')
+end
 addpath external/iCubViz
-n=100; %for init:n:end
+
 % take joints till 23th joint to avoid the neck joints
 dataset.qj(:,1:23);
 
@@ -23,8 +27,18 @@ dataset.qj(:,1:23);
 if (any(strcmp('ftDataNoOffset', fieldnames(dataset))))
     whichFtData='ftDataNoOffset';
 else
-    whichFtData='filteredFtData';
+    if (any(strcmp('filteredFtData', fieldnames(dataset))))
+        whichFtData='filteredFtData';
+    else
+        whichFtData='ftData';
+    end
 end
+
+ if (any(strcmp('estimatedFtData', fieldnames(dataset))))
+     estimatedAvailable=true;
+ else
+     estimatedAvailable=false;     
+ end
 
 %% Getting names to put into visualizer
 % Create estimator class
@@ -65,12 +79,19 @@ for indx=1:length(sensorsToAnalize)
     H.(ft).old2=plot3(0,0,0);
     
     %get axis values
-    minF=[min(dataset.(whichFtData).(ft));
-        min(dataset.estimatedFtData.(ft))];
-    minF=min(minF);
-    maxF=[max(dataset.(whichFtData).(ft));
-        max(dataset.estimatedFtData.(ft))];
-    maxF=max(maxF);
+    if estimatedAvailable
+        minF=[min(dataset.(whichFtData).(ft));
+            min(dataset.estimatedFtData.(ft))];
+        maxF=[max(dataset.(whichFtData).(ft));
+            max(dataset.estimatedFtData.(ft))];
+        
+        minF=min(minF);
+        maxF=max(maxF);
+    else
+        minF=min(dataset.(whichFtData).(ft));
+        maxF=max(dataset.(whichFtData).(ft));
+    end
+      
     
     tempMax=max(abs(minF-maxF));
     H.(ft).minMaxForces=[minF(1),minF(1)+tempMax,minF(2),minF(2)+tempMax,minF(3),minF(3)+tempMax];
@@ -125,12 +146,16 @@ for i=init_time:n:length(dataset.qj(:,1));
         subplot( H.(ft).sub)
         h= plot3_matrix(dataset.(whichFtData).(ft)(1:i,1:3),'r');%
         hold on;
-        h2= plot3_matrix(dataset.estimatedFtData.(ft)(1:i,1:3),'b');
         delete(H.(ft).old);
         H.(ft).old=h;
-        delete(H.(ft).old2);
-        H.(ft).old2=h2;
-        legend('measuredData','estimatedData','Location','west');
+        if estimatedAvailable
+            h2= plot3_matrix(dataset.estimatedFtData.(ft)(1:i,1:3),'b');
+            delete(H.(ft).old2);
+            H.(ft).old2=h2;
+            legend('measuredData','estimatedData','Location','west');
+        else
+            legend('measuredData','Location','west');
+        end
         title(strcat({'Wrench space '},escapeUnderscores(ft)));
         xlabel('F_{x}');
         ylabel('F_{y}');
@@ -154,3 +179,7 @@ for k = init_time:n:length(dataset.qj(:,1));
   writeVideo(v,F(k));
 end
 close(v);
+
+if prefixOn
+ cd ( currentDir)
+end
