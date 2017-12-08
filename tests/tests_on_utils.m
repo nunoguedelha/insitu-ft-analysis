@@ -1,9 +1,13 @@
-function test_suite = tests_on_utils( )
+function test_suite = tests_on_utils
     % this suite can be run using the moxunit_runtests, check 
     % https://github.com/MOxUnit/MOxUnit for more info
+    try % assignment of 'localfunctions' is necessary in Matlab >= 2016
+        test_functions=localfunctions();
+    catch % no problem; early Matlab versions can use initTestSuite fine
+    end
     initTestSuite;
     
-function test_estimateCalibMatrixAndOff()
+function test_estimateCalibMatrixAndOff
     % Test for the estimateCalibMatrixAndOff function 
     % Generate N random wrenches
     nSamples = 100;
@@ -27,10 +31,18 @@ function test_estimateCalibMatrixAndOff()
     [Cest,full_scale,offsetEst] = estimateCalibMatrixAndOff(R,W);
     % assertElementsAlmostEqual(Cest,C);
     assertElementsAlmostEqual(round(offsetEst),offset);
-    offsetEst
-    offset
+    %offsetEst
+    %offset
 
-    
+     %% Tests on changes getRaw not standalone test
+%     [rawData,cMat]=getRawData(dataset.filteredFtData,input.calibMatPath,input.calibMatFileNames);
+% figure,plot(rawData.right_leg)
+% 
+% [rawData2,cMat]=getRawData(dataset.ftData,cMat);
+% plot(rawData2.right_leg)
+% 
+% [rawData3,cMat]=getRawData(dataset.filteredFtData,input.calibMatPath,input.calibMatFileNames,false);
+% plot(rawData3.right_leg)
 
     
     
