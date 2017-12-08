@@ -181,7 +181,7 @@ else
             
         end
         
-        if(length(intervalsNames)>1)
+        if(length(intervalsNames)>0)
             for index=1:length(intervalsNames)
                 if(~strcmp('hanging', intervalsNames{index}))
                     intName=intervalsNames{index};
@@ -216,13 +216,19 @@ else
                     dataset2=applyMask(dataset2,mask);
                     filterd=applyMask(filteredFtData,mask);
                     dataset2.filteredFtData=filterd;
-                    if (strcmp('hanging', intervalsNames{index-1}))
-                        data=dataset2;
+                    if (any(strcmp('hanging', intervalsNames)))
+                        if(strcmp('hanging', intervalsNames{index-1}))
+                            data=dataset2;
+                        end
                     else
-                        if (input.intervals.(intervalsNames{index-1}).initTime<input.intervals.(intName).initTime)
-                            data=addDatasets(data,dataset2);
+                        if (length(intervalsNames)==1)
+                            data=dataset2;
                         else
-                            data=addDatasets(dataset2,data);
+                            if (input.intervals.(intervalsNames{index-1}).initTime<input.intervals.(intName).initTime)
+                                data=addDatasets(data,dataset2);
+                            else
+                                data=addDatasets(dataset2,data);
+                            end
                         end
                     end
                 end
@@ -339,7 +345,8 @@ else
         filterd=applyMask(filteredFtData,mask);
         dataset.filteredFtData=filterd;
     end
-    %getting raw data
+    %getting raw data  
+    %should be on filtered data proven.
     if(scriptOptions.raw)
         [dataset.rawData,cMat]=getRawData(dataset.filteredFtData,input.calibMatPath,input.calibMatFileNames);
         dataset.cMat=cMat;
