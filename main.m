@@ -1,47 +1,59 @@
 %% Comparing FT data vs estimated data
 % %create input parameter is done through params.m for each experiment
 
-%add required folders for use of functions
+%% add required folders for use of functions
 addpath external/quadfit
 addpath utils
-% name and paths of the data files
-%     experimentName='icub-insitu-ft-analysis-big-datasets/16_03_2016/leftRightLegsGrid';% Name of the experiment;
-%      experimentName='icub-insitu-ft-analysis-big-datasets/21_03_2016/yogaLeft1';% Name of the experiment;
-%   experimentName='icub-insitu-ft-analysis-big-datasets/2016_04_21/extendedYoga4StandingOnLeft';% Name of the experiment;
-%experimentName='icub-insitu-ft-analysis-big-datasets/2016_05_19/blackBothLegs';% Name of the experiment;
-%experimentName='icub-insitu-ft-analysis-big-datasets/2016_04_19/blackUsingOldSensor';% Name of the experiment;
-%    experimentName='icub-insitu-ft-analysis-big-datasets/2016_06_08/extendedYoga';% Name of the experiment;
-%      experimentName='icub-insitu-ft-analysis-big-datasets/2016_06_08/yoga';% Name of the experiment;
-%  experimentName='icub-insitu-ft-analysis-big-datasets/2016_06_17/normal';% Name of the experiment;
-% experimentName='icub-insitu-ft-analysis-big-datasets/2016_06_17/fast';% Name of the experiment;
-% experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_04/normal';% Name of the experiment;
-%  experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin30';% Name of the experiment;
-%  experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin45';% Name of the experiment;
-experimentName='2017_10_31_3';% 
-%experimentName='2017_08_29_2';% 
 
-
-
+%% general configuration options 
 scriptOptions = {};
 scriptOptions.forceCalculation=false;%false;
 scriptOptions.printPlots=false;%true
 scriptOptions.saveData=true;%true
 scriptOptions.raw=true;% to calculate the raw data, for recalibration always true
-% Script of the mat file used for save the intermediate results 
+scriptOptions.firstTime=true;%when there is no previous calibration matrix
+% Script of the mat file used for save the intermediate results
 %scriptOptions.saveDataAll=true;
 scriptOptions.matFileName='ftDataset';
 
-  [dataset,extraSample]=read_estimate_experimentData2(experimentName,scriptOptions);
- % We carry the analysis just for a subset of the sensors
-%sensorsToAnalize = {'left_leg','right_leg'};
-sensorsToAnalize = {'left_leg','right_leg','right_foot','left_foot'};
-if( scriptOptions.printPlots )
-run('plottinScript.m')
-end
+%% name and paths of the experiment files
+%  experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin45';% Name of the experiment;
+experimentName='green-iCub-Insitu-Datasets/2017_12_5_Strain2_3';% 
+%experimentName='green-iCub-Insitu-Datasets/2017_12_5_Strain2_rightYoga';%
+%experimentName='2017_08_29_2';% 
 
+%% We carry the analysis just for a subset of the sensors
+% the names are associated to the location of the sensor in the
+% in the iCub
+
+%sensorsToAnalize = {'left_leg','right_leg'};
+sensorsToAnalize = {'right_leg'};
+%sensorsToAnalize = {'left_leg','right_leg','right_foot','left_foot'};
+
+%% Calibration options
+%Regularization parameter
 lambda=0;
 lambdaName='';
 
+%script options
+calibOptions.saveMat=false;
+calibOptions.usingInsitu=true;
+calibOptions.plot=true;
+calibOptions.onlyWSpace=true;
+%% Start 
+%Read data
+[dataset,extraSample]=read_estimate_experimentData2(experimentName,scriptOptions);
+
+%Plot for inspection of data
+if( scriptOptions.printPlots )
+    run('plottinScript.m')
+end
+
+%Calibrate
+%temp until change is correctly handled in read experiment data
+if(scriptOptions.firstTime)
+    dataset.rawData=dataset.filteredFtData;
+    extraSample.right.rawData=extraSample.right.filteredFtData;
+end
 run('CalibMatCorrection.m')
 
-%
