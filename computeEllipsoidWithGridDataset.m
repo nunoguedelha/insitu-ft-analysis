@@ -41,7 +41,7 @@ addpath utils
 % experimentName='icub-insitu-ft-analysis-big-datasets/2017_01_26/2nm_4_2legs';% first sample with cable corrected ;
 % experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin45';% Name of the experiment;
 % experimentName='2017_05_31_3';% first sample with cable corrected ;
-experimentName='purpleGrid2017_11_12';% first sample with cable corrected ;
+experimentName='/green-iCub-Insitu-Datasets/2017_12_5_TestGrid';% first sample with cable corrected ;
 
 
 
@@ -50,27 +50,21 @@ experimentName='purpleGrid2017_11_12';% first sample with cable corrected ;
 
 % Script options, meant to control the behavior of this script
 scriptOptions = {};
-scriptOptions.forceCalculation=true;%false;
+scriptOptions.forceCalculation=false;%false;
 scriptOptions.printPlots=true;%true
-scriptOptions.raw=false;
+scriptOptions.raw=true;
 scriptOptions.saveData=true;
 % Script of the mat file used for save the intermediate results
 %scriptOptions.matFileName='dataEllipsoidAnalysis'; %newName
 scriptOptions.matFileName='ftDataset';
-[dataset]=read_estimate_experimentData2(experimentName,scriptOptions);
-% % load the script of parameters relative
-paramScript=strcat('data/',experimentName,'/params.m');
-run(paramScript)
+[dataset,~,~]=read_estimate_experimentData2(experimentName,scriptOptions);
 % Sample to use less data
 dataset=dataSampling(dataset,5);
 
-%test eliminating the bad part of the fourthTrial sample contained between %5951:6208
-%  mask=dataset.time<dataset.time(5951) | dataset.time>dataset.time(6208);
-%             dataset=applyMask(dataset,mask);
-
 % We carry the analysis just for a subset of the sensors
 %sensorsToAnalize = {'left_leg','right_leg','right_foot','left_foot'};
-sensorsToAnalize = {'left_leg','right_leg'};
+%sensorsToAnalize = {'left_leg','right_leg'};
+sensorsToAnalize = {'right_leg'};
 meanOffset=false;
 
 %% Check ellipsoid

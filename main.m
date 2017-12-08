@@ -7,11 +7,11 @@ addpath utils
 
 %% general configuration options 
 scriptOptions = {};
-scriptOptions.forceCalculation=false;%false;
+scriptOptions.forceCalculation=true;%false;
 scriptOptions.printPlots=false;%true
 scriptOptions.saveData=true;%true
 scriptOptions.raw=true;% to calculate the raw data, for recalibration always true
-scriptOptions.firstTime=true;%when there is no previous calibration matrix
+
 % Script of the mat file used for save the intermediate results
 %scriptOptions.saveDataAll=true;
 scriptOptions.matFileName='ftDataset';
@@ -40,6 +40,7 @@ calibOptions.saveMat=false;
 calibOptions.usingInsitu=true;
 calibOptions.plot=true;
 calibOptions.onlyWSpace=true;
+calibOptions.IITfirmwareFriendly=true; % in case a calibration matrix that will not be used by iit firmware is estimated
 %% Start 
 %Read data
 [dataset,extraSample]=read_estimate_experimentData2(experimentName,scriptOptions);
@@ -50,10 +51,5 @@ if( scriptOptions.printPlots )
 end
 
 %Calibrate
-%temp until change is correctly handled in read experiment data
-if(scriptOptions.firstTime)
-    dataset.rawData=dataset.filteredFtData;
-    extraSample.right.rawData=extraSample.right.filteredFtData;
-end
 run('CalibMatCorrection.m')
 

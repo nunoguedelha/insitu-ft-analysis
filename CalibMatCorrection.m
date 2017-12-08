@@ -7,7 +7,7 @@
 %TODO: procedure for choosing when to use insitu or not required
 if(calibOptions.usingInsitu)
          % [calibMatrices,offset,fullscale]=estimateMatrices(dataset.rawData,dataset.estimatedFtData,sensorsToAnalize);
- [calibMatrices,offset,fullscale]= estimateMatricesWthReg(dataset.rawData,dataset.estimatedFtData,sensorsToAnalize, dataset.cMat,lambda);
+ [calibMatrices,offset,fullscale]= estimateMatricesWthReg(dataset.rawDataFiltered,dataset.estimatedFtData,sensorsToAnalize, dataset.cMat,lambda);
  
    if (isstruct(extraSample.right)||isstruct(extraSample.left))
        tempCmat=dataset.cMat;
@@ -52,8 +52,15 @@ if(calibOptions.saveMat)
         ft = sensorsToAnalize{ftIdx};
         i=find(strcmp(ft, names));
         filename=strcat('data/',experimentName,'/calibrationMatrices/',dataset.calibMatFileNames{i},lambdaName);
-        defualtScale=[32767,32767,32767,32767,32767,32767]; %% this might work only for strain2 for reasons unknown
-        writeCalibMat(firmwareMat, defualtScale, filename)
+        if calibOptions.IITfirmwareFriendly
+            %CalibrationMatrix*rawData = [T,F]. When calibration flag = true, the values
+            %are swapped before sending them to yarp port [F,T]. This swap function
+            %accounts for this behavior
+            [firmwareMat,full_scale]=swapCMat(calibMat);
+        else
+            firmwareMat=calibMat;
+        end
+        writeCalibMat(firmwareMat, full_scale, filename)
     end
 end
 %% generate wrenches with new calibration matrix
