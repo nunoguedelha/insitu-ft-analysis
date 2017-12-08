@@ -31,3 +31,6 @@ max_Tz = full_scale(6);
 Wf = diag([1/max_Fx 1/max_Fy 1/max_Fz 1/max_Tx 1/max_Ty 1/max_Tz]);
 Ws = diag([1/32767 1/32767 1/32767 1/32767 1/32767 1/32767]);
 cMat = inv(Wf) * calibMat *Ws;
+
+%% since the channels in raw imput are swaped with respect to the yarp ports it is necesary to sawp the matrix and fullscale properly
+[cMat,full_scale]=swapCMat(cMat,full_scale);
