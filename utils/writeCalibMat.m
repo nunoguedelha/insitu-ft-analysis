@@ -13,11 +13,6 @@ function [] = writeCalibMat(calibMat, full_scale, filename)
 % written . 
 %
 
-%CalibrationMatrix*rawData = [T,F]. When calibration flag = true, the values
-%are swapped before sending them to yarp port [F,T]. This swap function
-%accounts for this behavior
-[calibMat,full_scale]=swapCMat(calibMat, full_scale);
-
 % logic copied from the write_matrix script in ftSensCalib repository
 max_Fx = full_scale(1);
 max_Fy = full_scale(2);

@@ -1,5 +1,7 @@
 function [cMat,full_scale] = readCalibMat(filename)
 %read the calibration matrix delivered by the calibration procedure
+defaultFullScale=true;
+
 
 fid = fopen(filename);
 
@@ -20,7 +22,12 @@ end
 %these values were originally base 10, due to format they were converted
 %as if they were hex so dec2hex returns them to real base 10 value in this
 %case
-full_scale=str2num(dec2hex(vec(38:end)));
+if defaultFullScale
+    defaultScale=[32767,32767,32767,32767,32767,32767]; %% this might work only for strain2 for reasons unknown
+    full_scale=defaultScale;
+else
+    full_scale=str2num(dec2hex(vec(38:end)));
+end
 max_Fx = full_scale(1);
 max_Fy = full_scale(2);
 max_Fz = full_scale(3);
@@ -32,5 +39,3 @@ Wf = diag([1/max_Fx 1/max_Fy 1/max_Fz 1/max_Tx 1/max_Ty 1/max_Tz]);
 Ws = diag([1/32767 1/32767 1/32767 1/32767 1/32767 1/32767]);
 cMat = inv(Wf) * calibMat *Ws;
 
-%% since the channels in raw imput are swaped with respect to the yarp ports it is necesary to sawp the matrix and fullscale properly
-[cMat,full_scale]=swapCMat(cMat,full_scale);

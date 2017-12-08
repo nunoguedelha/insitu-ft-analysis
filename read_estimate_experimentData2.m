@@ -1,4 +1,4 @@
-function [dataset,extraSample]=read_estimate_experimentData2(experimentName,scriptOptions)
+function [dataset,extraSample,input]=read_estimate_experimentData2(experimentName,scriptOptions)
 % This function is meant to read all info available in a dataset obtained
 % from analog and stateExt ports. It also estimates forces and torques and
 % calculates the raw measurments of ft sensors
@@ -348,8 +348,9 @@ else
     %getting raw data  
     %should be on filtered data proven.
     if(scriptOptions.raw)
-        [dataset.rawData,cMat]=getRawData(dataset.filteredFtData,input.calibMatPath,input.calibMatFileNames);
+        [dataset.rawDataFiltered,cMat]=getRawData(dataset.filteredFtData,input.calibMatPath,input.calibMatFileNames);
         dataset.cMat=cMat;
+        [dataset.rawData]=getRawData(dataset.ftData,cMat);
         dataset.calibMatFileNames=input.calibMatFileNames;
     end
     
