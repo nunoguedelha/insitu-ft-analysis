@@ -18,30 +18,30 @@ function [dataset,extraSample,input]=read_estimate_experimentData2(experimentNam
 %       scriptOptions.forceCalculation=true;%false;
 %       scriptOptions.saveData=true;%true
 %       scriptOptions.raw=true;
-% % Script of the mat file used for save the intermediate results 
+% % Script of the mat file used for save the intermediate results
 %       striptOptions.matFileName='ftDataset';
 
 
-% load the script of parameters relative 
+% load the script of parameters relative
 paramScript=strcat('data/',experimentName,'/params.m');
 run(paramScript)
 input.ftPortName; %for some reason you can not die fieldnames to input until you used input somewhere
 %fieldnames(input)
 % load the extra sample first (might change this to later in the code)
 if (any(strcmp('extraSampleRight', fieldnames(input))))
- [extraSample.right,~]=read_estimate_experimentData2(input.extraSampleRight,scriptOptions);
+    [extraSample.right,~]=read_estimate_experimentData2(input.extraSampleRight,scriptOptions);
 else
     extraSample.right=nan;
 end
 
 if (any(strcmp('extraSampleLeft', fieldnames(input))))
- [extraSample.left,~]=read_estimate_experimentData2(input.extraSampleLeft,scriptOptions);
+    [extraSample.left,~]=read_estimate_experimentData2(input.extraSampleLeft,scriptOptions);
 else
     extraSample.left=nan;
 end
 
 % This script will produce dataset (containing the raw data) and dataset2
-% (contained the original data and the filtered ft). 
+% (contained the original data and the filtered ft).
 
 if (exist(strcat('data/',experimentName,'/',scriptOptions.matFileName,'.mat'),'file')==2 && scriptOptions.forceCalculation==false)
     %% Load from workspace
@@ -243,24 +243,24 @@ else
             
             %% This part of code needs to be revised copied from previous version of read estimate experiment enables converting to an array of contact frames it might allow to have a continuos experiment without necesarily separating calculation of external forces by support contact
             %%mask=dataset.time<0;
-%             contactFrameName='';
-%             for index=1:length(intervalsNames)
-%                 if(~strcmp('hanging', intervalsNames{index}))
-%                     intName=intervalsNames{index};
-%                     maskTemp=dataset.time>dataset.time(1)+input.intervals.(intName).initTime & dataset.time<dataset.time(1)+input.intervals.(intName).endTime;
-%                     contactTemp(1:length(find(maskTemp)))={input.intervals.(intName).contactFrame};
-%                     mask=or(mask,maskTemp);
-%                     
-%                     %TODO: have to match the contactFrame vectors with the time
-%                     %the interval happens (compare init time of all intervals
-%                     %to order it
-%                     % contactFrameName=[contactFrameName,contactTemp];
-%                     contactFrameName=[contactTemp,contactFrameName];
-%                 end
-%                 
-%             end
-%             
-%             dataset=applyMask(dataset,mask);
+            %             contactFrameName='';
+            %             for index=1:length(intervalsNames)
+            %                 if(~strcmp('hanging', intervalsNames{index}))
+            %                     intName=intervalsNames{index};
+            %                     maskTemp=dataset.time>dataset.time(1)+input.intervals.(intName).initTime & dataset.time<dataset.time(1)+input.intervals.(intName).endTime;
+            %                     contactTemp(1:length(find(maskTemp)))={input.intervals.(intName).contactFrame};
+            %                     mask=or(mask,maskTemp);
+            %
+            %                     %TODO: have to match the contactFrame vectors with the time
+            %                     %the interval happens (compare init time of all intervals
+            %                     %to order it
+            %                     % contactFrameName=[contactFrameName,contactTemp];
+            %                     contactFrameName=[contactTemp,contactFrameName];
+            %                 end
+            %
+            %             end
+            %
+            %             dataset=applyMask(dataset,mask);
             
             %% load state and calculate estimated wrenches for comparison
             [dataset]=obtainEstimatedWrenches(estimator,dataset.time,contactFrameName,dataset);
@@ -364,7 +364,7 @@ else
         filterd=applyMask(filteredFtData,mask);
         dataset.filteredFtData=filterd;
     end
-    %getting raw data  
+    %getting raw data
     %should be on filtered data proven.
     if(scriptOptions.raw)
         [dataset.rawDataFiltered,cMat]=getRawData(dataset.filteredFtData,input.calibMatPath,input.calibMatFileNames);

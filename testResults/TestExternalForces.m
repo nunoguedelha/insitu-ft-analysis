@@ -11,10 +11,12 @@ addpath ../external/quadfit
 
 %Use only datasets where the same sensor is used
  experimentNames={
-'2017_08_29_2';% Name of the experiment;
+'green-iCub-Insitu-Datasets/2017_08_29_2';% Name of the experiment;
+'green-iCub-Insitu-Datasets/2017_12_7_TestYogaExtendedRIght';
      }; %this set is from iCubGenova02
 names={'Workbench';
-      'gridMin30'; 
+      'gridMin30';
+      'rightYoga';
     };% except for the first one all others are short names for the expermients in experimentNames
 % experimentNames={
 %     %    'icub-insitu-ft-analysis-big-datasets/2016_06_08/yoga';% Name of the experiment;
@@ -46,16 +48,18 @@ names={'Workbench';
 %     '_l6';
 %     '_l8';
 %     '_l10'};
-lambdaNames={'';
-    '_l_5';
-    '_l1';
-    '_l2';
-    '_l5';
-    '_l10';
-    '_l30';
-    '_l50';
-    '_l100';
-    '_l1000'
+% lambdasNames={'';
+%     '_l_5';
+%     '_l1';
+%     '_l2';
+%     '_l5';
+%     '_l10';
+%     '_l30';
+%     '_l50';
+%     '_l100';
+%     '_l1000'
+%     };
+lambdasNames={'';    
     };
 
 names2use{1}=names{1};
@@ -69,9 +73,9 @@ end
 names2use=names2use';
 %to compare
 toCompare=2;
-toCompareWith='gridMin30'; %choose in which experiment will comparison be made, it must have inertial data stored
-ttCompare=2; %should match the position of the toCompareWith name in the names list
-paramScript=strcat('..//data/',experimentNames{1},'/params.m');
+toCompareWith='rightYoga'; %choose in which experiment will comparison be made, it must have inertial data stored
+ttCompare=3; %should match the position of the toCompareWith name in the names list
+paramScript=strcat('../data/',experimentNames{1},'/params.m');
 run(paramScript)
 ftNames=input.ftNames;
 
@@ -87,6 +91,7 @@ framesToAnalize={'l_lower_leg','r_lower_leg'};
 sensorName='r_leg_ft_sensor';
 
 for i=1:length(experimentNames)
+    clear input;
     paramScript=strcat('../data/',experimentNames{i},'/params.m');
     run(paramScript)
     if (i==ttCompare-1)
@@ -94,10 +99,12 @@ for i=1:length(experimentNames)
     end
     [data.(names2use{(i-1)*length(lambdasNames)+2}),WorkbenchMat]=load_measurements_and_cMat(experimentNames{i},scriptOptions,26);
     data.(names2use{(i-1)*length(lambdasNames)+2})=dataSampling(data.(names2use{(i-1)*length(lambdasNames)+2}),10);
+   if (any(strcmp('hangingInit', fieldnames(input))))
     if(input.hangingInit==1)
         load(strcat('../data/',experimentNames{i},'/',scriptOptions.matFileName,'.mat'),'dataset');
         [inertialData.(names2use{(i-1)*length(lambdasNames)+2})]=dataset.inertial;
     end
+   end
     for lam=1:length(lambdasNames)
         for j=1:length(sensorsToAnalize)
             sIndx= find(strcmp(ftNames,sensorsToAnalize{j}));
@@ -105,9 +112,11 @@ for i=1:length(experimentNames)
             secMat.(names2use{(i-1)*length(lambdasNames)+1+lam}).(sensorsToAnalize{j})= cMat.(names2use{(i-1)*length(lambdasNames)+1+lam}).(sensorsToAnalize{j})/WorkbenchMat.(sensorsToAnalize{j});
         end
         data.(names2use{(i-1)*length(lambdasNames)+1+lam})=data.(names2use{(i-1)*length(lambdasNames)+2});
+       if (any(strcmp('hangingInit', fieldnames(input))))
         if(input.hangingInit==1)
             inertialData.(names2use{(i-1)*length(lambdasNames)+1+lam}) =inertialData.(names2use{(i-1)*length(lambdasNames)+2});
         end
+       end
     end
     
     %     if   (exist(strcat('../data/',experimentNames{i},'/',scriptOptions.matFileName,'.mat'),'file')==2)
@@ -125,6 +134,9 @@ contactFrame=contactFrame';
 noInertial=false;
 if (any(strcmp('intervals', fieldnames(input))))
     intervalsNames=fieldnames(input.intervals);
+    if (~any(strcmp('hanging', intervalsNames)))
+        noInertial=true; 
+    end
     for index=1:length(intervalsNames)
         
         intName=intervalsNames{index};
@@ -133,32 +145,39 @@ if (any(strcmp('intervals', fieldnames(input))))
         
         
     end
-    if (input.intervals.leftLeg.initTime<input.intervals.rightLeg.initTime)
-        mask=data.(toCompareWith).time>=data.(toCompareWith).time(1)+input.intervals.hanging.endTime & data.(toCompareWith).time<=data.(toCompareWith).time(1)+input.intervals.leftLeg.initTime;
-        contactFrame(mask)={input.intervals.leftLeg.contactFrame};
-        t2=(input.intervals.rightLeg.initTime-input.intervals.leftLeg.endTime)/2+input.intervals.leftLeg.endTime;
-        mask=data.(toCompareWith).time>=data.(toCompareWith).time(1)+input.intervals.leftLeg.endTime & data.(toCompareWith).time<=data.(toCompareWith).time(1)+t2;
-        contactFrame(mask)={input.intervals.leftLeg.contactFrame};
-        mask=data.(toCompareWith).time>=data.(toCompareWith).time(1)+t2 & data.(toCompareWith).time<=data.(toCompareWith).time(1)+input.intervals.rightLeg.initTime;
-        contactFrame(mask)={input.intervals.rightLeg.contactFrame};
-        mask=data.(toCompareWith).time>=data.(toCompareWith).time(1)+input.intervals.rightLeg.endTime;
-        contactFrame(mask)={input.intervals.rightLeg.contactFrame};
+    if (length(intervalsNames)==1 && ~any(strcmp('hanging', intervalsNames)))
+        
     else
-        mask=data.(toCompareWith).time>=data.(toCompareWith).time(1)+input.intervals.hanging.endTime & data.(toCompareWith).time<=data.(toCompareWith).time(1)+input.intervals.rightLeg.initTime;
-        contactFrame(mask)={input.intervals.rightLeg.contactFrame};
-        t2=(input.intervals.leftLeg.initTime-input.intervals.rightLeg.endTime)/2+input.intervals.rightLeg.endTime;
-        mask=data.(toCompareWith).time>=data.(toCompareWith).time(1)+input.intervals.rightLeg.endTime & data.(toCompareWith).time<=data.(toCompareWith).time(1)+t2;
-        contactFrame(mask)={input.intervals.rightLeg.contactFrame};
-        mask=data.(toCompareWith).time>=data.(toCompareWith).time(1)+t2 & data.(toCompareWith).time<=data.(toCompareWith).time(1)+input.intervals.leftLeg.initTime;
-        contactFrame(mask)={input.intervals.leftLeg.contactFrame};
-        mask=data.(toCompareWith).time>=data.(toCompareWith).time(1)+input.intervals.leftLeg.endTime;
-        contactFrame(mask)={input.intervals.leftLeg.contactFrame};
+        if (input.intervals.leftLeg.initTime<input.intervals.rightLeg.initTime)
+            mask=data.(toCompareWith).time>=data.(toCompareWith).time(1)+input.intervals.hanging.endTime & data.(toCompareWith).time<=data.(toCompareWith).time(1)+input.intervals.leftLeg.initTime;
+            contactFrame(mask)={input.intervals.leftLeg.contactFrame};
+            t2=(input.intervals.rightLeg.initTime-input.intervals.leftLeg.endTime)/2+input.intervals.leftLeg.endTime;
+            mask=data.(toCompareWith).time>=data.(toCompareWith).time(1)+input.intervals.leftLeg.endTime & data.(toCompareWith).time<=data.(toCompareWith).time(1)+t2;
+            contactFrame(mask)={input.intervals.leftLeg.contactFrame};
+            mask=data.(toCompareWith).time>=data.(toCompareWith).time(1)+t2 & data.(toCompareWith).time<=data.(toCompareWith).time(1)+input.intervals.rightLeg.initTime;
+            contactFrame(mask)={input.intervals.rightLeg.contactFrame};
+            mask=data.(toCompareWith).time>=data.(toCompareWith).time(1)+input.intervals.rightLeg.endTime;
+            contactFrame(mask)={input.intervals.rightLeg.contactFrame};
+        else
+            mask=data.(toCompareWith).time>=data.(toCompareWith).time(1)+input.intervals.hanging.endTime & data.(toCompareWith).time<=data.(toCompareWith).time(1)+input.intervals.rightLeg.initTime;
+            contactFrame(mask)={input.intervals.rightLeg.contactFrame};
+            t2=(input.intervals.leftLeg.initTime-input.intervals.rightLeg.endTime)/2+input.intervals.rightLeg.endTime;
+            mask=data.(toCompareWith).time>=data.(toCompareWith).time(1)+input.intervals.rightLeg.endTime & data.(toCompareWith).time<=data.(toCompareWith).time(1)+t2;
+            contactFrame(mask)={input.intervals.rightLeg.contactFrame};
+            mask=data.(toCompareWith).time>=data.(toCompareWith).time(1)+t2 & data.(toCompareWith).time<=data.(toCompareWith).time(1)+input.intervals.leftLeg.initTime;
+            contactFrame(mask)={input.intervals.leftLeg.contactFrame};
+            mask=data.(toCompareWith).time>=data.(toCompareWith).time(1)+input.intervals.leftLeg.endTime;
+            contactFrame(mask)={input.intervals.leftLeg.contactFrame};
+        end
     end
-    
 else
     contactFrame(1:length(data.(toCompareWith).time))=input.contactFrameName;
+    if (~any(strcmp('hangingInit', fieldnames(input))))
+         noInertial=true; 
+    else
     if (input.hangingInit==0)
        noInertial=true; 
+    end
     end
 end
 
@@ -182,6 +201,7 @@ for j=1:length(sensorsToAnalize)
         sMat.(sensorsToAnalize{j})=secMat.(names2use{i}).(sensorsToAnalize{j});
         
         % end
+        %% TODO: fill the offset with the values of the comparison set when not available in the temp dataset.
         if noInertial
             load(strcat('../data/',experimentNames{1},'/',scriptOptions.matFileName,'.mat'),'dataset');
             datatemp=dataSampling(dataset,100);
@@ -191,7 +211,9 @@ for j=1:length(sensorsToAnalize)
        %       [Offset.(names2use{i}),~]=calculateOffset(sensorsToAnalize,inertialData.(toCompareWith).ftData,inertialData.(toCompareWith).estimatedFtData,WorkbenchMat, cMat.(names2use{i}));
         [Offset.(names2use{i}),~]=calculateOffset(sensorsToAnalize2,inertialData.(toCompareWith).ftData,inertialData.(toCompareWith).estimatedFtData,WorkbenchMat, calMat.(names2use{i}));
         end
+        cd ..
         [tF_general.(names2use{i}).externalForces,tF_general.(names2use{i}).eForcesTime]=obtainExternalForces(input.robotName,data.(toCompareWith),sMat,input.sensorNames,contactFrame,timeFrame,framesNames,Offset.(names2use{i})) ;
+        cd testResults/
         clear sMat;
     end
     %filter data

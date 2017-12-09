@@ -16,7 +16,9 @@ addpath ../external/quadfit
 %     'icub-insitu-ft-analysis-big-datasets/2016_04_21/extendedYoga4StandingOnLeft';...% Name of the experiment;
 %     }; %this set is from iCubGenova02 'icub-insitu-ft-analysis-big-datasets/2016_06_17/normal';
 %experimentName=('icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin45');%this set is form iCubGenova05
-experimentName=('icub-insitu-ft-analysis-big-datasets/2016_07_04/normal');%this set is form iCubGenova05
+%experimentName=('icub-insitu-ft-analysis-big-datasets/2016_07_04/normal');%this set is form iCubGenova05
+experimentName='/green-iCub-Insitu-Datasets/2017_12_5_TestGrid';% first sample with cable corrected ;
+
 names2use={'Estimated';
 %    'Yoga';
 %    'Yogapp1st';
@@ -31,7 +33,8 @@ toCompareWith='gridMin45'; %choose in which experiment will comparison be made, 
 run(paramScript)
   ftNames=input.ftNames;
 
-sensorsToAnalize = {'right_foot','right_leg'};  %load the new calibration matrices
+%sensorsToAnalize = {'right_foot','right_leg'};  %load the new calibration matrices
+sensorsToAnalize = {'right_leg'};  %load the new calibration matrices
 framesNames={'l_sole','r_sole','l_lower_leg','r_lower_leg','root_link','l_elbow_1','r_elbow_1'};
 %framesNames={'r_sole','r_lower_leg','root_link'};
 %load the experiment measurements
