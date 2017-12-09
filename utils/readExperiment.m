@@ -44,7 +44,7 @@ run(paramScript)
       estimator = iDynTree.ExtWrenchesAndJointTorquesEstimator();
     
     % Load model and sensors from the URDF file
-    estimator.loadModelAndSensorsFromFile(strcat('./',input.robotName,'.urdf'));
+    estimator.loadModelAndSensorsFromFile(strcat(prefixDir,'robots/',input.robotName,'.urdf'));
     
     % Check if the model was correctly created by printing the model
     %estimator.model().toString()

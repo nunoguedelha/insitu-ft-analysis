@@ -6,6 +6,7 @@ jointPos.fromMatlab(joints);
 odom.updateKinematics(jointPos);
 odom.init(fixedFrame,fixedFrame);
 %baseT=odom.getWorldLinkTransform(model.getDefaultBaseLink());
+%baseT=odom.getWorldLinkTransform(model.getLink());
 baseT=odom.getWorldLinkTransform(0);
 pos = iDynTree.Position();
 pos.fromMatlab([0;0;0.5]);

@@ -31,7 +31,7 @@ else
     
    [calibMatrices,offsetC,fullscale]=...
             estimateMatricesAndOffset(...
-            dataset.rawData,... %raw data input
+            dataset.rawDataFiltered,... %raw data input
             dataset.estimatedFtData,...% estimated wrenches as reference
             dataset.cMat,...% previous calibration matrix for regularization
             lambda,...
@@ -56,9 +56,10 @@ if(calibOptions.saveMat)
             %CalibrationMatrix*rawData = [T,F]. When calibration flag = true, the values
             %are swapped before sending them to yarp port [F,T]. This swap function
             %accounts for this behavior
-            [firmwareMat,full_scale]=swapCMat(calibMat);
+            [firmwareMat,full_scale]=swapCMat(calibMatrices.(ft));
         else
-            firmwareMat=calibMat;
+            firmwareMat=calibMatrices.(ft);
+            full_scale=fullscale.(ft);
         end
         writeCalibMat(firmwareMat, full_scale, filename)
     end
@@ -98,6 +99,7 @@ reCabData.calibMatFileNames=dataset.calibMatFileNames;
     end
 %% Plotting section
 if(calibOptions.plot)    
+    
     %% plot 3D graph
     if (calibOptions.onlyWSpace)
         for ftIdx =1:length(sensorsToAnalize)
@@ -107,7 +109,11 @@ if(calibOptions.plot)
             else
                 filteredOffset.(ft)=offsetC.(ft)';
             end
-            
+            if (round(dataset.cMat.(ft))==eye(6))
+                scriptOptions.firstTime=true;
+            else
+                scriptOptions.firstTime=false;
+            end
             filteredNoOffset.(ft)=dataset.filteredFtData.(ft) -repmat(filteredOffset.(ft),size(dataset.filteredFtData.(ft),1),1);
             
             figure,

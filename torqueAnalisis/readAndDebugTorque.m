@@ -3,20 +3,21 @@ addpath external/quadfit
 addpath utils
 
 % name and paths of the data files
-%experimentName='skinTest20170903';% 
-%experimentName='skinTest20170911_3';
-%experimentName='skintest2017_09_14_1';
+%experimentName='green-iCub-Insitu-Datasets/skinTest20170903';% 
+%experimentName='green-iCub-Insitu-Datasets/skinTest20170911_3';
+%experimentName='green-iCub-Insitu-Datasets/skintest2017_09_14_1';
 %experimentName='dumper'
-%experimentName='heavyWeight'
-%experimentName='skinMutipleWeights'
-experimentName='angles'
+%experimentName='green-iCub-Insitu-Datasets/heavyWeight'
+%experimentName='green-iCub-Insitu-Datasets/skinMutipleWeights'
+experimentName='green-iCub-Insitu-Datasets/angles'
 
 
 scriptOptions = {};
 scriptOptions.forceCalculation=false;%false;
 scriptOptions.printPlots=false;%true
-scriptOptions.saveData=true;%true
+scriptOptions.saveData=false;%true
 scriptOptions.raw=true;% to calculate the raw data, for recalibration always true
+scriptOptions.testDir=true;
 % Script of the mat file used for save the intermediate results 
 %scriptOptions.saveDataAll=true;
 scriptOptions.matFileName='iCubDataset';
@@ -37,9 +38,9 @@ inspectdata=false;
         dataset.estimatedFtData=dataset.filteredFtData;        
        
         
-cMat.Workbench = readCalibMat('data/sensorCalibMatrices/matrix_SN269.txt');
+cMat.Workbench = readCalibMat('../data/sensorCalibMatrices/matrix_SN269.txt');
 lambda='_l500000';
-cMat.right_leg = readCalibMat(strcat('data/secCalibMat/',strcat(input.calibMatFileNames{4},lambda)));
+cMat.right_leg = readCalibMat(strcat('../data/secCalibMat/',strcat(input.calibMatFileNames{4},lambda)));
 sCalibMat=cMat.right_leg/(cMat.Workbench);%calculate secondary calibration matrix 
 
 for s=1:length(dataset.time)

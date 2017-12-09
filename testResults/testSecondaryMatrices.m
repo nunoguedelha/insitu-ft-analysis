@@ -14,17 +14,16 @@ scriptOptions.printAll=true;
 
 %Use only datasets where the same sensor is used
 experimentNames={
-    '2017_10_31_3';
-    '2017_10_31_4'% Name of the experiment;
-    '2017_10_17Grid';
-    '2017_10_30';
-    '2017_10_31';}; %this set is from iCubGenova02
+    'green-iCub-Insitu-Datasets/2017_10_31_3';
+    'green-iCub-Insitu-Datasets/2017_10_31_4'% Name of the experiment;
+    'green-iCub-Insitu-Datasets/2017_10_17Grid';
+    'green-iCub-Insitu-Datasets/2017_10_30';
+    }; %this set is from iCubGenova02
 names={'Workbench';
     'bestleftleg';
     'bestleftfoot';
     'fristGreenSample';
-    'day30';
-    'day31';
+    'day30';    
     };% except for the first one all others are short names for the expermients in experimentNames
 
 lambdas=[0];
@@ -92,7 +91,7 @@ for c=1:length(toCompare)
     %inspect data to select where to calculate offset
     robotName='iCubGenova04';
     onTestDir=true;
-    %iCubVizWithSlider(data.(toCompareNames{c}),robotName,sensorsToAnalize,input.contactFrameName{1},onTestDir);
+   % iCubVizWithSlider(data.(toCompareNames{c}),robotName,sensorsToAnalize,input.contactFrameName{1},onTestDir);
     sampleInit=[1600,1600];
     sampleEnd=[1650,1650];
     [offset.(toCompareNames{c})]=calculateOffsetUsingWBD(estimator,data.(toCompareNames{c}),sampleInit(c),sampleEnd(c),input);
@@ -116,8 +115,9 @@ for c=1:length(toCompare)
         %% Calculate external forces
         for i=1:length(names2use)
             sMat.(sensorsToAnalize{j})=secMat.(names2use{i}).(sensorsToAnalize{j});% select specific secondary matrices
+            cd ../
             [results.(toCompareNames{c}).(sensorsToAnalize{j}).(names2use{i}).externalForces,results.(toCompareNames{c}).(sensorsToAnalize{j}).(names2use{i}).eForcesTime]= obtainExternalForces(input.robotName,data.(toCompareNames{c}),sMat,input.sensorNames,input.contactFrameName,timeFrame,framesNames,offset.(toCompareNames{c}));
-            
+            cd testResults/
         end
         if c==1
             stackedResults.(sensorsToAnalize{j})=results.(toCompareNames{c}).(sensorsToAnalize{j});
