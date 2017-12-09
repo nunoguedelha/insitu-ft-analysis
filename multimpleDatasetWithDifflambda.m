@@ -11,8 +11,8 @@ experimentNames={
 % 'icub-insitu-ft-analysis-big-datasets/2016_07_04/fast';% Name of the experiment;
 %   'icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin30';% Name of the experiment;
 % 'icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin45'% Name of the experiment;
- '2017_10_31_3';
- '2017_10_31_4';% Name of the experiment;
+ 'green-iCub-Insitu-Datasets/2017_08_29_2';
+ 'green-iCub-Insitu-Datasets/2017_08_29_3';% Name of the experiment;
     };
 scriptOptions = {};
 scriptOptions.forceCalculation=false;%false;
@@ -71,6 +71,15 @@ lambdasNames=lambdasNames'
 %     '_l100000';};
 
 calculate=true;
+%%
+%calibration options
+calibOptions.saveMat=true;
+calibOptions.usingInsitu=true;
+calibOptions.plot=true;
+calibOptions.onlyWSpace=true;
+calibOptions.IITfirmwareFriendly=true; % in case a calibration matrix that will not be used by iit firmware is estimated
+
+%%
 for i=1:length(experimentNames)
     %TODO: create a variable for having extrasample variable for each
     %expermient
@@ -94,5 +103,6 @@ for i=1:length(experimentNames)
         end
         clear dataset;
         clear reCalibData;
+        clear extraSample;
     end
 end

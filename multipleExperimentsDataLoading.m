@@ -2,15 +2,19 @@
 experimentNames={
 %    'icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin30';% Name of the experiment;
 %  'icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin45'% Name of the experiment;
-    'icub-insitu-ft-analysis-big-datasets/2016_06_08/yoga';% Name of the experiment;
-'icub-insitu-ft-analysis-big-datasets/2016_06_17/normal';% Name of the experiment;
-'icub-insitu-ft-analysis-big-datasets/2016_06_17/fast';% Name of the experiment;
-
- 'icub-insitu-ft-analysis-big-datasets/2016_07_04/normal';% Name of the experiment;
- 'icub-insitu-ft-analysis-big-datasets/2016_07_04/fast';% Name of the experiment;
+% 'icub-insitu-ft-analysis-big-datasets/2016_06_08/yoga';% Name of the experiment;
+% 'icub-insitu-ft-analysis-big-datasets/2016_06_17/normal';% Name of the experiment;
+% 'icub-insitu-ft-analysis-big-datasets/2016_06_17/fast';% Name of the experiment;
+% 
+% 'icub-insitu-ft-analysis-big-datasets/2016_07_04/normal';% Name of the experiment;
+% 'icub-insitu-ft-analysis-big-datasets/2016_07_04/fast';% Name of the experiment;
+'green-iCub-Insitu-Datasets/2017_08_29_3';% Name of the experiment;
+  'green-iCub-Insitu-Datasets/2017_08_29_2';
+ 
     };
+   
 scriptOptions = {};
-scriptOptions.forceCalculation=true;%false;
+scriptOptions.forceCalculation=false;%false;
 scriptOptions.printPlots=false;%true
 scriptOptions.saveData=true;%
 scriptOptions.raw=true;
@@ -18,26 +22,37 @@ scriptOptions.raw=true;
 scriptOptions.saveDataAll=true;
 scriptOptions.matFileName='ftDataset';
 
-calculate=false;
+calculate=true;
+%%
+%calibration options
+calibOptions.saveMat=false;
+calibOptions.usingInsitu=true;
+calibOptions.plot=true;
+calibOptions.onlyWSpace=true;
+calibOptions.IITfirmwareFriendly=true; % in case a calibration matrix that will not be used by iit firmware is estimated
+
+%%
 for i=1:length(experimentNames)
     
-    [data.(strcat('e',num2str(i)))]=read_estimate_experimentData(experimentNames{i},scriptOptions);
+    [data.(strcat('e',num2str(i))),data.(strcat('extra',num2str(i)))]=read_estimate_experimentData2(experimentNames{i},scriptOptions);
     
     if(calculate)
         dataset=data.(strcat('e',num2str(i)));
+        extraSample=data.(strcat('extra',num2str(i)));
         experimentName=experimentNames{i};
         % We carry the analysis just for a subset of the sensors
-        sensorsToAnalize = {'right_leg','right_foot'};
+        sensorsToAnalize = {'left_leg','right_leg'};
         
         if( scriptOptions.printPlots )
             run('plottinScript.m')
         end
         
-        lambda=10;
+        lambda=0;
         lambdaName='';
         
         run('CalibMatCorrection.m')
         clear dataset;
         clear reCalibData;
+        clear extraSample;
     end
 end
