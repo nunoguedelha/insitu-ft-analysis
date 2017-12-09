@@ -84,7 +84,7 @@ else
     estimator = iDynTree.ExtWrenchesAndJointTorquesEstimator();
     
     % Load model and sensors from the URDF file
-    estimator.loadModelAndSensorsFromFile(strcat('./',input.robotName,'.urdf'));
+    estimator.loadModelAndSensorsFromFile(strcat('./robots/',input.robotName,'.urdf'));
     
     % Check if the model was correctly created by printing the model
     %estimator.model().toString()
@@ -241,7 +241,26 @@ else
                 dataset=applyMask(dataset,mask);
             end
             
-            
+            %% This part of code needs to be revised copied from previous version of read estimate experiment enables converting to an array of contact frames it might allow to have a continuos experiment without necesarily separating calculation of external forces by support contact
+            %%mask=dataset.time<0;
+%             contactFrameName='';
+%             for index=1:length(intervalsNames)
+%                 if(~strcmp('hanging', intervalsNames{index}))
+%                     intName=intervalsNames{index};
+%                     maskTemp=dataset.time>dataset.time(1)+input.intervals.(intName).initTime & dataset.time<dataset.time(1)+input.intervals.(intName).endTime;
+%                     contactTemp(1:length(find(maskTemp)))={input.intervals.(intName).contactFrame};
+%                     mask=or(mask,maskTemp);
+%                     
+%                     %TODO: have to match the contactFrame vectors with the time
+%                     %the interval happens (compare init time of all intervals
+%                     %to order it
+%                     % contactFrameName=[contactFrameName,contactTemp];
+%                     contactFrameName=[contactTemp,contactFrameName];
+%                 end
+%                 
+%             end
+%             
+%             dataset=applyMask(dataset,mask);
             
             %% load state and calculate estimated wrenches for comparison
             [dataset]=obtainEstimatedWrenches(estimator,dataset.time,contactFrameName,dataset);

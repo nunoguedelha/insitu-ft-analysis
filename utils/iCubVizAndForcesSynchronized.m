@@ -45,7 +45,7 @@ end
 estimator = iDynTree.ExtWrenchesAndJointTorquesEstimator();
 
 % Load model and sensors from the URDF file
-estimator.loadModelAndSensorsFromFile(strcat('./',robotName,'.urdf'));
+estimator.loadModelAndSensorsFromFile(strcat('./robots/',robotName,'.urdf'));
 
 dofs = estimator.model().getNrOfDOFs();
 consideredJoints = iDynTree.StringVector();

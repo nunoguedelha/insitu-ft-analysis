@@ -11,7 +11,7 @@ function [externalWrenches,time]= obtainExternalForces(robotName,dataset,secMat,
 estimator = iDynTree.ExtWrenchesAndJointTorquesEstimator();
 
 % Load model and sensors from the URDF file
-estimator.loadModelAndSensorsFromFile(strcat('./',robotName,'.urdf'));
+estimator.loadModelAndSensorsFromFile(strcat('./robots/',robotName,'.urdf'));
 
 % Check if the model was correctly created by printing the model
 %estimator.model().toString()
