@@ -58,7 +58,7 @@ if(onlyWSpace || all)
            end
            plot3_matrix(dataset.estimatedFtData.(ft)(:,1:3)); grid on;
             legend('measuredData','estimatedData','Location','west');
-        title(strcat({'Wrench space '},escapeUnderscores(ft)));
+        title(strcat({'Wrench space '},escapeUnderscores(ft))); % title(strcat({'Wrench space '},ft), 'Interpreter', 'none'); 
         xlabel('F_{x}');
         ylabel('F_{y}');
         zlabel('F_{z}');
