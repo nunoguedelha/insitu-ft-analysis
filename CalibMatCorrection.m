@@ -57,6 +57,8 @@ if(calibOptions.saveMat)
             %are swapped before sending them to yarp port [F,T]. This swap function
             %accounts for this behavior
             [firmwareMat,full_scale]=swapCMat(calibMatrices.(ft));
+            % enable when problem with fullscale is sovled in firmware
+            %[firmwareMat,full_scale]=swapCMat(calibMatrices.(ft),fullscale.(ft));
         else
             firmwareMat=calibMatrices.(ft);
             full_scale=fullscale.(ft);
