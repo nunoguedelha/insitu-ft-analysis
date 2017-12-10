@@ -5,8 +5,7 @@
 %using insitu
 % NOTE: only use when position of center of mass is constant
 %TODO: procedure for choosing when to use insitu or not required
-if(calibOptions.usingInsitu)
-         % [calibMatrices,offset,fullscale]=estimateMatrices(dataset.rawData,dataset.estimatedFtData,sensorsToAnalize);
+if(calibOptions.usingInsitu) 
  [calibMatrices,offset,fullscale]= estimateMatricesWthReg(dataset.rawDataFiltered,dataset.estimatedFtData,sensorsToAnalize, dataset.cMat,lambda);
  
    if (isstruct(extraSample.right)||isstruct(extraSample.left))
@@ -24,11 +23,7 @@ if(calibOptions.usingInsitu)
     end
     
 else
-    %not using insitu
-    
-%    lambda=.5;
-   
-    
+    %not using insitu    
    [calibMatrices,offsetC,fullscale]=...
             estimateMatricesAndOffset(...
             dataset.rawDataFiltered,... %raw data input
@@ -42,8 +37,6 @@ reCabData.calibMatrices=calibMatrices;
 
 reCabData.fullscale=fullscale;
 
-
-
 %% write calibration matrices file
 
 if(calibOptions.saveMat)
@@ -51,7 +44,26 @@ if(calibOptions.saveMat)
      for ftIdx =1:length(sensorsToAnalize)
         ft = sensorsToAnalize{ftIdx};
         i=find(strcmp(ft, names));
-        filename=strcat('data/',experimentName,'/calibrationMatrices/',dataset.calibMatFileNames{i},lambdaName);
+        if (round(dataset.cMat.(ft))==eye(6))
+            scriptOptions.firstTime=true;
+        else
+            scriptOptions.firstTime=false;
+        end
+        if (scriptOptions.firstTime)
+            prompt={'First time sensor:                 insert serial number or      desired sensor name'};
+            name = 'Sensor name';
+            defaultans = {'SN00001'};
+            answer = inputdlg(prompt,name,[1 30],defaultans);
+            if (~isempty(answer))
+            filename=strcat('data/',experimentName,'/calibrationMatrices/',answer{1},lambdaName);
+            else
+                disp('Sensor name canceled, not saving calibration matrix');
+                filename=strcat('data/',experimentName,'/calibrationMatrices/',defaultans{1},lambdaName);
+                break;
+            end
+        else
+            filename=strcat('data/',experimentName,'/calibrationMatrices/',dataset.calibMatFileNames{i},lambdaName);
+        end
         if calibOptions.IITfirmwareFriendly
             %CalibrationMatrix*rawData = [T,F]. When calibration flag = true, the values
             %are swapped before sending them to yarp port [F,T]. This swap function
@@ -67,9 +79,7 @@ if(calibOptions.saveMat)
     end
 end
 %% generate wrenches with new calibration matrix
-if(calibOptions.usingInsitu)
-    
-    
+if(calibOptions.usingInsitu)   
     
     for ftIdx =1:length(sensorsToAnalize)
         ft = sensorsToAnalize{ftIdx};
