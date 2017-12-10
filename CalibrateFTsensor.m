@@ -38,10 +38,13 @@ addpath utils
 
 %% general reading configuration options 
 scriptOptions = {};
-scriptOptions.forceCalculation=false;%false;
-scriptOptions.printPlots=false;%true
-scriptOptions.saveData=false;%true
-scriptOptions.raw=true;% to calculate the raw data, for recalibration always true
+scriptOptions.forceCalculation=true;%false;
+scriptOptions.printPlots=true;%true
+scriptOptions.raw=false;
+scriptOptions.saveData=false;
+scriptOptions.testDir=false;% to calculate the raw data, for recalibration always true
+scriptOptions.filterData=true;
+scriptOptions.estimateWrenches=true;
 scriptOptions.useInertial=false;
 
 % Script of the mat file used for save the intermediate results
@@ -71,8 +74,8 @@ calibOptions.onlyWSpace=true;
 calibOptions.IITfirmwareFriendly=true; % in case a calibration matrix that will not be used by iit firmware is estimated
 %% Start 
 %Read data
-[dataset,extraSample]=read_estimate_experimentData(experimentName,scriptOptions);
-
+%[dataset,extraSample]=read_estimate_experimentData(experimentName,scriptOptions);
+[dataset,~,~,extraSample]=readExperiment(experimentName,scriptOptions);
 %Plot for inspection of data
 if( scriptOptions.printPlots )
     run('plottinScript.m')

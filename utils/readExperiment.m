@@ -38,12 +38,12 @@ if (~any(strcmp('saveData', fieldnames(scriptOptions))))
     disp(' Using default value saveData=false');
 end
 if (~any(strcmp('testDir', fieldnames(scriptOptions))))
-    scriptOptions.saveData=false;
+    scriptOptions.testDir=false;
     disp(' Using default value testDir=false');
 end
 if (~any(strcmp('matFileName', fieldnames(scriptOptions))))
     scriptOptions.matFileName='iCubDataset';
-    disp(' Using default value matFileName=false');
+    disp(' Using default value matFileName=iCubDataset');
 end
 if (~any(strcmp('filterData', fieldnames(scriptOptions))))
     scriptOptions.filterData=true;
@@ -54,8 +54,8 @@ if (~any(strcmp('raw', fieldnames(scriptOptions))))
     disp(' Using default value raw=false');
 end
 if (~any(strcmp('estimateWrenches', fieldnames(scriptOptions))))
-    scriptOptions.estimateWrenches=false;
-    disp(' Using default value estimateWrenches=false');
+    scriptOptions.estimateWrenches=true;
+    disp(' Using default value estimateWrenches=true');
 end
 if (~any(strcmp('useInertial', fieldnames(scriptOptions))))
     scriptOptions.useInertial=false;
@@ -202,7 +202,8 @@ else
     %% This section modifies or estimates data
     %% Estimate wrenches
     if(scriptOptions.estimateWrenches)
-        
+        estimatedDataset=estimateDynamicsUsingIntervals(dataset,estimator,input,scriptOptions.useInertial);
+        dataset.estimatedFtData=estimatedDataset.estimatedFtData;
     end
     %% Filter ft data
     if(scriptOptions.filterData)
