@@ -22,7 +22,7 @@ scriptOptions.raw=true;
 scriptOptions.saveDataAll=true;
 scriptOptions.matFileName='ftDataset';
 
-calculate=true;
+calculate=false;
 %%
 %calibration options
 calibOptions.saveMat=false;
@@ -34,7 +34,7 @@ calibOptions.IITfirmwareFriendly=true; % in case a calibration matrix that will 
 %%
 for i=1:length(experimentNames)
     
-    [data.(strcat('e',num2str(i))),data.(strcat('extra',num2str(i)))]=read_estimate_experimentData2(experimentNames{i},scriptOptions);
+    [data.(strcat('e',num2str(i))),data.(strcat('extra',num2str(i)))]=read_estimate_experimentData(experimentNames{i},scriptOptions);
     
     if(calculate)
         dataset=data.(strcat('e',num2str(i)));
