@@ -1,4 +1,4 @@
-function [dataset,estimator,input]=readExperiment(experimentName,scriptOptions)
+function [dataset,estimator,input,extraSample]=readExperiment(experimentName,scriptOptions)
 
 % This function is meant to read all info available in a dataset obtained
 % from analog and stateExt ports. It also estimates forces and torques and
@@ -306,4 +306,17 @@ else
         fprintf('readExperiment: Data is being saved in %s\n',scriptOptions.matFileName);
         save(strcat(prefixDir,'data/',experimentName,'/',scriptOptions.matFileName,'.mat'),'dataset')
     end
+end
+
+%% Load extra samples if required
+if (any(strcmp('extraSampleRight', fieldnames(input))))
+    [extraSample.right,~]=readExperiment(input.extraSampleRight,scriptOptions);
+else
+    extraSample.right=nan;
+end
+
+if (any(strcmp('extraSampleLeft', fieldnames(input))))
+    [extraSample.left,~]=readExperiment(input.extraSampleLeft,scriptOptions);
+else
+    extraSample.left=nan;
 end
