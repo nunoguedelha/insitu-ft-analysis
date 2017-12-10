@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE devices PUBLIC "-//YARP//DTD robotInterface 1.0//EN" "http://www.icub.org/DTD/robotInterfaceV1.0.dtd">
+
+<devices robot="iCubGenova04" build="1">
+    <device name="wholebodydynamics" type="wholebodydynamics">
+        <param name="axesNames">(torso_pitch,torso_roll,torso_yaw,neck_pitch, neck_roll,neck_yaw,l_shoulder_pitch,l_shoulder_roll,l_shoulder_yaw,l_elbow,l_wrist_prosup,l_wrist_pitch,l_wrist_yaw,r_shoulder_pitch,r_shoulder_roll,r_shoulder_yaw,r_elbow,r_wrist_prosup,r_wrist_pitch,r_wrist_yaw,l_hip_pitch,l_hip_roll,l_hip_yaw,l_knee,l_ankle_pitch,l_ankle_roll,r_hip_pitch,r_hip_roll,r_hip_yaw,r_knee,r_ankle_pitch,r_ankle_roll)</param>
+        <param name="modelFile">model.urdf</param>
+        <param name="fixedFrameGravity">(0,0,-9.81)</param>
+        <param name="defaultContactFrames">(l_hand,r_hand,root_link,l_sole,r_sole,r_lower_leg,l_lower_leg,l_elbow_1,r_elbow_1)</param>
+        <param name="imuFrameName">imu_frame</param>
+        <param name="publishOnROS">true</param>
+	    <param name="forceTorqueEstimateConfidence">2</param>
+
+        <!-- map between iDynTree links (identified by a name)
+             and skinDynLib links (identified by their frame name, a BodyPart enum
+             and a local (to the body part) index -->
+        <group name="IDYNTREE_SKINDYNLIB_LINKS">
+            <param name="root_link">(root_link,1,0)</param>
+            <param name="chest"> (chest,1,2)</param>
+            <param name="l_upper_arm">(l_upper_arm,3,2)</param>
+            <param name="l_hand">(l_hand_dh_frame,3,6)</param>
+            <param name="r_hand">(r_hand_dh_frame,4,6)</param>
+            <param name="l_elbow_1">(l_elbow_1, 3, 4)</param>
+            <param name="r_upper_arm">(r_upper_arm,4,2)</param>
+            <param name="r_elbow_1">(r_elbow_1, 4, 4)</param>
+            <param name="l_upper_leg">(l_upper_leg,5,2)</param>
+            <param name="l_lower_leg">(l_lower_leg,5,3)</param>
+            <param name="l_ankle_1">(l_ankle_1,5,4)</param>
+            <param name="l_foot">(l_foot_dh_frame,5,5)</param>
+            <param name="r_upper_leg">(r_upper_leg,6,2)</param>
+            <param name="r_lower_leg">(r_lower_leg_dh_frame,6,3)</param>
+            <param name="r_ankle_1">(r_ankle_1,6,4)</param>
+            <param name="r_foot">(r_foot_dh_frame,6,5)</param>
+        </group>
+
+        <group name="GRAVITY_COMPENSATION">
+            <param name="enableGravityCompensation">true</param>
+            <param name="gravityCompensationBaseLink">root_link</param>
+            <param name="gravityCompensationAxesNames">(torso_pitch,torso_roll,torso_yaw,neck_pitch,neck_roll,neck_yaw,l_shoulder_pitch,l_shoulder_roll,l_shoulder_yaw,l_elbow,r_shoulder_pitch,r_shoulder_roll,r_shoulder_yaw,r_elbow,l_hip_pitch,l_hip_roll,l_hip_yaw,l_knee,l_ankle_pitch,l_ankle_roll,r_hip_pitch,r_hip_roll,r_hip_yaw,r_knee,r_ankle_pitch,r_ankle_roll)</param>
+        </group>
+         <group name="FT_SECONDARY_CALIBRATION"> 
+            <param name="l_leg_ft_sensor"> (9.865575e-01,9.832824e-04,1.573775e-03,8.838008e-03,-1.242557e+00,-3.662685e-02 
+             ,-3.880700e-03,9.580185e-01,-3.490652e-03,3.387828e+00,-1.681220e-01,4.758923e-02 
+             ,-7.755550e-04,-3.081145e-03,9.960339e-01,2.731980e-01,-4.400748e-02,-2.246920e-02 
+             ,1.892086e-04,-1.458911e-04,-1.235189e-04,1.020877e+00,1.802424e-02,-2.612012e-05 
+             ,-3.074386e-04,2.408253e-04,7.930542e-05,-1.747481e-02,9.713355e-01,-1.021070e-03 
+             ,-3.015784e-05,8.055900e-05,7.402333e-06,-6.211765e-03,-2.974117e-03,1.012486e+00)</param> 
+
+            <param name="r_leg_ft_sensor"> (9.950895e-01,7.206357e-03,-7.812037e-04,-7.131592e-01,-4.768743e-01,3.425631e-03 
+             ,2.289473e-03,9.811578e-01,-1.320067e-03,1.808590e+00,2.238271e-01,5.279488e-02 
+             ,-1.682089e-04,3.784282e-03,9.989771e-01,-3.646397e-01,-6.982818e-03,1.551183e-03 
+             ,9.951291e-05,2.185251e-04,-7.531628e-06,9.916090e-01,9.657669e-03,-6.589607e-04 
+             ,-5.287989e-04,7.740907e-05,3.331646e-05,-9.419993e-03,9.524966e-01,6.184876e-04 
+             ,-9.859766e-06,2.091271e-04,1.660427e-05,-1.970882e-02,-1.076372e-03,1.017499e+00)</param> 
+
+          </group>
+         
+      <!--       <param name="r_leg_ft_sensor"> (1,0,0,0,0,0 
+             ,0,1,0,0,0,0 
+             ,0,0,1,0,0,0 
+             ,0,0,0,1,0,0 
+             ,0,0,0,0,1,0,
+             ,0,0,0,0,0,1,)</param> 
+
+	      </group>
+  	   <param name="r_foot_ft_sensor"> (1.113038e+00,3.895262e-01,5.628541e-02,1.425217e+01,9.335381e+00,-2.356212e+01
+ 		,4.727625e-02,5.994493e-01,-3.936630e-03,5.725949e+00,-6.383810e-01,1.509833e+01
+ 		,-2.346138e-01,8.277714e-02,1.513520e-01,1.973899e+01,-3.906337e+01,-1.252079e+01
+ 		,-1.204251e-03,1.125677e-03,8.085666e-04,1.124675e-01,-2.102171e-01,-4.996963e-02
+ 		,6.622161e-03,-3.226779e-03,-5.152621e-03,-6.798943e-01,1.302857e+00,4.478166e-01
+ 		,-4.382199e-03,1.806866e-02,-4.344822e-04,1.159518e-01,-7.157236e-02,6.339767e-01)</param>
+ 	</group>
+	<group name="FT_SECONDARY_CALIBRATION">
+  	    <param name="l_foot_ft_sensor"> (1.255352e+00,6.763550e-02,-1.811173e-02,-1.304284e+01,7.881415e+00,-9.695211e-02
+ 		,-7.378689e-02,7.379756e-01,-1.316501e-01,-1.148407e+01,-3.146908e+00,1.443434e+01
+		 ,-2.501237e-01,2.385519e-03,-3.760952e-03,-8.837879e+00,-4.630413e+01,5.076750e+00
+ 		,1.256229e-03,8.360102e-04,-1.321234e-04,3.432385e-02,2.447871e-01,-1.048867e-02
+ 		,6.978455e-03,-1.576717e-04,1.480116e-04,3.127858e-01,1.550942e+00,-1.709628e-01
+		 ,4.250296e-03,2.522316e-02,-4.531687e-03,-4.566470e-01,-6.374355e-02,4.858233e-01)</param>
+	 </group> -->
+        <group name="WBD_OUTPUT_EXTERNAL_WRENCH_PORTS">
+            <param name="/wholeBodyDynamics/left_leg/cartesianEndEffectorWrench:o">(l_foot,l_sole,root_link)</param>
+            <param name="/wholeBodyDynamics/left_foot/cartesianEndEffectorWrench:o">(l_foot,l_sole,l_sole)</param>
+            <param name="/wholeBodyDynamics/right_leg/cartesianEndEffectorWrench:o">(r_foot,r_sole,root_link)</param>
+            <param name="/wholeBodyDynamics/right_foot/cartesianEndEffectorWrench:o">(r_foot,r_sole,l_sole)</param>
+            <param name="/wholeBodyDynamics/right__lower_leg/cartesianEndEffectorWrench:o">(r_lower_leg,r_lower_leg,root_link)</param>
+            <param name="/wholeBodyDynamics/right_lower_leg_sole/cartesianEndEffectorWrench:o">(r_lower_leg,r_lower_leg,l_sole)</param>
+            <param name="/wholeBodyDynamics/root_link/cartesianEndEffectorWrench:o">(root_link,root_link,root_link)</param>
+        </group>
+
+        <action phase="startup" level="15" type="attach">
+            <paramlist name="networks">
+                <!-- motorcontrol -->
+                <elem name="left_leg">left_leg_mc</elem>
+                <elem name="right_leg">right_leg_mc</elem>
+                <elem name="torso">torso_mc</elem>
+                <elem name="right_arm">right_arm_mc</elem>
+                <elem name="left_arm">left_arm_mc</elem>
+                <elem name="head">head_mc</elem>
+                <!-- virtual torque sensors -->
+                <elem name="left_leg_vsens">left_leg_virtual_strain</elem>
+                <elem name="right_leg_vsens">right_leg_virtual_strain</elem>
+                <elem name="torso_vsens">torso_virtual_strain</elem>
+                <elem name="right_arm_vsens">right_arm_virtual_strain</elem>
+                <elem name="left_arm_vsens">left_arm_virtual_strain</elem>
+                <!-- imu -->
+                <elem name="imu">inertial</elem>
+                <!-- ft -->
+                <elem name="l_arm_ft_sensor">left_upper_arm_strain</elem>
+                <elem name="r_arm_ft_sensor">right_upper_arm_strain</elem>
+                <elem name="l_leg_ft_sensor">left_upper_leg_strain</elem>
+                <elem name="r_leg_ft_sensor">right_upper_leg_strain</elem>
+                <elem name="l_foot_ft_sensor">left_lower_leg_strain</elem>
+                <elem name="r_foot_ft_sensor">right_lower_leg_strain</elem>
+            </paramlist>
+</action>
+
+        <action phase="shutdown" level="2" type="detach" />
+
+    </device>
+</devices>
