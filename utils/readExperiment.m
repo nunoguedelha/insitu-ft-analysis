@@ -7,8 +7,8 @@ function [dataset,estimator,input]=readExperiment(experimentName,scriptOptions)
 %   timeStamp of the experiment
 %   joints positions, velocities and accelerations
 %   force/torque measurements
-%   motor side enconder positions, velocities and accelerations (optional not implemented at the moment but ready for it) 
-%   joint torques 
+%   motor side enconder positions, velocities and accelerations (optional not implemented at the moment but ready for it)
+%   joint torques
 %   inertial data optional from config file (params.m)
 %Output variables:
 %   dataset: structure containinng all obtained information
@@ -18,39 +18,69 @@ function [dataset,estimator,input]=readExperiment(experimentName,scriptOptions)
 %Input variables:
 %   experimentName: address and name of the experiment in the data folder
 %   scriptOptions should include :
-%       scriptOptions = {};
 %       scriptOptions.forceCalculation=true;%false;
-%       scriptOptions.saveData=true;%true 
+%       scriptOptions.saveData=true;%true
 %       scriptOptions.testDir=false;% true
-% % Script of the mat file used for save the intermediate results 
-%       striptOptions.matFileName='iCubDataset';
+% % Script of the mat file used for save the intermediate results
+%       scriptOptions.matFileName='iCubDataset';
 
- % convertion to radians
-    deg2rad = pi/180.0;
+%% Default values for scriptOptions
+if (~any(strcmp('forceCalculation', fieldnames(scriptOptions))))
+    scriptOptions.forceCalculation=false;
+    disp(' Using default value forceCalculation=false');
+end
+if (~any(strcmp('saveData', fieldnames(scriptOptions))))
+    scriptOptions.saveData=false;
+    disp(' Using default value saveData=false');
+end
+if (~any(strcmp('testDir', fieldnames(scriptOptions))))
+    scriptOptions.saveData=false;
+    disp(' Using default value testDir=false');
+end
+if (~any(strcmp('matFileName', fieldnames(scriptOptions))))
+    scriptOptions.matFileName='iCubDataset';
+    disp(' Using default value matFileName=false');
+end
+if (~any(strcmp('filterData', fieldnames(scriptOptions))))
+    scriptOptions.filterData=false;
+    disp(' Using default value filterData=false');
+end
+if (~any(strcmp('raw', fieldnames(scriptOptions))))
+    scriptOptions.raw=false;
+    disp(' Using default value raw=false');
+end
+if (~any(strcmp('estimateWrenches', fieldnames(scriptOptions))))
+    scriptOptions.estimateWrenches=false;
+    disp(' Using default value estimateWrenches=false');
+end
+if (~any(strcmp('useInertial', fieldnames(scriptOptions))))
+    scriptOptions.useInertial=false;
+    disp(' Using default value useInertial=false');
+end
+%%
+% convertion to radians
+deg2rad = pi/180.0;
 
-% load the script of parameters relative 
+% load the script of parameters relative
 if(scriptOptions.testDir==false)
     prefixDir='';
-
+    
 else
-   prefixDir='../';
+    prefixDir='../';
 end
- paramScript=strcat(prefixDir,'data/',experimentName,'/params.m');
+paramScript=strcat(prefixDir,'data/',experimentName,'/params.m');
 
 run(paramScript)
-  % Create estimator class
-  
-    %%% Load the estimator and model information
-      estimator = iDynTree.ExtWrenchesAndJointTorquesEstimator();
-    
-    % Load model and sensors from the URDF file
-    estimator.loadModelAndSensorsFromFile(strcat(prefixDir,'robots/',input.robotName,'.urdf'));
-    
-    % Check if the model was correctly created by printing the model
-    %estimator.model().toString()
-    
-% This script will produce dataset (containing the raw data) and dataset2
-% (contained the original data and the filtered ft). 
+% Create estimator class
+
+%%% Load the estimator and model information
+estimator = iDynTree.ExtWrenchesAndJointTorquesEstimator();
+
+% Load model and sensors from the URDF file
+estimator.loadModelAndSensorsFromFile(strcat(prefixDir,'robots/',input.robotName,'.urdf'));
+
+% Check if the model was correctly created by printing the model
+%estimator.model().toString()
 
 if (exist(strcat(prefixDir,'data/',experimentName,'/',scriptOptions.matFileName,'.mat'),'file')==2 && scriptOptions.forceCalculation==false)
     %% Load from workspace
@@ -61,11 +91,11 @@ if (exist(strcat(prefixDir,'data/',experimentName,'/',scriptOptions.matFileName,
 else
     %% load FT data
     ftDataName=strcat(input.ftPortName,'/data.log'); % (arm, foot and leg have FT data)
-         
+    
     for i=1:size(input.ftNames,1)
         dataFTDirs{i}=strcat(prefixDir,'data/',experimentName,'/icub/',input.ftNames{i},'/',ftDataName);
         
-    end    
+    end
     [ftData.(input.ftNames{1}),time]=readDataDumper(dataFTDirs{1});
     
     for i=2:size(input.ftNames,1)
@@ -78,36 +108,36 @@ else
     % Insert into final output
     dataset.time=time;
     dataset.ftData=ftData;
-   
+    
     %% load Inertial data
     if (any(strcmp('inertialName', fieldnames(input))))
-    dataInertialDir=strcat(prefixDir,'data/',experimentName,'/icub/',input.inertialName,'/data.log');
-      
+        dataInertialDir=strcat(prefixDir,'data/',experimentName,'/icub/',input.inertialName,'/data.log');
+        
+        
+        [linAcc_temp,angVel_temp, time_temp,euler_temp]=readInertial(dataInertialDir);
+        
+        [linAcc,angVel_temp,~] = resampleState(time, time_temp, linAcc_temp',angVel_temp', euler_temp');
+        
+        %Convert to radians
+        angVel = deg2rad*angVel_temp;
+        
+        inertialData.linAcc=linAcc';
+        inertialData.angVel=angVel';
+        
+        % Insert into final output
+        dataset.inertialData=inertialData;
+        
+    end
     
-    [linAcc_temp,angVel_temp, time_temp,euler_temp]=readInertial(dataInertialDir);
-   
-    [linAcc,angVel_temp,~] = resampleState(time, time_temp, linAcc_temp',angVel_temp', euler_temp');
-    
-   %Convert to radians
-    angVel = deg2rad*angVel_temp;
-    
-    inertialData.linAcc=linAcc';
-    inertialData.angVel=angVel';  
-    
-    % Insert into final output
-    dataset.inertialData=inertialData;
-    
-    end  
-    
-   %% Prepare to load stateExt data
-     stateDataName=strcat(input.statePortName,'/data.log');  % (only foot has no state data)
-        stateNames=fieldnames(input.stateNames);
+    %% Prepare to load stateExt data
+    stateDataName=strcat(input.statePortName,'/data.log');  % (only foot has no state data)
+    stateNames=fieldnames(input.stateNames);
     for i=1:size(stateNames,1)
         dataStateDirs{i}=strcat(prefixDir,'data/',experimentName,'/icub/',stateNames{i},'/',stateDataName);
-    end    
+    end
     
-    %%% Set model information   
-    % For more info on iCub frames check: http://wiki.icub.org/wiki/ICub_Model_naming_conventions    
+    %%% Set model information
+    % For more info on iCub frames check: http://wiki.icub.org/wiki/ICub_Model_naming_conventions
     
     % Get joint information.
     % Warning!! iDynTree takes in input **radians** based units,
@@ -115,9 +145,9 @@ else
     dofs = estimator.model().getNrOfDOFs();
     qj_all = zeros(dofs,size(time,1));
     dqj_all = zeros(dofs,size(time,1));
-    ddqj_all = zeros(dofs,size(time,1)); 
+    ddqj_all = zeros(dofs,size(time,1));
     tau_all = zeros(dofs,size(time,1));
-   
+    
     %get the names of the model to match the names from the data file read
     for i=0:dofs-1
         % disp(strcat('name=',estimator.model().getJointName(i),' , index=',num2str(i)))
@@ -156,81 +186,81 @@ else
     % Store the information into final output
     dataset.qj = qj_all';
     dataset.dqj = dqj_all';
-    dataset.ddqj = ddqj_all';    
+    dataset.ddqj = ddqj_all';
     dataset.tau=tau_all';
     
     %% Load skin events information
-     if (any(strcmp('skinEventsName', fieldnames(input))))
-    dataSkinDir=strcat(prefixDir,'data/',experimentName,'/skinManager/',input.skinEventsName,'/data.log');
-      
-    %TODO: replace with appropiate information read from 
-    [time_temp, cop_temp ,force_temp,torque_temp,normalDirection_temp,geomCenter_temp, ~,wrench_temp]=readSkinEvents(dataSkinDir);
-    %[linAcc_temp,angVel_temp, time_temp,euler_temp]=readSkinEvents(dataSkinDir);
-    try
-        [cop_temp ,force_temp,torque_temp] = resampleState(time, time_temp, cop_temp' ,force_temp',torque_temp');
-        normalDirection_temp= interp1(time_temp, normalDirection_temp'  , time)';   
-        wrench_temp= interp1(time_temp, wrench_temp'  , time)';
-        geomCenter_temp= interp1(time_temp, geomCenter_temp'  , time)';
-    catch ME        
-         disp( 'readExperiment:loadSkinEvents:timeMismatch could not resample to default time, adding skin time ' )
-        if (strcmp(ME.identifier,'MATLAB:griddedInterpolant:CompVecValueMismatchErrId'))
-            msg = ['Can not resample to ft time frame: Initial time of ft is ', ...
-                num2str(time(1)),' while skin time initial time is ', ...
-                num2str(time_temp(1)),' difference (ft - skin) is ', num2str(time(1)-time_temp(1)), ' end times are ft=', num2str(time(end)),' skin= ', ...
-                num2str(time_temp(end)) ,' difference is ', num2str(time(end)-time_temp(end))];
-            causeException = MException('readExperiment:loadSkinEvents:timeMismatch',msg);
-            ME = addCause(ME,causeException);
-        end
-        skinData.time=time_temp';
-        %rethrow(ME)
-    end
-    %Convert to radians
-    skinData.cop=cop_temp';
-    skinData.force=force_temp';
-    skinData.torque=torque_temp';
-    skinData.normalDirection=normalDirection_temp';  
-    skinData.wrench=wrench_temp';
-    skinData.geomCenter=geomCenter_temp';
-    
-    % Insert into final output
-    dataset.skinData=skinData;
-     end
-     
-         %% Load wholeBodyDynamics torques information
-     if (any(strcmp('wbdPortNames', fieldnames(input))))
-    torquesPortName=strcat(input.torquesPortName,'/data.log'); % (arm, foot and leg have FT data)   
-    for p=1:size(input.wbdPortNames,1)
-        for i=1:size(input.subModels,1)           
-            dataTorqueDirs{i}=strcat(prefixDir,'data/',experimentName,'/',input.wbdPortNames{p},'/',input.subModels{i},'/',torquesPortName);  
-            %read from dataDumper
-            [torqueData_temp,time_temp]=readTorqueData(dataTorqueDirs{i});
-            %resample Torque data
-            try
-                torqueData.(input.subModels{i})=torqueData_temp;
-                torqueData.time=time_temp;
-                %resampleFt(time,time_temp,torqueData_temp); need to match
-                %by time without interpolating since there is a mismatch
-                %between the time the skin event is registerd and the
-                %torque is evaluated
-            catch ME
-                disp( 'readExperiment:loadWBD:timeMismatch could not resample to default time, adding skin time ' )
-                if (strcmp(ME.identifier,'MATLAB:griddedInterpolant:CompVecValueMismatchErrId'))
-                    msg = ['Can not resample to ft time frame: Initial time of ft is ', ...
-                        num2str(time(1)),' while skin time initial time is ', ...
-                        num2str(time_temp(1)),' difference (ft - skin) is ', num2str(time(1)-time_temp(1)), ' end times are ft=', num2str(time(end)),' skin= ', ...
-                        num2str(time_temp(end)) ,' difference is ', num2str(time(end)-time_temp(end))];
-                    causeException = MException('readExperiment:loadWBD:timeMismatch',msg);
-                    ME = addCause(ME,causeException);
-                end
-                torqueData.(input.subModels{i})=torqueData_temp;
-               torqueData.time=time_temp;
-            end
-        end
+    if (any(strcmp('skinEventsName', fieldnames(input))))
+        dataSkinDir=strcat(prefixDir,'data/',experimentName,'/skinManager/',input.skinEventsName,'/data.log');
         
-        % Insert into final output        
-        dataset.(input.wbdNames{p})=torqueData;
+        %TODO: replace with appropiate information read from
+        [time_temp, cop_temp ,force_temp,torque_temp,normalDirection_temp,geomCenter_temp, ~,wrench_temp]=readSkinEvents(dataSkinDir);
+        %[linAcc_temp,angVel_temp, time_temp,euler_temp]=readSkinEvents(dataSkinDir);
+        try
+            [cop_temp ,force_temp,torque_temp] = resampleState(time, time_temp, cop_temp' ,force_temp',torque_temp');
+            normalDirection_temp= interp1(time_temp, normalDirection_temp'  , time)';
+            wrench_temp= interp1(time_temp, wrench_temp'  , time)';
+            geomCenter_temp= interp1(time_temp, geomCenter_temp'  , time)';
+        catch ME
+            disp( 'readExperiment:loadSkinEvents:timeMismatch could not resample to default time, adding skin time ' )
+            if (strcmp(ME.identifier,'MATLAB:griddedInterpolant:CompVecValueMismatchErrId'))
+                msg = ['Can not resample to ft time frame: Initial time of ft is ', ...
+                    num2str(time(1)),' while skin time initial time is ', ...
+                    num2str(time_temp(1)),' difference (ft - skin) is ', num2str(time(1)-time_temp(1)), ' end times are ft=', num2str(time(end)),' skin= ', ...
+                    num2str(time_temp(end)) ,' difference is ', num2str(time(end)-time_temp(end))];
+                causeException = MException('readExperiment:loadSkinEvents:timeMismatch',msg);
+                ME = addCause(ME,causeException);
+            end
+            skinData.time=time_temp';
+            %rethrow(ME)
+        end
+        %Convert to radians
+        skinData.cop=cop_temp';
+        skinData.force=force_temp';
+        skinData.torque=torque_temp';
+        skinData.normalDirection=normalDirection_temp';
+        skinData.wrench=wrench_temp';
+        skinData.geomCenter=geomCenter_temp';
+        
+        % Insert into final output
+        dataset.skinData=skinData;
     end
-     end
+    
+    %% Load wholeBodyDynamics torques information
+    if (any(strcmp('wbdPortNames', fieldnames(input))))
+        torquesPortName=strcat(input.torquesPortName,'/data.log'); % (arm, foot and leg have FT data)
+        for p=1:size(input.wbdPortNames,1)
+            for i=1:size(input.subModels,1)
+                dataTorqueDirs{i}=strcat(prefixDir,'data/',experimentName,'/',input.wbdPortNames{p},'/',input.subModels{i},'/',torquesPortName);
+                %read from dataDumper
+                [torqueData_temp,time_temp]=readTorqueData(dataTorqueDirs{i});
+                %resample Torque data
+                try
+                    torqueData.(input.subModels{i})=torqueData_temp;
+                    torqueData.time=time_temp;
+                    %resampleFt(time,time_temp,torqueData_temp); need to match
+                    %by time without interpolating since there is a mismatch
+                    %between the time the skin event is registerd and the
+                    %torque is evaluated
+                catch ME
+                    disp( 'readExperiment:loadWBD:timeMismatch could not resample to default time, adding skin time ' )
+                    if (strcmp(ME.identifier,'MATLAB:griddedInterpolant:CompVecValueMismatchErrId'))
+                        msg = ['Can not resample to ft time frame: Initial time of ft is ', ...
+                            num2str(time(1)),' while skin time initial time is ', ...
+                            num2str(time_temp(1)),' difference (ft - skin) is ', num2str(time(1)-time_temp(1)), ' end times are ft=', num2str(time(end)),' skin= ', ...
+                            num2str(time_temp(end)) ,' difference is ', num2str(time(end)-time_temp(end))];
+                        causeException = MException('readExperiment:loadWBD:timeMismatch',msg);
+                        ME = addCause(ME,causeException);
+                    end
+                    torqueData.(input.subModels{i})=torqueData_temp;
+                    torqueData.time=time_temp;
+                end
+            end
+            
+            % Insert into final output
+            dataset.(input.wbdNames{p})=torqueData;
+        end
+    end
     
     
     %% Save the workspace

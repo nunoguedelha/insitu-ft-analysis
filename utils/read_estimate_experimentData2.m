@@ -19,10 +19,30 @@ function [dataset,extraSample,input]=read_estimate_experimentData2(experimentNam
 %       scriptOptions.saveData=true;%true
 %       scriptOptions.raw=true;
 % % Script of the mat file used for save the intermediate results
-%       striptOptions.matFileName='ftDataset';
+%       scriptOptions.matFileName='ftDataset';
+%% Default values for scriptOptions
+if (~any(strcmp('forceCalculation', fieldnames(scriptOptions))))
+    scriptOptions.forceCalculation=false;
+    disp(' Using default value forceCalculation=false');
+end
+if (~any(strcmp('saveData', fieldnames(scriptOptions))))
+    scriptOptions.saveData=false;
+    disp(' Using default value saveData=false');
+end
+if (~any(strcmp('raw', fieldnames(scriptOptions))))
+    scriptOptions.raw=false;
+    disp(' Using default value raw=false');
+end
+if (~any(strcmp('useInertial', fieldnames(scriptOptions))))
+    scriptOptions.useInertial=false;
+    disp(' Using default value useInertial=false');
+end
+if (~any(strcmp('matFileName', fieldnames(scriptOptions))))
+    scriptOptions.matFileName='iCubDataset';
+    disp(' Using default value matFileName=false');
+end
 
-
-% load the script of parameters relative
+%% load the script of parameters relative
 paramScript=strcat('data/',experimentName,'/params.m');
 run(paramScript)
 input.ftPortName; %for some reason you can not die fieldnames to input until you used input somewhere
@@ -152,19 +172,34 @@ else
     dataset.time=time;
     dataset.ftData=ftData;
     
-    
-    
     %% filter only relevant samples
     if (any(strcmp('intervals', fieldnames(input))))
         intervalsNames=fieldnames(input.intervals);
-        if (any(strcmp('hanging', intervalsNames)))
-            dataDir=strcat('data/',experimentName,'/icub/inertial/data.log');
-            mask=dataset.time>dataset.time(1)+input.intervals.hanging.initTime & dataset.time<dataset.time(1)+input.intervals.hanging.endTime;
-            datasetInertial=applyMask(dataset,mask);
-            [inertialEstimatedFtData]=obtainEstimatedWrenchesIMU(dataDir,estimator,datasetInertial.time,datasetInertial);
+        if (any(strcmp('hanging', intervalsNames)))            
+            mask=dataset.time>=dataset.time(1)+input.intervals.hanging.initTime & dataset.time<=dataset.time(1)+input.intervals.hanging.endTime;
             
-            inertial.ftData=datasetInertial.ftData;
-            inertial.time=datasetInertial.time;
+            if (any(strcmp('inertialName', fieldnames(input))))
+                dataInertialDir=strcat('data/',experimentName,'/icub/',input.inertialName,'/data.log');
+            else
+                dataInertialDir=strcat('data/',experimentName,'/icub/inertial/data.log');
+            end
+            
+            [linAcc_temp,angVel_temp, time_temp,euler_temp]=readInertial(dataInertialDir);            
+            [linAcc,angVel_temp,~] = resampleState(time, time_temp, linAcc_temp',angVel_temp', euler_temp');
+            
+            %Convert to radians
+            angVel = deg2rad*angVel_temp;
+            
+            inertialData.linAcc=linAcc';
+            inertialData.angVel=angVel';
+            
+            % Insert into final output
+            dataset.inertialData=inertialData;            
+            
+            [inertialEstimatedFtData]=obtainEstimatedWrenches(estimator,dataset.time,{input.intervals.hanging.contactFrame},dataset,mask,inertialData);
+                        
+            inertial.ftData=inertialEstimatedFtData.ftData;
+            inertial.time=inertialEstimatedFtData.time;
             
             sensorNames=fieldnames(inertialEstimatedFtData);
             % match field names with sensor loaded through readDataDumper
@@ -181,20 +216,26 @@ else
             
         end
         
-        if(length(intervalsNames)>0)
+        if(~isempty(intervalsNames))
             for index=1:length(intervalsNames)
                 if(~strcmp('hanging', intervalsNames{index}))
                     intName=intervalsNames{index};
-                    mask=dataset.time>dataset.time(1)+input.intervals.(intName).initTime & dataset.time<dataset.time(1)+input.intervals.(intName).endTime;
+                    mask=dataset.time>=dataset.time(1)+input.intervals.(intName).initTime & dataset.time<=dataset.time(1)+input.intervals.(intName).endTime;
                     dataset2=applyMask(dataset,mask);
-                    [dataset2]=obtainEstimatedWrenches(estimator,dataset2.time, {input.intervals.(intName).contactFrame},dataset2);
                     
-                    %     inertialDir=strcat('data/',experimentName,'/icub/inertial/data.log');
-                    %      [dataset]=obtainEstimatedWrenchesFloatingBase(dataStateDirs,input.stateNames,input.robotName,time,contactFrameName,inertialDir);
+                    if (scriptOptions.useInertial)
+                        if (any(strcmp('inertialName', fieldnames(input))))
+                            dataInertialDir=strcat('data/',experimentName,'/icub/',input.inertialName,'/data.log');
+                        else
+                            dataInertialDir=strcat('data/',experimentName,'/icub/inertial/data.log');
+                        end
+                        [dataset2]=obtainEstimatedWrenchesFloatingBase(dataStateDirs,input.stateNames,input.robotName,time,{input.intervals.(intName).contactFrame},dataInertialDir);
+                    else
+                        [dataset2]=obtainEstimatedWrenches(estimator,dataset2.time,{input.intervals.(intName).contactFrame},dataset2);
+                    end
                     sensorNames=fieldnames(dataset2.estimatedFtData);
                     
                     % match field names with sensor loaded through readDataDumper
-                    %
                     matchup=zeros(size(input.sensorNames,1),1);
                     for i=1:size(input.sensorNames,1)
                         matchup(i) = find(strcmp(sensorNames, input.sensorNames{i}));
@@ -237,7 +278,7 @@ else
             dataset=data;
         else
             if (relevant==1)
-                mask=dataset.time>dataset.time(1)+rData(1) & dataset.time<dataset.time(1)+rData(2);
+                mask=dataset.time>=dataset.time(1)+rData(1) & dataset.time<=dataset.time(1)+rData(2);
                 dataset=applyMask(dataset,mask);
             end
             
@@ -247,7 +288,7 @@ else
             %             for index=1:length(intervalsNames)
             %                 if(~strcmp('hanging', intervalsNames{index}))
             %                     intName=intervalsNames{index};
-            %                     maskTemp=dataset.time>dataset.time(1)+input.intervals.(intName).initTime & dataset.time<dataset.time(1)+input.intervals.(intName).endTime;
+            %                     maskTemp=dataset.time>=dataset.time(1)+input.intervals.(intName).initTime & dataset.time<=dataset.time(1)+input.intervals.(intName).endTime;
             %                     contactTemp(1:length(find(maskTemp)))={input.intervals.(intName).contactFrame};
             %                     mask=or(mask,maskTemp);
             %
@@ -262,15 +303,20 @@ else
             %
             %             dataset=applyMask(dataset,mask);
             
-            %% load state and calculate estimated wrenches for comparison
-            [dataset]=obtainEstimatedWrenches(estimator,dataset.time,contactFrameName,dataset);
-            
-            %     inertialDir=strcat('data/',experimentName,'/icub/inertial/data.log');
-            %      [dataset]=obtainEstimatedWrenchesFloatingBase(dataStateDirs,input.stateNames,input.robotName,time,contactFrameName,inertialDir);
+            %% load state and calculate estimated wrenches for comparison            
+            if (scriptOptions.useInertial)
+                if (any(strcmp('inertialName', fieldnames(input))))
+                    dataInertialDir=strcat('data/',experimentName,'/icub/',input.inertialName,'/data.log');
+                else
+                    dataInertialDir=strcat('data/',experimentName,'/icub/inertial/data.log');
+                end
+                [dataset]=obtainEstimatedWrenchesFloatingBase(dataStateDirs,input.stateNames,input.robotName,time,contactFrameName,dataInertialDir);
+            else
+                [dataset]=obtainEstimatedWrenches(estimator,dataset.time,contactFrameName,dataset);
+            end
             sensorNames=fieldnames(dataset.estimatedFtData);
             
             % match field names with sensor loaded through readDataDumper
-            %
             matchup=zeros(size(input.sensorNames,1),1);
             for i=1:size(input.sensorNames,1)
                 matchup(i) = find(strcmp(sensorNames, input.sensorNames{i}));
@@ -282,11 +328,6 @@ else
                 estimatedFtData.(input.ftNames{i})=dataset.estimatedFtData.(sensorNames{matchup(i)});
             end
             dataset.estimatedFtData=estimatedFtData;
-            %     if(scriptOptions.saveDataAll)
-            %         allData=dataset;
-            %         save(strcat('data/',experimentName,'/all',scriptOptions.matFileName,'.mat'),'allData')
-            %     end
-            
             
             %% Filter data
             % filtered ft data
@@ -298,12 +339,29 @@ else
         end
         
     else
-        if(input.hangingInit==1)
-            dataDir=strcat('data/',experimentName,'/icub/inertial/data.log');
-            mask=dataset.time>dataset.time(1)+input.hangingInterval(1) & dataset.time<dataset.time(1)+input.hangingInterval(2);
+        if(input.hangingInit==1)            
+            mask=dataset.time>=dataset.time(1)+input.hangingInterval(1) & dataset.time<=dataset.time(1)+input.hangingInterval(2);
             datasetInertial=applyMask(dataset,mask);
-            [inertialEstimatedFtData]=obtainEstimatedWrenchesIMU(dataDir,estimator,datasetInertial.time,datasetInertial);
+            if (any(strcmp('inertialName', fieldnames(input))))
+                dataInertialDir=strcat('data/',experimentName,'/icub/',input.inertialName,'/data.log');
+            else
+                dataInertialDir=strcat('data/',experimentName,'/icub/inertial/data.log');
+            end
             
+            [linAcc_temp,angVel_temp, time_temp,euler_temp]=readInertial(dataInertialDir);            
+            [linAcc,angVel_temp,~] = resampleState(time, time_temp, linAcc_temp',angVel_temp', euler_temp');
+            
+            %Convert to radians
+            angVel = deg2rad*angVel_temp;
+            
+            inertialData.linAcc=linAcc';
+            inertialData.angVel=angVel';
+            
+            % Insert into final output
+            dataset.inertialData=inertialData;            
+            
+            [inertialEstimatedFtData]=obtainEstimatedWrenches(estimator,dataset.time,{input.intervals.hanging.contactFrame},dataset,mask,inertialData);
+                
             inertial.ftData=datasetInertial.ftData;
             inertial.time=datasetInertial.time;
             
@@ -324,18 +382,24 @@ else
         
         
         if (relevant==1)
-            mask=dataset.time>dataset.time(1)+rData(1) & dataset.time<dataset.time(1)+rData(2);
+            mask=dataset.time>=dataset.time(1)+rData(1) & dataset.time<=dataset.time(1)+rData(2);
             dataset=applyMask(dataset,mask);
         end
         
         
         
         %% load state and calculate estimated wrenches for comparison
-        [dataset]=obtainEstimatedWrenches(estimator,dataset.time,contactFrameName,dataset);
-        
-        %     inertialDir=strcat('data/',experimentName,'/icub/inertial/data.log');
-        %      [dataset]=obtainEstimatedWrenchesFloatingBase(dataStateDirs,input.stateNames,input.robotName,time,contactFrameName,inertialDir);
-        sensorNames=fieldnames(dataset.estimatedFtData);
+         if (scriptOptions.useInertial)
+                if (any(strcmp('inertialName', fieldnames(input))))
+                    dataInertialDir=strcat('data/',experimentName,'/icub/',input.inertialName,'/data.log');
+                else
+                    dataInertialDir=strcat('data/',experimentName,'/icub/inertial/data.log');
+                end
+                [dataset]=obtainEstimatedWrenchesFloatingBase(dataStateDirs,input.stateNames,input.robotName,time,contactFrameName,dataInertialDir);
+            else
+                [dataset]=obtainEstimatedWrenches(estimator,dataset.time,contactFrameName,dataset);
+         end
+         sensorNames=fieldnames(dataset.estimatedFtData);
         
         % match field names with sensor loaded through readDataDumper
         %
@@ -350,11 +414,6 @@ else
             estimatedFtData.(input.ftNames{i})=dataset.estimatedFtData.(sensorNames{matchup(i)});
         end
         dataset.estimatedFtData=estimatedFtData;
-        %     if(scriptOptions.saveDataAll)
-        %         allData=dataset;
-        %         save(strcat('data/',experimentName,'/all',scriptOptions.matFileName,'.mat'),'allData')
-        %     end
-        
         
         %% Filter data
         % filtered ft data
@@ -389,5 +448,3 @@ else
         save(strcat('data/',experimentName,'/',scriptOptions.matFileName,'.mat'),'dataset')
     end
 end
-
-

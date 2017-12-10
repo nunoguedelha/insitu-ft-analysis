@@ -1,4 +1,4 @@
- function [dataset]=obtainEstimatedWrenches(estimator,resampledTime,contactFrameName,dataset)
+ function [dataset]=obtainEstimatedWrenches(estimator,resampledTime,contactFrameName,dataset,varargin)
 % OBTAINESTIMATEDWRENCH Get (model) estimated wrenches for a iCub dataset
 %   estimator       : variable which contains the model of the robot
 %   dataset         : contains the joint position velocities and
@@ -12,11 +12,62 @@
 % contactInfo should in the end have this information for every time step,
 % for now assuming contact doesnt change
 % 
-
-% Take the used position from the dataset
-qj_all=dataset.qj';
-dqj_all=dataset.dqj';
-ddqj_all=dataset.ddqj';
+%% Check varargin
+useInertial=false;
+if(~isempty(varargin))
+    if (length(varargin)<3)
+        if (length(varargin)==1) % it means mask available
+            if (islogical(varargin{1}))
+                mask=varargin{1};                
+                if(size(mask)==size(resampledTime))
+                    dataset=applyMask(dataset,mask);
+                    resampledTime=applyMask(resampledTime,mask);
+                else
+                    disp('Mask is the wrong size');
+                end
+            else
+                if(isstruct(varargin{1}))
+                    inertialData=varargin{1};
+                    inertialFields=fieldnames(inertialData);
+                    if(length(inertialFields)==2)
+                        useInertial=true;
+                    else
+                        disp('Error! Expected inertial data that has only 2 fields');
+                    end
+                else
+                    disp('Not valid argument');
+                end
+            end
+        end
+        if (length(varargin)==2) % it means inertial data is provided
+            if (islogical(varargin{1}))
+                mask=varargin{1};
+                if(size(mask)==size(resampledTime))
+                    dataset=applyMask(dataset,mask);
+                    resampledTime=applyMask(resampledTime,mask);
+                else
+                    disp('Mask is the wrong size');
+                end
+            end
+            if(isstruct(varargin{2}))
+                inertialData=varargin{2};
+                inertialFields=fieldnames(inertialData);
+                if(length(inertialFields)==2)
+                    useInertial=true;
+                else
+                    disp('Error! Expected inertial data that has only 2 fields');
+                end
+            end
+        end
+        
+    else
+        disp('Too many arguments, check what you are sending (extra parameters ignored)')
+    end
+end
+%% Take the used position from the dataset
+qj_all=dataset.qj;
+dqj_all=dataset.dqj;
+ddqj_all=dataset.ddqj;
 
 dofs = estimator.model().getNrOfDOFs();
 
@@ -24,6 +75,10 @@ grav_idyn = iDynTree.Vector3();
 grav = [0.0;0.0;-9.81];
 grav_idyn.fromMatlab(grav);
 
+if (useInertial)
+    angVel_idyn = iDynTree.Vector3();
+    angAcc_idyn = iDynTree.Vector3();
+end
 %store number of sensors
 nrOfFTSensors = estimator.sensors().getNrOfSensors(iDynTree.SIX_AXIS_FORCE_TORQUE);
 
@@ -88,9 +143,9 @@ for t=1:length(resampledTime)
         fprintf('obtainedEstimatedWrenches: process the %d sample out of %d\n',t,length(resampledTime))
     end
     
-    qj=qj_all(:,t);
-    dqj=dqj_all(:,t);
-    ddqj=ddqj_all(:,t);
+    qj=qj_all(t,:);
+    dqj=dqj_all(t,:);
+    ddqj=ddqj_all(t,:);
     
     %    % velocity and acceleration to 0 to prove if they are neglegible. (slow
     %    % experiment scenario)
@@ -106,10 +161,20 @@ for t=1:length(resampledTime)
         contact_index = estimator.model().getFrameIndex(char(contactFrameName(t)));
 fullBodyUnknowns.addNewContactInFrame(estimator.model(),contact_index,unknownWrench);
         
-    end
+    end    
     
+    
+    if (useInertial)
+        grav_idyn.fromMatlab(inertialData.linAcc(t,:));
+    angVel_idyn.fromMatlab(inertialData.angVel(t,:));
+    angAcc_idyn.fromMatlab([0;0;0]);
     % Set the kinematics information in the estimator
+    ok = estimator.updateKinematicsFromFloatingBase(qj_idyn,dqj_idyn,ddqj_idyn,contact_index,grav_idyn,angVel_idyn,angAcc_idyn);
+
+    else
+        % Set the kinematics information in the estimator
     ok = estimator.updateKinematicsFromFixedBase(qj_idyn,dqj_idyn,ddqj_idyn,contact_index,grav_idyn);
+    end
     
     %% Run the prediction of FT measurements
     
