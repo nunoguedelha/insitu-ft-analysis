@@ -31,7 +31,7 @@ scriptOptions.raw=true;% to calculate the raw data, for recalibration always tru
 %scriptOptions.saveDataAll=true;
 scriptOptions.matFileName='ftDataset';
 cd ..
-[dataset]=read_estimate_experimentData2(experimentName,scriptOptions);
+[dataset]=read_estimate_experimentData(experimentName,scriptOptions);
 cd testResults/
 % We carry the analysis just for a subset of the sensors
 %sensorsToAnalize = {'left_leg','right_leg'};

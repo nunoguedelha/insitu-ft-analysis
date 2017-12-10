@@ -8,7 +8,7 @@ experimentNames={
  'green-iCub-Insitu-Datasets/2017_08_29_3';% Name of the experiment;
     };
 scriptOptions = {};
-scriptOptions.forceCalculation=false;%false;
+scriptOptions.forceCalculation=true;%false;
 scriptOptions.printPlots=false;%true
 scriptOptions.saveData=true;%true
 scriptOptions.raw=true;
@@ -39,7 +39,7 @@ lambdasNames=lambdasNames'
 calculate=true;
 %%
 %calibration options
-calibOptions.saveMat=true;
+calibOptions.saveMat=false;
 calibOptions.usingInsitu=true;
 calibOptions.plot=true;
 calibOptions.onlyWSpace=true;
@@ -49,7 +49,7 @@ calibOptions.IITfirmwareFriendly=true; % in case a calibration matrix that will 
 for i=1:length(experimentNames)
     %TODO: create a variable for having extrasample variable for each
     %expermient
-    [data.(strcat('e',num2str(i))),data.(strcat('extra',num2str(i)))]=read_estimate_experimentData2(experimentNames{i},scriptOptions);
+    [data.(strcat('e',num2str(i))),data.(strcat('extra',num2str(i)))]=read_estimate_experimentData(experimentNames{i},scriptOptions);
     
     if(calculate)
         dataset=data.(strcat('e',num2str(i)));

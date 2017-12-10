@@ -1,7 +1,7 @@
 %Parameter script template
 %name of the file should be renamed to params.m and should be inside the
 %experiment folder
-
+%create input parameter
 %% Variables that depend on the experiment
 input.intervals=struct(); %this will have the relevant intervals of the demos 4 possibilities hanging, fixed, right_leg, left_leg, each interval must have initTime, endTime, contactFrame.
 %example
@@ -10,9 +10,10 @@ input.intervals=struct(); %this will have the relevant intervals of the demos 4 
 % input.intervals.rightLeg=struct('initTime',0,'endTime',0,'contactFrame','r_sole');
 % input.intervals.leftLeg=struct('initTime',0,'endTime',0,'contactFrame','l_sole');
 
-%if no intervals it will take this values as default
-input.relevant=0; %if relevantData file exists
-input.contactFrameName='root_link'; %name of the frame which is in contact
+% for considering extra samples
+%input.extraSampleRight  %input here the name of the other experiment from
+%which to take the samples
+%input.extraSampleLeft
 
 % skin torque experiment variables
 % input.torquesPortName;
@@ -20,27 +21,24 @@ input.contactFrameName='root_link'; %name of the frame which is in contact
 % input.wbdNames;
 % input.subModels;
 
-% for considering extra samples
-%input.extraSampleRight  %input here the name of the other experiment from
-%which to take the samples
-%input.extraSampleLeft
 
 %% Variables that depend on the way information was logged
-%create input parameter
-% input.experimentName='dumperRightLegNoIMU';% Name of the experiment
-%input.inertialName='inertial'; enable in case there is info read from the
+
+input.inertialName='inertial'; enable in case there is info read from the
 %IMU
-input.ftPortName=''; % (arm, foot and leg have FT data), usually is 'analog:o'
-input.statePortName=''; % (only foot has no state data), usually is 'stateExt:o'
-input.ftNames={}%usual values are {'left_arm';'right_arm';'left_leg';'right_leg';'left_foot';'right_foot'}; %name of folders that contain ft measures
-sensorNames={}% usual values are {'l_arm_ft_sensor'; 'r_arm_ft_sensor'; 'l_leg_ft_sensor'; 'r_leg_ft_sensor'; 'l_foot_ft_sensor'; 'r_foot_ft_sensor';};
+input.ftPortName='analog:o'; % (arm, foot and leg have FT data), usually is 'analog:o'
+input.statePortName='stateExt:i'; % (only foot has no state data), usually is 'stateExt:i'
+input.ftNames={'left_arm';'right_arm';'left_leg';'right_leg';'left_foot';'right_foot'};
+%usual values are {'left_arm';'right_arm';'left_leg';'right_leg';'left_foot';'right_foot'}; %name of folders that contain ft measures
+sensorNames={'l_arm_ft_sensor'; 'r_arm_ft_sensor'; 'l_leg_ft_sensor'; 'r_leg_ft_sensor'; 'l_foot_ft_sensor'; 'r_foot_ft_sensor';};
+% usual values are {'l_arm_ft_sensor'; 'r_arm_ft_sensor'; 'l_leg_ft_sensor'; 'r_leg_ft_sensor'; 'l_foot_ft_sensor'; 'r_foot_ft_sensor';};
 input.sensorNames=sensorNames; %make sensor names match the order of the names of the folders
 %this depends if the flag for obtaining calibrated data is on ( by default
 %it is, unless raw data is specifically requested form the yarp port )
 input.calibFlag=true;
 
 %% Variables that depend on the robot used in the experiment
-input.robotName=''; %name of the robot being used (urdf model should be present in the folder), example 'iCubGenova02'
+input.robotName='model'; %name of the robot being used (urdf model should be present in the folder), example 'iCubGenova02'
 % calib variables will only be used when raw data needs to be calculated
 input.calibMatPath='';%path to where calibration matrices can be found
 input.calibMatFileNames={}; % name of the files containing the calibration matrics in the same order specified in ftNames
@@ -58,12 +56,6 @@ right_leg='right_leg'; value5={'r_hip_pitch';'r_hip_roll';'r_hip_yaw';'r_knee';'
 torso='torso'; value6={'torso_yaw';'torso_roll';'torso_pitch'};
 
 input.stateNames=struct(head,{value1},left_arm,{value2},left_leg,{value3},right_arm,{value4},right_leg,{value5},torso,{value6});
-
-
-% Support legacy part of the script that expect parameters outside of the
-% input structure 
-relevant=input.relevant;
-contactFrameName = {input.contactFrameName};
 
 %% Mini checks
 if(size (input.calibMatFileNames)~=size (input.ftNames))

@@ -37,7 +37,7 @@ scriptOptions.saveData=true;
 % Script of the mat file used for save the intermediate results
 %scriptOptions.matFileName='dataEllipsoidAnalysis'; %newName
 scriptOptions.matFileName='ftDataset';
-[dataset,~,~]=read_estimate_experimentData2(experimentName,scriptOptions);
+[dataset,~,~]=read_estimate_experimentData(experimentName,scriptOptions);
 % Sample to use less data
 dataset=dataSampling(dataset,5);
 

@@ -49,13 +49,13 @@ input.ftPortName; %for some reason you can not die fieldnames to input until you
 %fieldnames(input)
 % load the extra sample first (might change this to later in the code)
 if (any(strcmp('extraSampleRight', fieldnames(input))))
-    [extraSample.right,~]=read_estimate_experimentData2(input.extraSampleRight,scriptOptions);
+    [extraSample.right,~]=read_estimate_experimentData(input.extraSampleRight,scriptOptions);
 else
     extraSample.right=nan;
 end
 
 if (any(strcmp('extraSampleLeft', fieldnames(input))))
-    [extraSample.left,~]=read_estimate_experimentData2(input.extraSampleLeft,scriptOptions);
+    [extraSample.left,~]=read_estimate_experimentData(input.extraSampleLeft,scriptOptions);
 else
     extraSample.left=nan;
 end
