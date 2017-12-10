@@ -21,6 +21,10 @@ function [dataset,estimator,input]=readExperiment(experimentName,scriptOptions)
 %       scriptOptions.forceCalculation=true;%false;
 %       scriptOptions.saveData=true;%true
 %       scriptOptions.testDir=false;% true
+%       scriptOptions.filterData=true;
+%       scriptOptions.raw=false;
+%       scriptOptions.estimateWrenches=false;
+%       scriptOptions.useInertial=false;
 % % Script of the mat file used for save the intermediate results
 %       scriptOptions.matFileName='iCubDataset';
 
@@ -42,8 +46,8 @@ if (~any(strcmp('matFileName', fieldnames(scriptOptions))))
     disp(' Using default value matFileName=false');
 end
 if (~any(strcmp('filterData', fieldnames(scriptOptions))))
-    scriptOptions.filterData=false;
-    disp(' Using default value filterData=false');
+    scriptOptions.filterData=true;
+    disp(' Using default value filterData=true');
 end
 if (~any(strcmp('raw', fieldnames(scriptOptions))))
     scriptOptions.raw=false;
@@ -96,13 +100,15 @@ else
         dataFTDirs{i}=strcat(prefixDir,'data/',experimentName,'/icub/',input.ftNames{i},'/',ftDataName);
         
     end
+    disp('readExperiment: reading FT data');
     [ftData.(input.ftNames{1}),time]=readDataDumper(dataFTDirs{1});
-    
+    fprintf('readExperiment: Reading the FT data for the part %s\n',input.ftNames{1});
     for i=2:size(input.ftNames,1)
         %read from dataDumper
         [ftData_temp,time_temp]=readDataDumper(dataFTDirs{i});
         %resample FT data
         ftData.(input.ftNames{i})=resampleFt(time,time_temp,ftData_temp);
+        fprintf('readExperiment: Resampling the FT data for the part %s\n',input.ftNames{i});
     end
     
     % Insert into final output
@@ -111,9 +117,12 @@ else
     
     %% load Inertial data
     if (any(strcmp('inertialName', fieldnames(input))))
-        dataInertialDir=strcat(prefixDir,'data/',experimentName,'/icub/',input.inertialName,'/data.log');
-        
-        
+        dataInertialDir=strcat('data/',experimentName,'/icub/',input.inertialName,'/data.log');
+    else
+        dataInertialDir=strcat('data/',experimentName,'/icub/inertial/data.log');
+    end
+    if (exist(dataInertialDir,'file')==2)
+        disp( 'readExperiment: Reading inertial data');
         [linAcc_temp,angVel_temp, time_temp,euler_temp]=readInertial(dataInertialDir);
         
         [linAcc,angVel_temp,~] = resampleState(time, time_temp, linAcc_temp',angVel_temp', euler_temp');
@@ -126,7 +135,9 @@ else
         
         % Insert into final output
         dataset.inertialData=inertialData;
-        
+    else
+        scriptOptions.useInertial=false;
+        disp( 'readExperiment: Disabling inertial data since inertial file does not exist');
     end
     
     %% Prepare to load stateExt data
@@ -153,28 +164,28 @@ else
         % disp(strcat('name=',estimator.model().getJointName(i),' , index=',num2str(i)))
         names{i+1}=estimator.model().getJointName(i);
     end
-    fNames=fieldnames(input.stateNames);
+    stateNames=fieldnames(input.stateNames);
     %to iterate through a struct do the following
     % input.stateNames.(fNames{i})
     %for the first elment in the first field it would be
     %input.stateNames.(fNames{1}){1}
     dataset.jointNames = {};
     
-    fprintf('readExperiment: Resampling the state\n');
-    for i=1:size(fNames)
-        Dof=size(input.stateNames.(fNames{i}));
+    fprintf('readExperiment: Reading the stateExt\n');
+    for i=1:size(stateNames)
+        Dof=size(input.stateNames.(stateNames{i}));
         [qj_temp,dqj_temp,ddqj_temp,time_temp, ~, ~, ~, tau_temp,]=readStateExt(Dof(1),dataStateDirs{i});
         %store only the ones that have a degree of freedom (the names of the joint
         %should match one of the names stored in the model of the robot
         % we resample joint encoders on the timestamp of the FT sensors
-        fprintf('readExperiment: Resampling the state for the part %s\n',fNames{i});
+        fprintf('readExperiment: Resampling the state for the part %s\n',stateNames{i});
         [qj_temp,dqj_temp,ddqj_temp] = resampleState(time, time_temp, qj_temp, dqj_temp, ddqj_temp);
         tau_temp= interp1(time_temp, tau_temp'  , time)';
         
         for j=1:Dof
-            index = find(strcmp(names, input.stateNames.(fNames{i}){j}));
+            index = find(strcmp(names, input.stateNames.(stateNames{i}){j}));
             if(isempty(index)==0)
-                dataset.jointNames{index} = input.stateNames.(fNames{i}){j};
+                dataset.jointNames{index} = input.stateNames.(stateNames{i}){j};
                 qj_all(index,:) = deg2rad*qj_temp(j,:);
                 dqj_all(index,:) =deg2rad* dqj_temp(j,:);
                 ddqj_all(index,:) =deg2rad* ddqj_temp(j,:);
@@ -188,6 +199,29 @@ else
     dataset.dqj = dqj_all';
     dataset.ddqj = ddqj_all';
     dataset.tau=tau_all';
+    %% This section modifies or estimates data
+    %% Estimate wrenches
+    if(scriptOptions.estimateWrenches)
+        
+    end
+    %% Filter ft data
+    if(scriptOptions.filterData)
+        disp( 'readExperiment: Filtering FT data');
+        [filteredFtData,mask]=filterFtData(dataset.ftData);
+        dataset=applyMask(dataset,mask);
+        dataset.filteredFtData=applyMask(filteredFtData,mask);
+    end
+    
+    %% Calculate raw data using known calibration matrix
+    if(scriptOptions.raw)
+        disp( 'readExperiment: Calculating raw FT values');
+        [dataset.rawData,cMat]=getRawData(dataset.ftData,input.calibMatPath,input.calibMatFileNames);
+        dataset.cMat=cMat;
+        if(scriptOptions.filterData)
+            [dataset.rawDataFiltered]=getRawData(dataset.filteredFtData,cMat);
+        end
+        dataset.calibMatFileNames=input.calibMatFileNames;
+    end
     
     %% Load skin events information
     if (any(strcmp('skinEventsName', fieldnames(input))))
@@ -269,6 +303,7 @@ else
     %     time stamp, workbench calibration matrices with their serial
     %     numbers
     if(scriptOptions.saveData)
+        fprintf('readExperiment: Data is being saved in %s\n',scriptOptions.matFileName);
         save(strcat(prefixDir,'data/',experimentName,'/',scriptOptions.matFileName,'.mat'),'dataset')
     end
 end
