@@ -1,0 +1,35 @@
+## Calibrate a sensor
+
+This script allows to calibrate six axis force torque (F/T)
+sensors once they are mounted on the robot. This procedure
+takes advantage of the knowledge of the model of the robot
+to generate the expected wrenches of the sensors during
+some arbitrary motions. It then uses this information to train
+and validate new calibration matrices, taking into account
+the calibration matrix obtained with a classical Workbench
+calibration. For more on the theory behind this script, check [1].
+The data from an experiment is typically logged
+using yarpDataDumper directly form statesAndFtSensorsInertial.xml or
+using sensor-calib-inertial [2] and stored in [3] or [4].
+[1] : F. J. A. Chavez, S. Traversaro, D. Pucci and F. Nori, 
+      "Model based in situ calibration of six axis force torque sensors," 
+      2016 IEEE-RAS 16th International Conference on Humanoid Robots (Humanoids), Cancun, 2016
+[2] : https://github.com/robotology-playground/sensors-calib-inertial/tree/feature/integrateFTSensors% 
+[3] : https://gitlab.com/dynamic-interaction-control/green-iCub-Insitu-Datasets
+[4] : https://gitlab.com/dynamic-interaction-control/icub-insitu-ft-analysis-big-datasets 
+
+% Instructions before running script
+-Log the experiment using statesAndFtSensorsInertial.xml or
+using sensor-calib-inertial
+-Edit a file params.m based on paramsTemplate.m to match the 
+characteristics of the experiment and put it in the experiment folder
+-Verify there is a folder named calibrationMatrices inside the experiment 
+folder to store resulting calibration matrices
+   ~ Remark: if nothing changed between experiments (logging method,
+   sensor replacement or use of another robot) params.m can be
+   directly copied for another experiment.
+-Select desired options for reading the experiment
+-Change experimentName to desired experiment folder
+-Select desired options of the calibration procedure
+-Run this script
+
