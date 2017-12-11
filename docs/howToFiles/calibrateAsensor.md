@@ -41,6 +41,9 @@ scriptOptions.estimateWrenches=true;
 scriptOptions.useInertial=false;
 scriptOptions.matFileName='ftDataset';
 ```
+  
+**required options to be on are `scriptOptions.raw scriptOptions.filterData scriptOptions.estimateWrenches` others are optional**
+
 - Change `experimentName='';` to desired experiment folder
 - Select desired options of the calibration procedure. Typycally
 ```
@@ -73,4 +76,56 @@ The options are the following:
 ![hidden feature](https://user-images.githubusercontent.com/11043189/33843192-f9f32c04-de9c-11e7-9007-9ad5083fd389.png)
       
        
-    
+### Understanding Results
+While calibrating the sensor the script will realease a series of messages.
+
+When no data has been read from the experiment or force calculation is on we will see:
+
+```
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material green not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material green not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material black not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material red not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material blue not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material yellow not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material pink not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material cyan not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material green not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material white not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material dblue not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material dgreen not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material gray not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material green not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material black not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material red not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material blue not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material yellow not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material pink not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material cyan not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material green not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material white not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material dblue not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material dgreen not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material gray not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material green not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material black not found in model database.
+[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material red not found in model database.
+readExperiment: reading FT data
+readExperiment: Reading the FT data for the part right_leg
+readExperiment: Disabling inertial data since inertial file does not exist
+readExperiment: Reading the stateExt
+readExperiment: Resampling the state for the part head
+readExperiment: Resampling the state for the part left_arm
+readExperiment: Resampling the state for the part left_leg
+readExperiment: Resampling the state for the part right_arm
+readExperiment: Resampling the state for the part right_leg
+readExperiment: Resampling the state for the part torso
+estimateDynamicsUsingIntervals: estimating interval fixed with contact frame root_link from 0 s to 3500 s 
+estimateDynamicsUsingIntervals: using fixed base for estimation
+obtainEstimatedWrenches: Computing the estimated wrenches
+obtainedEstimatedWrenches: process the 10000 sample out of 30976
+obtainedEstimatedWrenches: process the 20000 sample out of 30976
+obtainedEstimatedWrenches: process the 30000 sample out of 30976
+readExperiment: Filtering FT data
+readExperiment: Calculating raw FT values
+```
