@@ -57,6 +57,11 @@ Input variables:
     -  scriptOptions.matFileName='iCubDataset';
        - posible values: any string, most used iCubDataset or ftDataset
        - behavior: name of the file with which the data will be saved
+       
+ An image of how the dataset Structure looks in matlab:
+       
+![dataset Structure](https://user-images.githubusercontent.com/11043189/33834203-837347ea-de82-11e7-926f-4ea896f64d44.png)
+
 
 [1]:https://github.com/robotology-playground/sensors-calib-inertial/tree/feature/integrateFTSensors
 [2]:https://github.com/robotology-playground/insitu-ft-analysis/blob/master/docs/yarpManagerApps/statesAndFtSensorsInertial.xml
