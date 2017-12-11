@@ -77,55 +77,37 @@ The options are the following:
       
        
 ### Understanding Results
-While calibrating the sensor the script will realease a series of messages.
+While calibrating the sensor the script will realease a series of messages most of them belong to outputs from the [readExperiment.m] function.
+Due to the current [bugs detected](https://github.com/loc2/component_ft-sensors/issues/1#issuecomment-349793471) the rescaling of the matrix by the fullscale can not be used. So when the calibration matrix can be used without the rescaling and the save option is enabled it will print:
+`Matrix can be implemented in the DSP (i.e. coeffs in [-1 1])`
 
-When no data has been read from the experiment or force calculation is on we will see:
+Otherwise it will print
+```
+ERROR!!!! Matrix cannot be implemented in the DSP (i.e. coeffs not in [-1 1])
+Error using bitcmp
+Double inputs must have integer values in the range of ASSUMEDTYPE.
 
+Error in convert_onedotfifteen (line 10)
+quant = bitcmp(quant,'uint16') + 1; % Take the 2's complement
+
+Error in writeCalibMat (line 42)
+        temp=convert_onedotfifteen(Cs(iy,ix));
+
+Error in CalibMatCorrection (line 78)
+        writeCalibMat(firmwareMat, full_scale, filename)
+
+Error in run (line 86)
+evalin('caller', [script ';']);
+
+Error in calibrateFTsensor (line 86)
+run('CalibMatCorrection.m')
 ```
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material green not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material green not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material black not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material red not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material blue not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material yellow not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material pink not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material cyan not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material green not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material white not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material dblue not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material dgreen not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material gray not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material green not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material black not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material red not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material blue not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material yellow not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material pink not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material cyan not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material green not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material white not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material dblue not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material dgreen not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material gray not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material green not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material black not found in model database.
-[WARNING]  :: parseURDFMaterial : Impossible to parse URDF material, material red not found in model database.
-readExperiment: reading FT data
-readExperiment: Reading the FT data for the part right_leg
-readExperiment: Disabling inertial data since inertial file does not exist
-readExperiment: Reading the stateExt
-readExperiment: Resampling the state for the part head
-readExperiment: Resampling the state for the part left_arm
-readExperiment: Resampling the state for the part left_leg
-readExperiment: Resampling the state for the part right_arm
-readExperiment: Resampling the state for the part right_leg
-readExperiment: Resampling the state for the part torso
-estimateDynamicsUsingIntervals: estimating interval fixed with contact frame root_link from 0 s to 3500 s 
-estimateDynamicsUsingIntervals: using fixed base for estimation
-obtainEstimatedWrenches: Computing the estimated wrenches
-obtainedEstimatedWrenches: process the 10000 sample out of 30976
-obtainedEstimatedWrenches: process the 20000 sample out of 30976
-obtainedEstimatedWrenches: process the 30000 sample out of 30976
-readExperiment: Filtering FT data
-readExperiment: Calculating raw FT values
-```
+The first evaluation of the calibration matrix is obtained from visual evaluation of the resulting plots.
+![exampleResult](https://user-images.githubusercontent.com/11043189/33845375-915ba00c-dea3-11e7-8d5f-1d59d2353976.png)
+
+A good fitting and the procedure used for testing can be seen in [good calibration](https://github.com/loc2/component_ft-sensors/issues/1#issuecomment-349434170). This is method for checking is making an evaluation of the performance of the sensor with the correction on the robot.
+
+It is possible to test the calibration matrices offline using the scripts found in [testResults](https://github.com/robotology-playground/insitu-ft-analysis/tree/master/testResults)
+
+
+
