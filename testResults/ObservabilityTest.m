@@ -20,19 +20,22 @@ addpath ../data
 %  experimentName='icub-insitu-ft-analysis-big-datasets/2016_07_05/gridMin45';% Name of the experiment;
 experimentName='/green-iCub-Insitu-Datasets/2017_12_5_TestGrid';% first sample with cable corrected ;
 
-
-
 scriptOptions = {};
-scriptOptions.forceCalculation=false;%false;
-scriptOptions.printPlots=false;%true
-scriptOptions.saveData=false;%true
-scriptOptions.raw=true;% to calculate the raw data, for recalibration always true
+scriptOptions.forceCalculation=true;%false;
+scriptOptions.printPlots=true;%true
+scriptOptions.raw=true;
+scriptOptions.saveData=false;
+scriptOptions.testDir=true;% to calculate the raw data, for recalibration always true
+scriptOptions.filterData=true;
+scriptOptions.estimateWrenches=true;
+scriptOptions.useInertial=false;    
 % Script of the mat file used for save the intermediate results
 %scriptOptions.saveDataAll=true;
 scriptOptions.matFileName='ftDataset';
-cd ..
-[dataset]=read_estimate_experimentData(experimentName,scriptOptions);
-cd testResults/
+% cd ..
+% [dataset]=read_estimate_experimentData(experimentName,scriptOptions);
+% cd testResults/
+[dataset]=readExperiment(experimentName,scriptOptions);
 % We carry the analysis just for a subset of the sensors
 %sensorsToAnalize = {'left_leg','right_leg'};
 %sensorsToAnalize = {'right_foot','right_leg'};

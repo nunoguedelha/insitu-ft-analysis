@@ -77,6 +77,11 @@ compareDatasetOptions.forceCalculation=true;%false;
 compareDatasetOptions.saveData=true;%true
 compareDatasetOptions.matFileName='iCubDataset';
 compareDatasetOptions.testDir=true;
+compareDatasetOptions.raw=true;
+compareDatasetOptions.testDir=true;% to calculate the raw data, for recalibration always true
+compareDatasetOptions.filterData=false;
+compareDatasetOptions.estimateWrenches=false;
+compareDatasetOptions.useInertial=false;    
 
 for c=1:length(toCompare)
     [data.(toCompareNames{c}),estimator,input]=readExperiment(toCompare{c},compareDatasetOptions);

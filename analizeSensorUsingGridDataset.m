@@ -33,11 +33,16 @@ scriptOptions = {};
 scriptOptions.forceCalculation=true;%false;
 scriptOptions.printPlots=true;%true
 scriptOptions.raw=false;
-scriptOptions.saveData=true;
+scriptOptions.saveData=false;
+scriptOptions.testDir=false;% to calculate the raw data, for recalibration always true
+scriptOptions.filterData=true;
+scriptOptions.estimateWrenches=true;
+scriptOptions.useInertial=false;    
 % Script of the mat file used for save the intermediate results
 %scriptOptions.matFileName='dataEllipsoidAnalysis'; %newName
 scriptOptions.matFileName='ftDataset';
-[dataset,~,~]=read_estimate_experimentData(experimentName,scriptOptions);
+%[dataset,~,~]=read_estimate_experimentData(experimentName,scriptOptions);
+[dataset,~,~]=readExperiment (experimentName,scriptOptions);
 % Sample to use less data
 dataset=dataSampling(dataset,5);
 

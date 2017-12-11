@@ -56,7 +56,9 @@ for n=1:length(eNames)
     plotOptions.norm=true;%  plot norm over time
     plotOptions.modelVSnoModel=false;%  plot in which ellipsoids from the  model and not using the model are compared
     
-    [dataset]=read_estimate_experimentData(experimentName,scriptOptions);
+    %[dataset]=read_estimate_experimentData(experimentName,scriptOptions);
+    [dataset]=readExperiment (experimentName,scriptOptions);
+
     % % load the script of parameters relative
     paramScript=strcat('data/',experimentName,'/params.m');
     run(paramScript)

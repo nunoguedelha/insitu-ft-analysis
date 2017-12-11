@@ -1,6 +1,58 @@
-function [externalWrenches,time]= obtainExternalForces(robotName,dataset,secMat,sensorNames,contactFrameName,timeFrame,framesNames,offset)
+function [externalWrenches,time,jointTorques]= obtainExternalForces(robotName,dataset,secMat,sensorNames,contactFrameName,timeFrame,framesNames,offset,varargin)
+%% Check varargin
+useInertial=false;
+if(~isempty(varargin))
+    if (length(varargin)<3)
+        if (length(varargin)==1) % it means mask available
+            if (islogical(varargin{1}))
+                mask=varargin{1};                
+                if(size(mask)==size(resampledTime))
+                    dataset=applyMask(dataset,mask);
+                    resampledTime=applyMask(resampledTime,mask);
+                else
+                    disp('Mask is the wrong size');
+                end
+            else
+                if(isstruct(varargin{1}))
+                    inertialData=varargin{1};
+                    inertialFields=fieldnames(inertialData);
+                    if(length(inertialFields)==2)
+                        useInertial=true;
+                    else
+                        disp('Error! Expected inertial data that has only 2 fields');
+                    end
+                else
+                    disp('Not valid argument');
+                end
+            end
+        end
+        if (length(varargin)==2) % it means inertial data is provided
+            if (islogical(varargin{1}))
+                mask=varargin{1};
+                if(size(mask)==size(resampledTime))
+                    dataset=applyMask(dataset,mask);
+                    resampledTime=applyMask(resampledTime,mask);
+                else
+                    disp('Mask is the wrong size');
+                end
+            end
+            if(isstruct(varargin{2}))
+                inertialData=varargin{2};
+                inertialFields=fieldnames(inertialData);
+                if(length(inertialFields)==2)
+                    useInertial=true;
+                else
+                    disp('Error! Expected inertial data that has only 2 fields');
+                end
+            end
+        end
+        
+    else
+        disp('Too many arguments, check what you are sending (extra parameters ignored)')
+    end
+end
 
-%resize data to desired timeFrame
+%% resize data to desired timeFrame
    mask=dataset.time>dataset.time(1)+timeFrame(1) & dataset.time<dataset.time(1)+timeFrame(2);
         dataset=applyMask(dataset,mask);
 %TODO: might be easier to just get the indexes of the time start and finish
@@ -27,7 +79,10 @@ wrench_idyn= iDynTree.Wrench();
 qj_all=dataset.qj;
 dqj_all=dataset.dqj;
 ddqj_all=dataset.ddqj;
-
+if (useInertial)
+    angVel_idyn = iDynTree.Vector3();
+    angAcc_idyn = iDynTree.Vector3();
+end
 if (length(contactFrameName)==1)
 % Set the contact information in the estimator
 disp(strcat('using contact frame ',char(contactFrameName)));
@@ -93,6 +148,7 @@ sensorsToAnalize=fieldnames(secMat);
 
 %size of array with the expected Data
 ftData=zeros(length(framesNames),size(dataset.time,1),6);
+jointTorques=zeros(size(qj_all));
 %% For each time instant
 fprintf('obtainedExternalForces: Computing the estimated wrenches\n');
 for t=1:length(dataset.time)
@@ -126,8 +182,16 @@ for t=1:length(dataset.time)
         ok = estFTmeasurements.setMeasurement(iDynTree.SIX_AXIS_FORCE_TORQUE,ftIndex,wrench_idyn);
         
     end
- 
-    ok = estimator.updateKinematicsFromFixedBase(qj_idyn,dqj_idyn,ddqj_idyn,contact_index,grav_idyn);
+    if (useInertial)
+        grav_idyn.fromMatlab(inertialData.linAcc(t,:));
+        angVel_idyn.fromMatlab(inertialData.angVel(t,:));
+        angAcc_idyn.fromMatlab([0;0;0]);
+        % Set the kinematics information in the estimator
+        ok = estimator.updateKinematicsFromFloatingBase(qj_idyn,dqj_idyn,ddqj_idyn,contact_index,grav_idyn,angVel_idyn,angAcc_idyn);
+        
+    else
+        ok = estimator.updateKinematicsFromFixedBase(qj_idyn,dqj_idyn,ddqj_idyn,contact_index,grav_idyn);
+    end
 % Now we can call the estimator
 estimator.estimateExtWrenchesAndJointTorques(fullBodyUnknownsExtWrenchEst,estFTmeasurements,estContactForcesExtWrenchesEst,estJointTorquesExtWrenchesEst);
      
@@ -153,7 +217,7 @@ wrench = linkNetExtWrenches(estimator.model().getFrameLink(estimator.model().get
 %wrench.toMatlab();
 ftData(i,t,:)=wrench.toMatlab();
 end 
-    
+    jointTorques(t,:)=estJointTorquesExtWrenchesEst.toMatlab();
 end
 for i=1:length(framesNames)
     
