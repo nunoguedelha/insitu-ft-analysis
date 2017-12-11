@@ -58,6 +58,8 @@ using [sensorSelfCalibrator][1] and stored in [3] or [4].
 
 Detailed info on how to [Calibrate a sensor](https://raw.githubusercontent.com/robotology-playground/insitu-ft-analysis/master/docs/howToFiles/calibrateAsensor.md).
 
+The calibration matrix will be stored in 
+
 The first evaluation of the calibration matrix is obtained from visual evaluation of the resulting plots.
 ![exampleResult](https://user-images.githubusercontent.com/11043189/33845375-915ba00c-dea3-11e7-8d5f-1d59d2353976.png)
 
