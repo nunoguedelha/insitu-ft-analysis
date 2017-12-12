@@ -4,7 +4,7 @@ This script allows to calibrate six axis force torque (F/T) sensors once they ar
 takes advantage of the knowledge of the model of the robot to generate the expected wrenches of the sensors during
 some arbitrary motions. It then uses this information to train and validate new calibration matrices, taking into account
 the calibration matrix obtained with a classical Workbench calibration. The data from an experiment is typically logged using yarpDataDumper directly form [statesAndFtSensorsInertial.xml][5] or
-using [sensorSelfCalibrator][1] and stored in [3] or [4].
+using [sensorSelfCalibrator][1] and stored in [green datssets][3] or [previous dataset repo][4].
 For more on the theory behind this script, check [1,2].
 
 1. : [Traversaro, Silvio, Daniele Pucci, and Francesco Nori.
@@ -13,6 +13,7 @@ For more on the theory behind this script, check [1,2].
 2. : [F. J. A. Chavez, S. Traversaro, D. Pucci and F. Nori, 
       "Model based in situ calibration of six axis force torque sensors," 
       2016 IEEE-RAS 16th International Conference on Humanoid Robots (Humanoids), Cancun, 2016](http://ieeexplore.ieee.org/document/7803310/)
+      
 [1]:https://github.com/robotology-playground/sensors-calib-inertial/blob/feature/integrateFTSensors/src/app/sensorSelfCalibrator.m
 [2]:https://github.com/robotology-playground/insitu-ft-analysis/blob/master/docs/yarpManagerApps/statesAndFtSensorsInertial.xml
 [3]:https://gitlab.com/dynamic-interaction-control/green-iCub-Insitu-Datasets
