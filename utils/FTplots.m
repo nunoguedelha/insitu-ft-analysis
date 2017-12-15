@@ -1,4 +1,23 @@
 function []=FTplots(data,time,varargin)
+% This function plots the information received from an FT sensor be it the wrenches or the raw data.
+% It assumes wrenches are in a double matrix (time x wrench), wrench [F,T]
+% The x axis is the relative time of the experiment. This means it
+% considers the first sample as time 0 always.
+%% inputs
+% data: the actual information of the sensor
+% time: a vector the same size as the rows of data containing the timestamp
+% varargin: this allows to receive multiple configuration parameters.
+%  if varargin is a string it assumes it is one of the configuration
+%  variables otherwise it assumes that is the desired name for the
+%  reference data
+%  if varagin is a struct it assumes is another set of FT sensor data that
+%  will be used to compare the main data information
+%% configurations
+%  onlyFOrce: if enabled it will only plot the forces (first 3 columns)
+%  raw: if enabled it will change the legends to reflect the raw channels
+%  (channel swap considered due to IIT firmware)
+%  byChannel: if enable it will generate a different plot for every axis or
+%  channel.
 onlyForce=false;
 raw=false;
 byChannel=false;
@@ -44,10 +63,7 @@ else
         end
     end
 end
-%% Function to plot data from FT sensors
-% data is a struct type which includes data with sets wrenches
-% for which two different figures will be created
-% It assumes wrenches are in a double matrix (time x wrench), wrench [F,T]
+
 
 xPlotOptions = 'r.';
 yPlotOptions = 'g.';
@@ -62,6 +78,7 @@ fields=fieldnames(data);
 if (size(fields,1)==2)
     temp.(fields{1})=data.(fields{1});
     reference.(fields{1})=data.(fields{2});
+    referenceName=(fields{2});
     %FTplots(temp,time,(fields{2}),reference);
 end
 
