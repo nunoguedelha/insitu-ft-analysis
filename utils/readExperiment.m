@@ -216,7 +216,11 @@ else
     %% Calculate raw data using known calibration matrix
     if(scriptOptions.raw)
         disp( 'readExperiment: Calculating raw FT values');
-        [dataset.rawData,cMat]=getRawData(dataset.ftData,input.calibMatPath,input.calibMatFileNames);
+        if (any(strcmp('calibFlag', fieldnames(input))))
+            [dataset.rawData,cMat]=getRawData(dataset.ftData,input.calibMatPath,input.calibMatFileNames,input.calibFlag);
+        else
+            [dataset.rawData,cMat]=getRawData(dataset.ftData,input.calibMatPath,input.calibMatFileNames);
+        end
         dataset.cMat=cMat;
         if(scriptOptions.filterData)
             [dataset.rawDataFiltered]=getRawData(dataset.filteredFtData,cMat);
