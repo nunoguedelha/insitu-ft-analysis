@@ -40,8 +40,8 @@ addpath utils
 scriptOptions = {};
 scriptOptions.forceCalculation=true;%false;
 scriptOptions.printPlots=true;%true
-scriptOptions.raw=false;
-scriptOptions.saveData=false;
+scriptOptions.raw=true;
+scriptOptions.saveData=true;
 scriptOptions.testDir=false;% to calculate the raw data, for recalibration always true
 scriptOptions.filterData=true;
 scriptOptions.estimateWrenches=true;
@@ -52,14 +52,14 @@ scriptOptions.matFileName='ftDataset';
 
 %% name and paths of the experiment files
 % change name to desired experiment folder
-experimentName='/dataSamples/First_Time_Sensor';
+experimentName='/calibLeftLegFootFT/poleGridLeftLeg';
 
 %% We carry the calibration for just a subset of the sensors
 % the names are associated to the location of the sensor in the
 % in the iCub options are {'left_arm','right_arm','left_leg','right_leg','right_foot','left_foot'};
 
 %sensorsToAnalize = {'left_leg','right_leg'};
-sensorsToAnalize = {'right_leg'};
+sensorsToAnalize = {'left_leg'};
 
 %% Calibration options
 %Regularization parameter
@@ -74,8 +74,8 @@ calibOptions.onlyWSpace=true;
 calibOptions.IITfirmwareFriendly=true; % in case a calibration matrix that will not be used by iit firmware is estimated
 %% Start 
 %Read data
-%[dataset,extraSample]=read_estimate_experimentData(experimentName,scriptOptions);
-[dataset,~,~,extraSample]=readExperiment(experimentName,scriptOptions);
+[dataset,extraSample]=read_estimate_experimentData(experimentName,scriptOptions);
+%[dataset,~,~,extraSample]=readExperiment(experimentName,scriptOptions);
 %Plot for inspection of data
 if( scriptOptions.printPlots )
     run('plottinScript.m')
