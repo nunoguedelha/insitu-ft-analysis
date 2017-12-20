@@ -12,6 +12,7 @@ Thumbs.db
 # ftSensCalib repository #
 ##########################
 external/ftSensCalib
+external/iCubViz
 data/
 *.avi
 *.m~
