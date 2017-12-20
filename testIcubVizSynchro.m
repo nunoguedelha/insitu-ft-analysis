@@ -1,39 +1,47 @@
 % minimal test for iCubVizAndForcesSynchronized
-addpath /external/quadfit
-addpath /utils 
+addpath utils
+addpath external/quadfit
 %experimentName='2017_10_30';
-experimentName='leftYoga';
+%experimentName='/green-iCub-Insitu-Datasets/2017_12_7_testYogaWithSensorLeft';% first sample with cable corrected ;
+%experimentName='dataSamples/First_Time_Sensor';% 
+experimentName='dataSamples/TestYogaExtendedRIght';% 
 
+%% options when loading experiment dataset
 scriptOptions = {};
 scriptOptions.forceCalculation=false;%false;
 scriptOptions.printPlots=true;%true
-scriptOptions.raw=false;
-scriptOptions.saveData=true;
+scriptOptions.raw=true;
+scriptOptions.saveData=false;
+scriptOptions.testDir=false;% to calculate the raw data, for recalibration always true
+scriptOptions.filterData=true;
+scriptOptions.estimateWrenches=true;
+scriptOptions.useInertial=false;    
+
 % Script of the mat file used for save the intermediate results 
 %scriptOptions.matFileName='dataEllipsoidAnalysis'; %newName
-%scriptOptions.matFileName='ftDataset';
-scriptOptions.matFileName='iCubDataset';
-% [dataset]=read_estimate_experimentData2(experimentName,scriptOptions);
+scriptOptions.matFileName='ftDataset';
+%scriptOptions.matFileName='iCubDataset';
+ %[dataset]=read_estimate_experimentData(experimentName,scriptOptions);
+   [dataset,estimator,input]=readExperiment (experimentName,scriptOptions);
+   %withEstim=estimateDynamicsUsingIntervals(dataset,estimator,input,true);
+%   mask=dataset.time>dataset.time(1)+input.intervals.rightLeg.initTime & dataset.time<dataset.time(1)+input.intervals.rightLeg.endTime;
+%   dataset=applyMask(dataset,mask);
+ %  figure,plot(dataset.rawData.right_leg); hold on;
+ %  plot(dataset.time-dataset.time(1));
+ %  legend 4 5 6 1 2 3 time % the channels are inverted since true channels are like this
+   %the saturation message considers the F T notation when calibration is
+   %true
 % % % load the script of parameters relative 
-  load(strcat('data/',experimentName,'/',scriptOptions.matFileName,'.mat'),'dataset')
+%  load(strcat('data/',experimentName,'/',scriptOptions.matFileName,'.mat'),'dataset')
+  %getRawData(dataset.ftData,pathFile,serialNumbers)
   
-  
+  %sensorsToAnalize = {'right_leg'};
   sensorsToAnalize = {'left_leg'};
   
   robotName='iCubGenova04';
+  input.robotName='model';
   onTestDir=false;
-  iCubVizWithSlider(dataset,robotName,sensorsToAnalize,'l_sole',onTestDir);
+  visualizeExperiment(dataset,input,sensorsToAnalize,'contactFrame','r_sole')
+%  iCubVizWithSlider(dataset,robotName,sensorsToAnalize,'l_sole',onTestDir);
   % iCubVizAndForcesSynchronized(dataset,robotName,sensorsToAnalize,'root_link',100);
-   
-%    for i=1:length(view2)
-%        view(-37.5,view2(i));
-%        drawnow;
-%        pause(.01);
-%     end
-
-%Think of a function that uses the slider to get the time sample that wants
-%to be evaulated send this to a one time position and plot of forces
-%example slider. Consider rounding the value of the slider to get only
-%integers or find an alternate solution
-%b = uicontrol('Parent',f,'Style','slider','Position',[81,54,419,23],...
-%              'value',1, 'min',1, 'max',dataset.time(end)-dataset.time(1);
+  
