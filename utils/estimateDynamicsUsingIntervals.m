@@ -29,26 +29,13 @@ if (any(strcmp('intervals', fieldnames(input))))
             end
             
         end
-        %% This part of code needs to be revised copied from previous version of read estimate experiment enables converting to an array of contact frames it might allow to have a continuos experiment without necesarily separating calculation of external forces by support contact
-        %%mask=dataset.time<0;
-        %             contactFrameName='';
-        %             for index=1:length(intervalsNames)
-        %                 if(~strcmp('hanging', intervalsNames{index}))
-        %                     intName=intervalsNames{index};
-        %                     maskTemp=dataset.time>=dataset.time(1)+input.intervals.(intName).initTime & dataset.time<=dataset.time(1)+input.intervals.(intName).endTime;
-        %                     contactTemp(1:length(find(maskTemp)))={input.intervals.(intName).contactFrame};
-        %                     mask=or(mask,maskTemp);
-        %
-        %                     %TODO: have to match the contactFrame vectors with the time
-        %                     %the interval happens (compare init time of all intervals
-        %                     %to order it
-        %                     % contactFrameName=[contactFrameName,contactTemp];
-        %                     contactFrameName=[contactTemp,contactFrameName];
-        %                 end
-        %
-        %             end
-        %
-        %             dataset=applyMask(dataset,mask);
+        %% Use not hanging intervals
+        % generalize ordering of intervals
+         for i=1:size(input.ftNames,1)
+                    estimatedFtData.(input.ftNames{i})=zeros(size(dataset.ftData.(input.ftNames{i})));
+         end
+                newOrdering=true;
+         %   generalize ordering of intervals end first section
         for index=1:length(intervalsNames)
             
             if(~strcmp('hanging', intervalsNames{index}))
@@ -78,31 +65,44 @@ if (any(strcmp('intervals', fieldnames(input))))
                     matchup(i) = find(strcmp(sensorNames, input.sensorNames{i}));
                 end
                 
-                %replace the estored estimatedFtData for one with the same order and name as the
-                %ftData
-                for i=1:size(input.ftNames,1)
-                    estimatedFtData.(input.ftNames{i})=dataset2.estimatedFtData.(sensorNames{matchup(i)});
-                end
-                dataset2.estimatedFtData=estimatedFtData;
-                
-
-                if (length(intervalsNames)==1)
-                    data=dataset2;
+                if (newOrdering)
+                    % generalize intervals ordering section 2
+                    
+                    for i=1:size(input.ftNames,1)
+                        estimatedFtData.(input.ftNames{i})(mask,:)=dataset2.estimatedFtData.(sensorNames{matchup(i)});
+                    end
+                    data.estimatedFtData=estimatedFtData;
+                    % generalize intervals ordering section 2 end
                 else
-                    if (any(strcmp('hanging', intervalsNames)) && strcmp('hanging', intervalsNames{index-1}))                        
+                    %replace the estored estimatedFtData for one with the same order and name as the
+                    %ftData
+                    for i=1:size(input.ftNames,1)
+                        estimatedFtData.(input.ftNames{i})=dataset2.estimatedFtData.(sensorNames{matchup(i)});
+                    end
+                    dataset2.estimatedFtData=estimatedFtData;
+                    
+                    % deal with the ordering of the intervals
+                    if (length(intervalsNames)==1)
                         data=dataset2;
                     else
-                        if (input.intervals.(intervalsNames{index-1}).initTime<input.intervals.(intName).initTime)
-                            data=addDatasets(data,dataset2);
+                        if (any(strcmp('hanging', intervalsNames)) && strcmp('hanging', intervalsNames{index-1}))
+                            data=dataset2;
                         else
-                            data=addDatasets(dataset2,data);
+                            if (input.intervals.(intervalsNames{index-1}).initTime<input.intervals.(intName).initTime)
+                                data=addDatasets(data,dataset2);
+                            else
+                                data=addDatasets(dataset2,data);
+                            end
                         end
                     end
-                end                
+                end
             end
         end
         dataset=data;
-        contactFrame=contactFrame(endMask);      
+        contactFrame=contactFrame(endMask); 
+        if(newOrdering)
+            dataset=applyMask(dataset,endMask);
+        end
         if (any(strcmp('hanging', intervalsNames)) && isfield(dataset,'inertialData'))
             dataset.inertial=inertial;
         end
