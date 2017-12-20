@@ -1,4 +1,7 @@
-function [dataset]=estimateDynamicsUsingIntervals(dataset,estimator,input,useInertial)
+function [dataset,endMask,contactFrame]=estimateDynamicsUsingIntervals(dataset,estimator,input,useInertial)
+
+endMask=~logical(dataset.time);
+contactFrame=cell(length(dataset.time),1);
 %% Manage intervals
 if (any(strcmp('intervals', fieldnames(input))))
     intervalsNames=fieldnames(input.intervals);
@@ -10,6 +13,7 @@ if (any(strcmp('intervals', fieldnames(input))))
             
             inertial.ftData=inertialEstimatedFtData.ftData;
             inertial.time=inertialEstimatedFtData.time;
+            %inertial.mask=mask;
             
             sensorNames=fieldnames(inertialEstimatedFtData.estimatedFtData);
             % match field names with sensor loaded through readDataDumper
@@ -52,6 +56,13 @@ if (any(strcmp('intervals', fieldnames(input))))
                 mask=dataset.time>=dataset.time(1)+input.intervals.(intName).initTime & dataset.time<=dataset.time(1)+input.intervals.(intName).endTime;
                 fprintf('estimateDynamicsUsingIntervals: estimating interval %s with contact frame %s from %d s to %d s \n',(intName),input.intervals.(intName).contactFrame,input.intervals.(intName).initTime,input.intervals.(intName).endTime);
             
+                %create a cell array with the contact frame used in each
+                %time sample
+                contactFrame(mask)={input.intervals.(intName).contactFrame};
+                
+                % create the endMask;
+                endMask=endMask | mask;
+                
                 if (useInertial && isfield(dataset,'inertialData'))
                     disp('estimateDynamicsUsingIntervals: using floating base for estimation');
                     [dataset2]=obtainEstimatedWrenches(estimator,dataset.time,{input.intervals.(intName).contactFrame},dataset,mask,dataset.inertialData);
@@ -74,12 +85,11 @@ if (any(strcmp('intervals', fieldnames(input))))
                 end
                 dataset2.estimatedFtData=estimatedFtData;
                 
-                if (any(strcmp('hanging', intervalsNames)))
-                    if(strcmp('hanging', intervalsNames{index-1}))
-                        data=dataset2;
-                    end
+
+                if (length(intervalsNames)==1)
+                    data=dataset2;
                 else
-                    if (length(intervalsNames)==1)
+                    if (any(strcmp('hanging', intervalsNames)) && strcmp('hanging', intervalsNames{index-1}))                        
                         data=dataset2;
                     else
                         if (input.intervals.(intervalsNames{index-1}).initTime<input.intervals.(intName).initTime)
@@ -88,12 +98,12 @@ if (any(strcmp('intervals', fieldnames(input))))
                             data=addDatasets(dataset2,data);
                         end
                     end
-                end
+                end                
             end
         end
         dataset=data;
-        
-        if (any(strcmp('hanging', intervalsNames)))
+        contactFrame=contactFrame(endMask);      
+        if (any(strcmp('hanging', intervalsNames)) && isfield(dataset,'inertialData'))
             dataset.inertial=inertial;
         end
     else

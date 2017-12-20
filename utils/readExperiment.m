@@ -202,7 +202,8 @@ else
     %% This section modifies or estimates data
     %% Estimate wrenches
     if(scriptOptions.estimateWrenches)
-        estimatedDataset=estimateDynamicsUsingIntervals(dataset,estimator,input,scriptOptions.useInertial);
+        [estimatedDataset,intervalMask,contactFrame]=estimateDynamicsUsingIntervals(dataset,estimator,input,scriptOptions.useInertial);
+        dataset=applyMask(dataset,intervalMask);
         dataset.estimatedFtData=estimatedDataset.estimatedFtData;
     end
     %% Filter ft data
