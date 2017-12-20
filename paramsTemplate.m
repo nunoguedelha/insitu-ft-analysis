@@ -26,6 +26,7 @@ input.intervals=struct(); %this will have the relevant intervals of the demos 4 
 
 %input.type='';%
 
+%-----------------------------------------------------------
 %% Variables that depend on the way information was logged
 
 input.inertialName='inertial'; %enable in case there is info read from the
@@ -37,14 +38,25 @@ input.ftNames={'left_arm';'right_arm';'left_leg';'right_leg';'left_foot';'right_
 input.calibFlag=true; %if the flag for obtaining calibrated data is on ( by default
 %it is, unless raw data is specifically requested form the yarp port )
 
+%-----------------------------------------------------------
 %% Variables that depend on the specific robot used in the experiment
+
 input.robotName='model'; %name of the robot being used (urdf file should be present in the robots folder),
 %example input.robotName='iCubGenova02'
 % calib variables will only be used when raw data needs to be calculated
 input.calibMatPath='';%path to where calibration matrices can be found
 input.calibMatFileNames={}; % name of the files containing the calibration matrics in the same order specified in ftNames
 
+
+%-----------------------------------------------------------
 %% Variables that depend on the urdf 
+
+input.sensorNames={'l_arm_ft_sensor'; 'r_arm_ft_sensor'; 'l_leg_ft_sensor'; 'r_leg_ft_sensor'; 'l_foot_ft_sensor'; 'r_foot_ft_sensor';};
+% usual values are {'l_arm_ft_sensor'; 'r_arm_ft_sensor'; 'l_leg_ft_sensor'; 'r_leg_ft_sensor'; 'l_foot_ft_sensor'; 'r_foot_ft_sensor';};
+%make sure sensor names match the order of the ftNames variable
+%this will be used for matching names used in the model to names used in
+%ftNames
+
 %input.stateNames=struct();% this should have a structure with the %knowledge 
 %of the name of the degrees of freedom that are printed in each state data
 %file (normally fixed for the general iCub robot)
@@ -59,14 +71,7 @@ right_leg='right_leg'; value5={'r_hip_pitch';'r_hip_roll';'r_hip_yaw';'r_knee';'
 torso='torso'; value6={'torso_yaw';'torso_roll';'torso_pitch'};
 input.stateNames=struct(head,{value1},left_arm,{value2},left_leg,{value3},right_arm,{value4},right_leg,{value5},torso,{value6});
 
-input.sensorNames={'l_arm_ft_sensor'; 'r_arm_ft_sensor'; 'l_leg_ft_sensor'; 'r_leg_ft_sensor'; 'l_foot_ft_sensor'; 'r_foot_ft_sensor';};
-% usual values are {'l_arm_ft_sensor'; 'r_arm_ft_sensor'; 'l_leg_ft_sensor'; 'r_leg_ft_sensor'; 'l_foot_ft_sensor'; 'r_foot_ft_sensor';};
-%make sure sensor names match the order of the ftNames variable
-%this will be used for matching names used in the model to names used in
-%ftNames
-
-
-
+%-----------------------------------------------------------
 %% Mini checks
 if(size (input.calibMatFileNames)~=size (input.ftNames))
     disp('amount of calibration matrix files does not match the amount of sensors available in the dataset')
@@ -75,4 +80,5 @@ if(size (input.sensorNames)~=size (input.ftNames))
     disp('amount of sensor names does not match the amount of sensors available in the dataset')
 end
 
+%-----------------------------------------------------------
 %% Add a description of the experiment (optional)

@@ -1,6 +1,6 @@
 %% Calibration matrix correction script
 % estimate new calibration matrices
-% assuming is run at the end of main, or after main
+% assuming is run at the end of calibrateFTsensor, or after calibrateFTsensor
 
 %using insitu
 % NOTE: only use when position of center of mass is constant
@@ -154,4 +154,9 @@ if(calibOptions.plot)
     end
 end
 
-
+%% plot secondary matrix format
+% for ftIdx =1:length(sensorsToAnalize)
+%     ft = sensorsToAnalize{ftIdx};
+%     secMat.(ft)= calibMatrices.(ft)/dataset.cMat.(ft);
+%     xmlStr=cMat2xml(secMat.(ft),input.sensorName{j})% print in required format to use by WholeBodyDynamics    
+% end
