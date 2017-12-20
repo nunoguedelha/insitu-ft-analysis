@@ -1,13 +1,17 @@
 function [H]=plotForceAndVizFromSample(i,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model)
 i = round(i);  
-joints = dataset.qj(i,1:23)';
+numberOfJoints=size(jointPos.toMatlab());
+%joints = dataset.qj(i,1:23)'; %TODO:This depends in the model used that
+%outputs the considerd joints. Is the robot model not the one in external
+%icubViz
+joints = dataset.qj(i,1:numberOfJoints)';
 jointPos.fromMatlab(joints);
 
 odom.updateKinematics(jointPos);
 odom.init(fixedFrame,fixedFrame);
 %baseT=odom.getWorldLinkTransform(model.getDefaultBaseLink());
-%baseT=odom.getWorldLinkTransform(model.getLink());
-baseT=odom.getWorldLinkTransform(0);
+baseT=odom.getWorldLinkTransform(model.getFrameLink(model.getFrameIndex(fixedFrame)));
+%baseT=odom.getWorldLinkTransform(0);
 pos = iDynTree.Position();
 pos.fromMatlab([0;0;0.5]);
 baseT.setPosition(pos);

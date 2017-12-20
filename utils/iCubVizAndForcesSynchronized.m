@@ -103,7 +103,7 @@ end
 %% Start variables for viz
 
 jointPos = iDynTree.JointPosDoubleArray(model);
-     joints = dataset.qj(i,1:23)';
+     joints = dataset.qj(i,1:dofs-3)';
     jointPos.fromMatlab(joints);
     
     
@@ -114,7 +114,8 @@ jointPos = iDynTree.JointPosDoubleArray(model);
     %odom.init(fixedFrame,'r_sole');
      odom.updateKinematics(jointPos);
     odom.init(fixedFrame,fixedFrame);
-    baseT=odom.getWorldLinkTransform(model.getDefaultBaseLink());
+    %baseT=odom.getWorldLinkTransform(model.getDefaultBaseLink());
+    baseT=odom.getWorldLinkTransform(model.getFrameLink(model.getFrameIndex(fixedFrame)));
     pos = iDynTree.Position();
     pos.fromMatlab([0;0;0.5]);
     baseT.setPosition(pos);
@@ -130,7 +131,7 @@ for i=init_time:n:length(dataset.qj(:,1));
      
        
        
-     joints = dataset.qj(i,1:23)';
+     joints = dataset.qj(i,1:dofs-3)';
     jointPos.fromMatlab(joints);
     
 %      odom.updateKinematics(jointPos);
