@@ -12,14 +12,22 @@ addpath ../external/quadfit
 
 %Use only datasets where the same sensor is used
  experimentNames={
-'2017_10_31_3';
- '2017_10_31_4'% Name of the experiment;
-     }; %this set is from iCubGenova02
+'icub-insitu-ft-analysis-big-datasets/2017_12_20_Green_iCub_leftLegFoot/poleGridLeftLeg'; % Name of the experiment;
+     }; 
 names={'Workbench';
-      'bestleftleg'; 
-      'bestleftfoot';
+      'newCalibrationMatrix';       
     };% except for the first one all others are short names for the expermients in experimentNames
-% experimentNames={
+
+% %Use only datasets where the same sensor is used
+%  experimentNames={
+% 'green-iCub-Insitu-Datasets/2017_10_31_3';
+%  'green-iCub-Insitu-Datasets/2017_10_31_4'% Name of the experiment;
+%      }; %this set is from iCubGenova02
+% names={'Workbench';
+%       'bestleftleg'; 
+%       'bestleftfoot';
+%     };% except for the first one all others are short names for the expermients in experimentNames
+% % experimentNames={
 %     %    'icub-insitu-ft-analysis-big-datasets/2016_06_08/yoga';% Name of the experiment;
 %     'icub-insitu-ft-analysis-big-datasets/2016_06_17/normal';% Name of the experiment;
 %     'icub-insitu-ft-analysis-big-datasets/2016_06_17/fast';% Name of the experiment;
@@ -68,6 +76,8 @@ names={'Workbench';
 %     '_l100000';
 %     };
 
+lambdasNames={''};
+
 names2use{1}=names{1};
 num=2;
 for i=2:length(names)
@@ -77,24 +87,17 @@ for i=2:length(names)
     end
 end
 names2use=names2use';
-toCompare=2;
-toCompareWith='gridMin30'; %choose in which experiment will comparison be made, it must have inertial data stored
-ttCompare=2; %should match the position of the toCompareWith name in the names list
-paramScript=strcat('..//data/',experimentNames{1},'/params.m');
+paramScript=strcat('../data/',experimentNames{1},'/params.m');
 run(paramScript)
 ftNames=input.ftNames;
 
-%sensorsToAnalize2 = {'left_arm';'right_arm';'left_leg';'right_leg';'left_foot';'right_foot'};  %load the new calibration matrices
-%sensorsToAnalize = {'right_foot','right_leg'};  %load the new calibration matrices
-sensorsToAnalize2 = {'left_leg';'right_leg'};  %load the new calibration matrices
-sensorsToAnalize = {'left_leg','right_leg'};  %load the new calibration matrices
-framesNames={'l_sole','r_sole','l_lower_leg','r_lower_leg','root_link','l_elbow_1','r_elbow_1'}; %there has to be atleast 6
-framesToAnalize={'l_lower_leg','r_lower_leg'};
-% framesToAnalize={'r_sole','r_lower_leg'};
-%framesToAnalize={'r_lower_leg'};
-%load the experiment measurements
-sensorName={'l_leg_ft_sensor','r_leg_ft_sensor'};
+% sensorsToAnalize = {'left_leg','right_leg'};  %load the new calibration matrices
+% sensorName={'l_leg_ft_sensor','r_leg_ft_sensor'}; % name of sensor in urdf
 
+sensorsToAnalize = {'left_leg'};  %load the new calibration matrices
+sensorName={'l_leg_ft_sensor'}; % name of sensor in urdf
+
+%load the experiment calibration matrices
 for i=1:length(experimentNames)
     paramScript=strcat('../data/',experimentNames{i},'/params.m');
     run(paramScript)

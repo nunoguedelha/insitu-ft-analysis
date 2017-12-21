@@ -7,24 +7,35 @@ scriptOptions = {};
 scriptOptions.testDir=true;% to calculate the raw data, for recalibration always true
 scriptOptions.matFileName='ftDataset';
 scriptOptions.printAll=true;
+scriptOptions.IITfirmwareFriendly=true;
 % Script of the mat file used for save the intermediate results
 %scriptOptions.saveDataAll=true;
 
 %% Select datasets with which the matrices where generated and lambda values
 
+% %Use only datasets where the same sensor is used
+% experimentNames={
+%     'green-iCub-Insitu-Datasets/2017_10_31_3';
+%     'green-iCub-Insitu-Datasets/2017_10_31_4'% Name of the experiment;
+%     'green-iCub-Insitu-Datasets/2017_10_17Grid';
+%     'green-iCub-Insitu-Datasets/2017_10_30';
+%     }; %this set is from iCubGenova02
+% names={'Workbench';
+%     'bestleftleg';
+%     'bestleftfoot';
+%     'fristGreenSample';
+%     'day30';    
+%     };% except for the first one all others are short names for the expermients in experimentNames
+
 %Use only datasets where the same sensor is used
 experimentNames={
-    'green-iCub-Insitu-Datasets/2017_10_31_3';
-    'green-iCub-Insitu-Datasets/2017_10_31_4'% Name of the experiment;
-    'green-iCub-Insitu-Datasets/2017_10_17Grid';
-    'green-iCub-Insitu-Datasets/2017_10_30';
+    'icub-insitu-ft-analysis-big-datasets/2017_12_20_Green_iCub_leftLegFoot/poleGridLeftLeg';
+  
     }; %this set is from iCubGenova02
 names={'Workbench';
-    'bestleftleg';
-    'bestleftfoot';
-    'fristGreenSample';
-    'day30';    
+    'fittedOnRaw';    
     };% except for the first one all others are short names for the expermients in experimentNames
+
 
 lambdas=[0];
 % lambdas=[0;
@@ -60,27 +71,27 @@ end
 names2use=names2use';
 
 %%  Select sensors and frames to analize
-sensorsToAnalize = {'left_leg','right_leg'};  %load the new calibration matrices
-framesToAnalize={'l_lower_leg','r_lower_leg'};
-sensorName={'l_leg_ft_sensor','r_leg_ft_sensor'};
+sensorsToAnalize = {'left_leg'};  %load the new calibration matrices
+framesToAnalize={'l_lower_leg'};
+sensorName={'l_leg_ft_sensor'};
 
 %% Read the calibration matrices to evaluate
 
 [cMat,secMat,WorkbenchMat]=readGeneratedCalibMatrices(experimentNames,scriptOptions,sensorsToAnalize,names2use,lambdasNames);
 
 %% Select datasets in which the matrices will be evaluated
-toCompare={'leftYoga','leftYoga'};%datasets name 'leftYoga' 'failedLeftYoga'
-toCompareNames={'leftYoga','leftYoga2'}; % short Name of the experiments
+toCompare={'dataSamples/TestYogaExtendedLeft','dataSamples/TestYogaExtendedRight'};%datasets name 'leftYoga' 'failedLeftYoga'
+toCompareNames={'leftYoga','rightYoga'}; % short Name of the experiments
 
 compareDatasetOptions = {};
 compareDatasetOptions.forceCalculation=true;%false;
 compareDatasetOptions.saveData=true;%true
 compareDatasetOptions.matFileName='iCubDataset';
 compareDatasetOptions.testDir=true;
-compareDatasetOptions.raw=true;
+compareDatasetOptions.raw=false;
 compareDatasetOptions.testDir=true;% to calculate the raw data, for recalibration always true
 compareDatasetOptions.filterData=false;
-compareDatasetOptions.estimateWrenches=false;
+compareDatasetOptions.estimateWrenches=true;
 compareDatasetOptions.useInertial=false;    
 
 for c=1:length(toCompare)
@@ -134,7 +145,7 @@ for c=1:length(toCompare)
     
 end
 %% Evaluate error
-useMean=false; %select which means of evaluation should be considered is either mean or standard deviation.
+useMean=true; %select which means of evaluation should be considered is either mean or standard deviation.
 for j=1:length(sensorsToAnalize) %why for each sensor? because there could be 2 sensors in the same leg
     for frN=1:length(framesToAnalize)
         
