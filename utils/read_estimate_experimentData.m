@@ -292,12 +292,12 @@ else
         %getting raw data
         %should be on filtered data proven.
         if(scriptOptions.raw)
-             if (any(strcmp('calibFlag', fieldnames(input))))
-            [dataset.rawData,cMat]=getRawData(dataset.ftData,input.calibMatPath,input.calibMatFileNames,input.calibFlag);
-        else
-            [dataset.rawData,cMat]=getRawData(dataset.ftData,input.calibMatPath,input.calibMatFileNames);
-             end
-             dataset.cMat=cMat;
+            if (any(strcmp('calibFlag', fieldnames(input))))
+                [dataset.rawDataFiltered,cMat]=getRawData(dataset.filteredFtData,input.calibMatPath,input.calibMatFileNames,input.calibFlag);
+            else
+                [dataset.rawDataFiltered,cMat]=getRawData(dataset.filteredFtData,input.calibMatPath,input.calibMatFileNames);
+            end
+            dataset.cMat=cMat;
             [dataset.rawData]=getRawData(dataset.ftData,cMat);
             dataset.calibMatFileNames=input.calibMatFileNames;
         end
