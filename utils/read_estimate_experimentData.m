@@ -294,11 +294,15 @@ else
         if(scriptOptions.raw)
             if (any(strcmp('calibFlag', fieldnames(input))))
                 [dataset.rawDataFiltered,cMat]=getRawData(dataset.filteredFtData,input.calibMatPath,input.calibMatFileNames,input.calibFlag);
+                [dataset.rawData]=getRawData(dataset.ftData,cMat);
+                if (~input.calibFlag)
+                    dataset.rawData=swapFT(dataset.rawData);
+                end
             else
                 [dataset.rawDataFiltered,cMat]=getRawData(dataset.filteredFtData,input.calibMatPath,input.calibMatFileNames);
+                [dataset.rawData]=getRawData(dataset.ftData,cMat);
             end
-            dataset.cMat=cMat;
-            [dataset.rawData]=getRawData(dataset.ftData,cMat);
+            dataset.cMat=cMat;            
             dataset.calibMatFileNames=input.calibMatFileNames;
         end
         
