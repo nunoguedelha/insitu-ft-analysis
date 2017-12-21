@@ -79,6 +79,10 @@ end
 if(size (input.sensorNames)~=size (input.ftNames))
     disp('amount of sensor names does not match the amount of sensors available in the dataset')
 end
-
+if(size (fieldnames(input.intervals),1)==1)
+    disp('only one interval setting a general contactframe')
+    intervalName=fieldnames(input.intervals);
+    input.contactFrameName={input.intervals.(intervalName{1}).contactFrame};
+end
 %-----------------------------------------------------------
 %% Add a description of the experiment (optional)
