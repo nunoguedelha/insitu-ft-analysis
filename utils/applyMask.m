@@ -18,6 +18,12 @@ if (isstruct(dataset))
                         end
                     end
                 end
+            else
+                if (iscell(dataset.(dataFieldNames{i})))
+                    if(size(dataset.(dataFieldNames{i}),1)==sizeRef)
+                        dataset.(dataFieldNames{i})=dataset.(dataFieldNames{i})(mask);
+                    end
+                end
             end
         end
     end
@@ -32,6 +38,12 @@ else
                 if(size(dataset,1)==sizeRef)
                 dataset=dataset(mask);
                 end
+            end
+        end
+    else
+        if (iscell(dataset))
+            if(size(dataset,1)==sizeRef)
+                 dataset=dataset(mask);
             end
         end
     end

@@ -205,6 +205,7 @@ else
         [estimatedDataset,intervalMask,contactFrame]=estimateDynamicsUsingIntervals(dataset,estimator,input,scriptOptions.useInertial);
         dataset=applyMask(dataset,intervalMask);
         dataset.estimatedFtData=estimatedDataset.estimatedFtData;
+        dataset.contactFrame=contactFrame;
     end
     %% Filter ft data
     if(scriptOptions.filterData)

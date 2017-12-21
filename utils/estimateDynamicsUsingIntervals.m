@@ -98,11 +98,12 @@ if (any(strcmp('intervals', fieldnames(input))))
                 end
             end
         end
-        dataset=data;
-        contactFrame=contactFrame(endMask); 
+        dataset=data;        
         if(newOrdering)
+            dataset.contactFrame=contactFrame;
             dataset=applyMask(dataset,endMask);
         end
+        contactFrame=contactFrame(endMask); 
         if (any(strcmp('hanging', intervalsNames)) && isfield(dataset,'inertialData'))
             dataset.inertial=inertial;
         end
