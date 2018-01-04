@@ -34,7 +34,9 @@ Variables:
       - input.ftNames={''}; : name of the part of the robot doing the logging of the ft sensor (is a part of the full yarp port name)
           - usual values are {'left_arm';'right_arm';'left_leg';'right_leg';'left_foot';'right_foot'}; 
           - it should match name of folders that contain ft measures
-     - input.calibFlag=true; : if the flag for obtaining calibrated data is on ( by default it is, unless raw data is specifically requested form the yarp device )
+     - input.calibFlag=true; : if the flag for obtaining calibrated data is on ( by default it is, unless raw data is specifically requested form the yarp device as in [rightLeg iCubGenova04](https://github.com/robotology/robots-configuration/blob/791e4d7453300bbb2496fd8d79a928975f99b22d/iCubGenova04/hardware/FT/right_leg-eb8-j0_3-strain.xml#L46)). 
+           
+      **Note:** it currently assumes (wrongly) that all yarp devices of sensors to calibrate have the same value either true or false. This will be fixed in coming updates.
      
  - related to the specific robot
       - input.robotName='model'; :name of the robot being used (urdf file should be present in the robots folder). Example:
