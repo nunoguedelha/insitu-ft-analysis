@@ -2,7 +2,7 @@
 Here we will have a description of the main functionalities of this repo and what to do to use it
 
 ## Log the experiment data 
-To log all info required from and experiment log the analog, stateExt and inertial ports using [sensor calib][1] or this [yarpManagerApp][2].
+To log all info required from and experiment log the analog, stateExt and inertial ports using [sensor calib][1] (for grid datasets) or this [yarpManagerApp][2] (for yoga and general experiments).
 
 ## Prepare the experiment data 
 To prepare the loged information to be used by the repo you need to create a [params.m](https://github.com/robotology-playground/insitu-ft-analysis/blob/master/paramsTemplate.m) file and put it in the directory of the experiment inside the data directory.
