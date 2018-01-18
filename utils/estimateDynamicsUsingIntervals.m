@@ -40,8 +40,12 @@ if (any(strcmp('intervals', fieldnames(input))))
             
             if(~strcmp('hanging', intervalsNames{index}))
                 intName=intervalsNames{index};
-                mask=dataset.time>=dataset.time(1)+input.intervals.(intName).initTime & dataset.time<=dataset.time(1)+input.intervals.(intName).endTime;
-                fprintf('estimateDynamicsUsingIntervals: estimating interval %s with contact frame %s from %d s to %d s \n',(intName),input.intervals.(intName).contactFrame,input.intervals.(intName).initTime,input.intervals.(intName).endTime);
+                mask=~logical(dataset.time);
+                for timeIntervals=1:length(input.intervals.(intName).initTime)
+                    tempMask=dataset.time>=dataset.time(1)+input.intervals.(intName).initTime(timeIntervals) & dataset.time<=dataset.time(1)+input.intervals.(intName).endTime(timeIntervals);
+                    fprintf('estimateDynamicsUsingIntervals: estimating interval %s with contact frame %s from %d s to %d s \n',(intName),input.intervals.(intName).contactFrame,input.intervals.(intName).initTime(timeIntervals),input.intervals.(intName).endTime(timeIntervals));
+                     mask=mask | tempMask;                
+                end
             
                 %create a cell array with the contact frame used in each
                 %time sample
