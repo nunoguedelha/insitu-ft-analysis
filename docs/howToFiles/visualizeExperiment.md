@@ -34,3 +34,12 @@ To obtain the required inputs dataset and input we need to load the experiment d
 Once the experiment is loaded select the sensors to be displayed. The sensors should be part of the experiment data. The possible options are 'left_arm','right_arm','left_leg','right_leg','left_foot','right_foot'. More than one sensor can be selected it will display them together in different subplots.
 
 A temporary ready script for using this function is [testIcubVizSynchro](https://github.com/robotology-playground/insitu-ft-analysis/blob/master/testIcubVizSynchro.m)
+
+Example:
+```
+sensorsToAnalize = {'left_leg'};  
+  robotName='iCubGenova04';
+  input.robotName='model';
+  visualizeExperiment(dataset,input,sensorsToAnalize,'contactFrame','r_sole')
+```
+![Visualization example](https://user-images.githubusercontent.com/11043189/35084305-a37c41fe-fc23-11e7-913b-96381c6b88c2.png)
