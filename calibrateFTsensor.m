@@ -1,3 +1,9 @@
+clear all
+clear all
+close all
+clc
+
+
 %% Calibrate a sensor
 % This script allows to calibrate six axis force torque (F/T)
 % sensors once they are mounted on the robot. This procedure
@@ -34,14 +40,15 @@
 
 %% adding required dependencies
 addpath external/quadfit
+addpath external/walkingDatasetScripts
 addpath utils
 
 %% general reading configuration options 
 scriptOptions = {};
 scriptOptions.forceCalculation=true;%false;
 scriptOptions.printPlots=true;%true
-scriptOptions.raw=false;
-scriptOptions.saveData=false;
+scriptOptions.raw=true;
+scriptOptions.saveData=true;
 scriptOptions.testDir=false;% to calculate the raw data, for recalibration always true
 scriptOptions.filterData=true;
 scriptOptions.estimateWrenches=true;
@@ -52,14 +59,14 @@ scriptOptions.matFileName='ftDataset';
 
 %% name and paths of the experiment files
 % change name to desired experiment folder
-experimentName='/dataSamples/First_Time_Sensor';
+experimentName='green-iCub-Insitu-Datasets/2018_01_18_poleWalkingLeftRight/poleLeftRight_1';
 
 %% We carry the calibration for just a subset of the sensors
 % the names are associated to the location of the sensor in the
 % in the iCub options are {'left_arm','right_arm','left_leg','right_leg','right_foot','left_foot'};
 
-%sensorsToAnalize = {'left_leg','right_leg'};
-sensorsToAnalize = {'right_leg'};
+sensorsToAnalize = {'left_leg','left_foot','right_leg','right_foot'};
+%sensorsToAnalize = {'right_leg'};
 
 %% Calibration options
 %Regularization parameter
