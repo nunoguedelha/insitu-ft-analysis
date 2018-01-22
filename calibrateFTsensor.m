@@ -53,6 +53,7 @@ scriptOptions.testDir=false;% to calculate the raw data, for recalibration alway
 scriptOptions.filterData=true;
 scriptOptions.estimateWrenches=true;
 scriptOptions.useInertial=false;
+scriptOptions.visualizeExp=true;
 
 % Script of the mat file used for save the intermediate results
 scriptOptions.matFileName='ftDataset';
@@ -74,7 +75,7 @@ lambda=0;
 lambdaName='';
 
 %calibration script options
-calibOptions.saveMat=true;
+calibOptions.saveMat=false;
 calibOptions.usingInsitu=true;
 calibOptions.plot=true;
 calibOptions.onlyWSpace=true;
@@ -82,10 +83,14 @@ calibOptions.IITfirmwareFriendly=true; % in case a calibration matrix that will 
 %% Start 
 %Read data
 %[dataset,extraSample]=read_estimate_experimentData(experimentName,scriptOptions);
-[dataset,~,~,extraSample]=readExperiment(experimentName,scriptOptions);
+[dataset,~,input,extraSample]=readExperiment(experimentName,scriptOptions);
 %Plot for inspection of data
 if( scriptOptions.printPlots )
     run('plottinScript.m')
+end
+
+if( scriptOptions.visualizeExp )
+    visualizeExperiment(dataset,input,sensorsToAnalize,'contactFrame','root')
 end
 
 %Calibrate
