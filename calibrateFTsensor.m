@@ -90,9 +90,15 @@ if( scriptOptions.printPlots )
 end
 
 if( scriptOptions.visualizeExp )
-    visualizeExperiment(dataset,input,sensorsToAnalize,'contactFrame','root')
+    robotName='iCubGenova04';
+    onTestDir=false;
+    visualizeExperiment(dataset,input,sensorsToAnalize,'contactFrame','root_link');
+%     iCubVizWithSlider(dataset,robotName,sensorsToAnalize,'l_sole',onTestDir);
+%     iCubVizAndForcesSynchronized(dataset,robotName,sensorsToAnalize,'root_link',100);
 end
 
 %Calibrate
-run('CalibMatCorrection.m')
+if ( scriptOptions.calibrate )
+    run('CalibMatCorrection.m');
+end
 

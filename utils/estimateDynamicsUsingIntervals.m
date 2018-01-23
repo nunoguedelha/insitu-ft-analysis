@@ -35,23 +35,30 @@ if (any(strcmp('intervals', fieldnames(input))))
                     estimatedFtData.(input.ftNames{i})=zeros(size(dataset.ftData.(input.ftNames{i})));
          end
          newOrdering=true;
+         
+         % extract sub-intervals in the case of walking datasets
+         isLeftLegIntervDef = ismember('leftLeg',intervalsNames);
+         isRightLegIntervDef = ismember('rightLeg',intervalsNames);
+         if(isLeftLegIntervDef || isRightLegIntervDef)
+             [~, initStanceLeft, endStanceLeft, initStanceRight, endStanceRight] = getStancePeriodsFromWalkingFTdata(...
+                 dataset.time, dataset.ftData.left_foot,...
+                 dataset.time, dataset.ftData.right_foot,...
+                 input.gait.minSwingLength, input.gait.tolerancePercentage, input.gait.shrinkPercentage);
+             % set the sub-intervals
+             if(isLeftLegIntervDef)
+                 input.intervals.leftLeg=struct('initTime',initStanceLeft,'endTime',endStanceLeft,'contactFrame','l_sole');
+             end
+             if(isRightLegIntervDef)
+                 input.intervals.rightLeg=struct('initTime',initStanceRight,'endTime',endStanceRight,'contactFrame','r_sole');
+             end
+         end
+         
          %   generalize ordering of intervals end first section
         for index=1:length(intervalsNames)
             
             if(~strcmp('hanging', intervalsNames{index}))
                 intName=intervalsNames{index};
                 mask=~logical(dataset.time);
-                
-                % extract sub-intervals in the case of walking datasets
-                if(strcmp('leftLeg', intName) || strcmp('rightLeg', intName))
-                    [initTime, initStanceLeft, endStanceLeft, initStanceRight, endStanceRight] = getStancePeriodsFromWalkingFTdata(...
-                        dataset.time, dataset.ftData.left_foot,...
-                        dataset.time, dataset.ftData.right_foot,...
-                        input.gait.minSwingLength, input.gait.tolerancePercentage, input.gait.shrinkPercentage);
-                    % set the sub-intervals
-                    input.intervals.rightLeg=struct('initTime',initStanceRight,'endTime',endStanceRight,'contactFrame','r_sole');
-                    input.intervals.leftLeg=struct('initTime',initStanceLeft,'endTime',endStanceLeft,'contactFrame','l_sole');
-                end
                 
                 % process the intervals
                 for timeIntervals=1:length(input.intervals.(intName).initTime)
