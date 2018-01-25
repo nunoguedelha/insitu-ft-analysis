@@ -34,13 +34,33 @@ if (any(strcmp('intervals', fieldnames(input))))
          for i=1:size(input.ftNames,1)
                     estimatedFtData.(input.ftNames{i})=zeros(size(dataset.ftData.(input.ftNames{i})));
          end
-                newOrdering=true;
+         newOrdering=true;
+         
+         % extract sub-intervals in the case of walking datasets
+         isLeftLegIntervDef = ismember('leftLeg',intervalsNames);
+         isRightLegIntervDef = ismember('rightLeg',intervalsNames);
+         if(isLeftLegIntervDef || isRightLegIntervDef)
+             [~, initStanceLeft, endStanceLeft, initStanceRight, endStanceRight] = getStancePeriodsFromWalkingFTdata(...
+                 dataset.time, dataset.ftData.left_foot,...
+                 dataset.time, dataset.ftData.right_foot,...
+                 input.gait.minSwingLength, input.gait.tolerancePercentage, input.gait.shrinkPercentage);
+             % set the sub-intervals
+             if(isLeftLegIntervDef)
+                 input.intervals.leftLeg=struct('initTime',initStanceLeft,'endTime',endStanceLeft,'contactFrame','l_sole');
+             end
+             if(isRightLegIntervDef)
+                 input.intervals.rightLeg=struct('initTime',initStanceRight,'endTime',endStanceRight,'contactFrame','r_sole');
+             end
+         end
+         
          %   generalize ordering of intervals end first section
         for index=1:length(intervalsNames)
             
             if(~strcmp('hanging', intervalsNames{index}))
                 intName=intervalsNames{index};
                 mask=~logical(dataset.time);
+                
+                % process the intervals
                 for timeIntervals=1:length(input.intervals.(intName).initTime)
                     tempMask=dataset.time>=dataset.time(1)+input.intervals.(intName).initTime(timeIntervals) & dataset.time<=dataset.time(1)+input.intervals.(intName).endTime(timeIntervals);
                     fprintf('estimateDynamicsUsingIntervals: estimating interval %s with contact frame %s from %d s to %d s \n',(intName),input.intervals.(intName).contactFrame,input.intervals.(intName).initTime(timeIntervals),input.intervals.(intName).endTime(timeIntervals));
