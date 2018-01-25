@@ -84,7 +84,7 @@ end
 
 if (~byChannel && isempty(reference))
     for i=1:size(fields,1)
-        figure,
+        figure('WindowStyle','docked'),
         plot(time-timeStampinit,data.(fields{i})(:,1),xPlotOptions);hold on;
         plot(time-timeStampinit,data.(fields{i})(:,2),yPlotOptions);hold on;
         plot(time-timeStampinit,data.(fields{i})(:,3),zPlotOptions);hold on;
@@ -99,7 +99,7 @@ if (~byChannel && isempty(reference))
     end
     if(~onlyForce)
         for  i=1:size(fields,1)
-            figure,
+            figure('WindowStyle','docked'),
             plot(time-timeStampinit,data.(fields{i})(:,4),xPlotOptions);hold on;
             plot(time-timeStampinit,data.(fields{i})(:,5),yPlotOptions);hold on;
             plot(time-timeStampinit,data.(fields{i})(:,6),zPlotOptions);hold on;
@@ -118,13 +118,13 @@ end
 
 if (~isempty(reference) && ~byChannel)
     for i=1:size(fields,1)
-        figure,
+        figure('WindowStyle','docked'),
         plot(time-timeStampinit,data.(fields{i})(:,1),xPlotOptions);hold on;
         plot(time-timeStampinit,data.(fields{i})(:,2),yPlotOptions);hold on;
         plot(time-timeStampinit,data.(fields{i})(:,3),zPlotOptions);hold on;
-        plot(time-timeStampinit,reference.(fields{i})(:,1),x2PlotOptions);hold on;
-        plot(time-timeStampinit,reference.(fields{i})(:,2),y2PlotOptions);hold on;
-        plot(time-timeStampinit,reference.(fields{i})(:,3),z2PlotOptions);hold on;
+        plot(time-timeStampinit,reference.(fields{1})(:,1),x2PlotOptions);hold on;
+        plot(time-timeStampinit,reference.(fields{1})(:,2),y2PlotOptions);hold on;
+        plot(time-timeStampinit,reference.(fields{1})(:,3),z2PlotOptions);hold on;
         if raw
             legend('ch4','ch5','ch6','ch4_2','ch5_2','ch6_2','Location','west');
         else
@@ -136,13 +136,13 @@ if (~isempty(reference) && ~byChannel)
     end
     if(~onlyForce)
         for  i=1:size(fields,1)
-            figure,
+            figure('WindowStyle','docked'),
             plot(time-timeStampinit,data.(fields{i})(:,4),xPlotOptions);hold on;
             plot(time-timeStampinit,data.(fields{i})(:,5),yPlotOptions);hold on;
             plot(time-timeStampinit,data.(fields{i})(:,6),zPlotOptions);hold on;
-            plot(time-timeStampinit,reference.(fields{i})(:,4),x2PlotOptions);hold on;
-            plot(time-timeStampinit,reference.(fields{i})(:,5),y2PlotOptions);hold on;
-            plot(time-timeStampinit,reference.(fields{i})(:,6),z2PlotOptions);hold on;
+            plot(time-timeStampinit,reference.(fields{1})(:,4),x2PlotOptions);hold on;
+            plot(time-timeStampinit,reference.(fields{1})(:,5),y2PlotOptions);hold on;
+            plot(time-timeStampinit,reference.(fields{1})(:,6),z2PlotOptions);hold on;
             if raw
                 legend('ch1','ch2','ch3','ch1_2','ch2_2','ch3_2','Location','west');
             else
@@ -155,10 +155,10 @@ if (~isempty(reference) && ~byChannel)
         end
     end
     for  i=1:size(fields,1)
-        figure,
-        plot(time-timeStampinit,abs(data.(fields{i})(:,1))-abs(reference.(fields{i})(:,1)),xPlotOptions);hold on;
-        plot(time-timeStampinit,abs(data.(fields{i})(:,2))-abs(reference.(fields{i})(:,2)),yPlotOptions);hold on;
-        plot(time-timeStampinit,abs(data.(fields{i})(:,3))-abs(reference.(fields{i})(:,3)),zPlotOptions);hold on;
+        figure('WindowStyle','docked'),
+        plot(time-timeStampinit,abs(data.(fields{i})(:,1))-abs(reference.(fields{1})(:,1)),xPlotOptions);hold on;
+        plot(time-timeStampinit,abs(data.(fields{i})(:,2))-abs(reference.(fields{1})(:,2)),yPlotOptions);hold on;
+        plot(time-timeStampinit,abs(data.(fields{i})(:,3))-abs(reference.(fields{1})(:,3)),zPlotOptions);hold on;
         if raw
             legend('ch4','ch5','ch6','Location','west');
         else
@@ -170,10 +170,10 @@ if (~isempty(reference) && ~byChannel)
     end
     if(~onlyForce)
         for  i=1:size(fields,1)
-            figure,
-            plot(time-timeStampinit,abs(data.(fields{i})(:,4))-abs(reference.(fields{i})(:,4)),xPlotOptions);hold on;
-            plot(time-timeStampinit,abs(data.(fields{i})(:,5))-abs(reference.(fields{i})(:,5)),yPlotOptions);hold on;
-            plot(time-timeStampinit,abs(data.(fields{i})(:,6))-abs(reference.(fields{i})(:,6)),zPlotOptions);hold on;
+            figure('WindowStyle','docked'),
+            plot(time-timeStampinit,abs(data.(fields{i})(:,4))-abs(reference.(fields{1})(:,4)),xPlotOptions);hold on;
+            plot(time-timeStampinit,abs(data.(fields{i})(:,5))-abs(reference.(fields{1})(:,5)),yPlotOptions);hold on;
+            plot(time-timeStampinit,abs(data.(fields{i})(:,6))-abs(reference.(fields{1})(:,6)),zPlotOptions);hold on;
             if raw
                 legend('ch1','ch2','ch3','Location','west');
             else
@@ -199,10 +199,10 @@ if (byChannel)
     end
     for i=1:size(fields,1)
         for n=1:count
-            figure,
+            figure('WindowStyle','docked'),
             plot(time-timeStampinit,data.(fields{i})(:,n),xPlotOptions);
             if ~isempty(reference)
-                hold on; plot(time-timeStampinit,reference.(fields{i})(:,n),zPlotOptions);
+                hold on; plot(time-timeStampinit,reference.(fields{1})(:,n),zPlotOptions);
                 legend((legendNames{n}),strcat((legendNames{n}),'_2'));
                 title(strcat((legendNames{n}),{' : '},escapeUnderscores((fields{i})),{' and  '},escapeUnderscores(referenceName)));
             else

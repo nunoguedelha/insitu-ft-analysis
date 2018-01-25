@@ -128,7 +128,7 @@ if(calibOptions.plot)
             end
             filteredNoOffset.(ft)=dataset.filteredFtData.(ft) -repmat(filteredOffset.(ft),size(dataset.filteredFtData.(ft),1),1);
             
-            figure,
+            figure('WindowStyle','docked'),
             if(~scriptOptions.firstTime)
                 plot3_matrix(filteredNoOffset.(ft)(:,1:3)); grid on;hold on;
             end

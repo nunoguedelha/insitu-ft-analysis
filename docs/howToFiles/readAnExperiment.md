@@ -35,7 +35,7 @@ Input variables:
 -  scriptOptions should include :
     -  scriptOptions.forceCalculation
        - posible values:true ,false
-       - behavior: if true it will retrieve previously stored .mat files with the experiment data if available
+       - behavior: if false it will retrieve previously stored .mat files with the experiment data if available
     -  scriptOptions.testDir=false;
        - posible values:true ,false
        - behavior: if true it will consider to be in a directory below the main directory of the repository. Most common case the testResults dir
