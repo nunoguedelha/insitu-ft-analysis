@@ -132,8 +132,8 @@ if(calibOptions.plot)
             if(~scriptOptions.firstTime)
                 plot3_matrix(filteredNoOffset.(ft)(:,1:3)); grid on;hold on;
             end
-            plot3_matrix(dataset.estimatedFtData.(ft)(:,1:3)); grid on;hold on;
-            plot3_matrix(reCalibData.(ft)(:,1:3));
+            plot3_matrix(dataset.estimatedFtData.(ft)(:,4:6)); grid on;hold on;
+            plot3_matrix(reCalibData.(ft)(:,4:6));
             
             if(~scriptOptions.firstTime)
                 legend('measuredDataNoOffset','estimatedData','reCalibratedData','Location','west');
@@ -141,9 +141,9 @@ if(calibOptions.plot)
                 legend('estimatedData','reCalibratedData','Location','west');
             end
             title(strcat({'Wrench space '},escapeUnderscores(ft),{' '},escapeUnderscores(lambdaName)));
-            xlabel('F_{x}');
-            ylabel('F_{y}');
-            zlabel('F_{z}');
+            xlabel('Tau_{x}');
+            ylabel('Tau_{y}');
+            zlabel('Tau_{z}');
         end
     else
         %% FTPLOTs
