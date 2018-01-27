@@ -49,7 +49,7 @@ if(calibOptions.saveMat)
         else
             scriptOptions.firstTime=false;
         end
-        if (scriptOptions.firstTime)
+        if (strcmp(dataset.calibMatFileNames{i},'identity'))
             prompt={'First time sensor:                 insert serial number or      desired sensor name'};
             name = 'Sensor name';
             defaultans = {'SN00001'};

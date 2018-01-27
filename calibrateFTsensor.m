@@ -54,6 +54,7 @@ scriptOptions.filterData=true;
 scriptOptions.estimateWrenches=true;
 scriptOptions.useInertial=false;
 scriptOptions.visualizeExp=true;
+scriptOptions.calibrate=true;
 
 % Script of the mat file used for save the intermediate results
 scriptOptions.matFileName='ftDataset';
