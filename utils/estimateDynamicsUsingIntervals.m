@@ -36,20 +36,22 @@ if (any(strcmp('intervals', fieldnames(input))))
          end
          newOrdering=true;
          
-         % extract sub-intervals in the case of walking datasets
-         isLeftLegIntervDef = ismember('leftLeg',intervalsNames);
-         isRightLegIntervDef = ismember('rightLeg',intervalsNames);
-         if(isLeftLegIntervDef || isRightLegIntervDef)
-             [~, initStanceLeft, endStanceLeft, initStanceRight, endStanceRight] = getStancePeriodsFromWalkingFTdata(...
-                 dataset.time, dataset.ftData.left_foot,...
-                 dataset.time, dataset.ftData.right_foot,...
-                 input.gait.minSwingLength, input.gait.tolerancePercentage, input.gait.shrinkPercentage);
-             % set the sub-intervals
-             if(isLeftLegIntervDef)
-                 input.intervals.leftLeg=struct('initTime',initStanceLeft,'endTime',endStanceLeft,'contactFrame','l_sole');
-             end
-             if(isRightLegIntervDef)
-                 input.intervals.rightLeg=struct('initTime',initStanceRight,'endTime',endStanceRight,'contactFrame','r_sole');
+         if (strcmp('walking',input.type))
+             % extract sub-intervals in the case of walking datasets
+             isLeftLegIntervDef = ismember('leftLeg',intervalsNames);
+             isRightLegIntervDef = ismember('rightLeg',intervalsNames);
+             if(isLeftLegIntervDef || isRightLegIntervDef)
+                 [~, initStanceLeft, endStanceLeft, initStanceRight, endStanceRight] = getStancePeriodsFromWalkingFTdata(...
+                     dataset.time, dataset.ftData.left_foot,...
+                     dataset.time, dataset.ftData.right_foot,...
+                     input.gait.minSwingLength, input.gait.tolerancePercentage, input.gait.shrinkPercentage);
+                 % set the sub-intervals
+                 if(isLeftLegIntervDef)
+                     input.intervals.leftLeg=struct('initTime',initStanceLeft,'endTime',endStanceLeft,'contactFrame','l_sole');
+                 end
+                 if(isRightLegIntervDef)
+                     input.intervals.rightLeg=struct('initTime',initStanceRight,'endTime',endStanceRight,'contactFrame','r_sole');
+                 end
              end
          end
          
