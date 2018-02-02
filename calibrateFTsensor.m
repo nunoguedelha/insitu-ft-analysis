@@ -80,7 +80,7 @@ calibOptions.saveMat=false;
 calibOptions.usingInsitu=true;
 calibOptions.plot=true;
 calibOptions.onlyWSpace=true;
-calibOptions.IITfirmwareFriendly=true; % in case a calibration matrix that will not be used by iit firmware is estimated
+calibOptions.IITfirmwareFriendly=false; % in case a calibration matrix that will not be used by iit firmware is estimated
 %% Start 
 %Read data
 %[dataset,extraSample]=read_estimate_experimentData(experimentName,scriptOptions);
