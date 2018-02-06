@@ -15,7 +15,6 @@ function []=FTplots(data,time,varargin)
 %% configurations
 %  onlyFOrce: if enabled it will only plot the forces (first 3 columns)
 %  raw: if enabled it will change the legends to reflect the raw channels
-%  (channel swap considered due to IIT firmware)
 %  byChannel: if enable it will generate a different plot for every axis or
 %  channel.
 onlyForce=false;
@@ -92,7 +91,7 @@ if (~byChannel && isempty(reference))
         plot(time-timeStampinit,data.(fields{i})(:,2),yPlotOptions);hold on;
         plot(time-timeStampinit,data.(fields{i})(:,3),zPlotOptions);hold on;
         if raw
-            legend('ch4','ch5','ch6','Location','west');
+             legend('ch1','ch2','ch3','Location','west');
         else
             legend('F_{x}','F_{y}','F_{z}','Location','west');
         end
@@ -106,8 +105,8 @@ if (~byChannel && isempty(reference))
             plot(time-timeStampinit,data.(fields{i})(:,4),xPlotOptions);hold on;
             plot(time-timeStampinit,data.(fields{i})(:,5),yPlotOptions);hold on;
             plot(time-timeStampinit,data.(fields{i})(:,6),zPlotOptions);hold on;
-            if raw
-                legend('ch1','ch2','ch3','Location','west');
+            if raw               
+                legend('ch4','ch5','ch6','Location','west');
             else
                 legend('\tau_{x}','\tau_{y}','\tau_{z}','Location','west');
             end
@@ -129,7 +128,7 @@ if (~isempty(reference) && ~byChannel)
         plot(time-timeStampinit,reference.(fields{i})(:,2),y2PlotOptions);hold on;
         plot(time-timeStampinit,reference.(fields{i})(:,3),z2PlotOptions);hold on;
         if raw
-            legend('ch4','ch5','ch6','ch4_2','ch5_2','ch6_2','Location','west');
+            legend('ch1','ch2','ch3','ch1_2','ch2_2','ch3_2','Location','west');
         else
             legend('F_{x}','F_{y}','F_{z}','F_{x2}','F_{y2}','F_{z2}','Location','west');
         end
@@ -146,8 +145,8 @@ if (~isempty(reference) && ~byChannel)
             plot(time-timeStampinit,reference.(fields{i})(:,4),x2PlotOptions);hold on;
             plot(time-timeStampinit,reference.(fields{i})(:,5),y2PlotOptions);hold on;
             plot(time-timeStampinit,reference.(fields{i})(:,6),z2PlotOptions);hold on;
-            if raw
-                legend('ch1','ch2','ch3','ch1_2','ch2_2','ch3_2','Location','west');
+            if raw                
+                legend('ch4','ch5','ch6','ch4_2','ch5_2','ch6_2','Location','west');
             else
                 legend('\tau_{x}','\tau_{y}','\tau_{z}','\tau_{x2}','\tau_{y2}','\tau_{z2}','Location','west');
             end
@@ -163,7 +162,8 @@ if (~isempty(reference) && ~byChannel)
         plot(time-timeStampinit,abs(data.(fields{i})(:,2))-abs(reference.(fields{i})(:,2)),yPlotOptions);hold on;
         plot(time-timeStampinit,abs(data.(fields{i})(:,3))-abs(reference.(fields{i})(:,3)),zPlotOptions);hold on;
         if raw
-            legend('ch4','ch5','ch6','Location','west');
+            
+                legend('ch1','ch2','ch3','Location','west');
         else
             legend('F_{x}','F_{y}','F_{z}','Location','west');
         end
@@ -178,7 +178,7 @@ if (~isempty(reference) && ~byChannel)
             plot(time-timeStampinit,abs(data.(fields{i})(:,5))-abs(reference.(fields{i})(:,5)),yPlotOptions);hold on;
             plot(time-timeStampinit,abs(data.(fields{i})(:,6))-abs(reference.(fields{i})(:,6)),zPlotOptions);hold on;
             if raw
-                legend('ch1','ch2','ch3','Location','west');
+                legend('ch4','ch5','ch6','Location','west');
             else
                 legend('\tau_{x}','\tau_{y}','\tau_{z}','Location','west');
             end
@@ -191,7 +191,7 @@ end
 
 if (byChannel)
     if raw
-        legendNames={'ch4','ch5','ch6','ch1','ch2','ch3'};
+        legendNames={'ch1','ch2','ch3','ch4','ch5','ch6'};
     else
         legendNames={'F_{x}','F_{y}','F_{z}','\tau_{x}','\tau_{y}','\tau_{z}'};
     end

@@ -226,11 +226,6 @@ else
         dataset.cMat=cMat;
         if(scriptOptions.filterData)
             [dataset.rawDataFiltered]=getRawData(dataset.filteredFtData,cMat);
-            if (any(strcmp('calibFlag', fieldnames(input))))
-                if (~input.calibFlag)
-                    dataset.rawDataFiltered=swapFT(dataset.rawDataFiltered);
-                end
-            end
         end
         dataset.calibMatFileNames=input.calibMatFileNames;
     end

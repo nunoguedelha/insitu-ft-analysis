@@ -45,8 +45,6 @@ ftNames=fieldnames(refDataset.ftData);
 % end
 %recalibrate with matrix 1 experiment1
 
-%asuming calibratio flag is false then the channel order is found in the
-%ftData, rawData is swaped
 for ftIdx =1:length(sensorsToAnalize)
     ft = sensorsToAnalize{ftIdx};
     for j=1:size(dataset.ftData.(ft),1)
@@ -57,14 +55,6 @@ end
 %remove offset
 % ftDataNoOffset1=removeOffset(reCalibData1,e1.dataset.estimatedFtData.(ftNames{i}));
 
-% recalibrate with matrix 2
-for ftIdx =1:length(sensorsToAnalize)
-    ft = sensorsToAnalize{ftIdx};
-    for j=1:size(dataset.ftData.( ft),1)
-        rawCalculated2.(ft)(j,:)=(swapCMat( workbench))\(dataset.ftData.(ft)(j,:)');%-offset.(ft)([4,5,6,1,2,3])');
-    end
-end
-% ftDataNoOffset2=removeOffset(reCalibData2,e1.dataset.estimatedFtData.(ftNames{i}));
 
 
 FTplots(rawCalculated,dataset.time,'raw');
@@ -74,10 +64,9 @@ FTplots(refDataset.ftData,refDataset.time,'raw');
 
 figure,plot3_matrix(rawCalculated.(ft)(:,1:3));hold on;
 plot3_matrix(refDataset.rawData.(ft)(:,1:3)); grid on;  hold on;
-plot3_matrix(rawCalculated2.(ft)(:,1:3));hold on;
 
 
-legend('normal','reference','swaped','Location','west');
+legend('normal','reference','Location','west');
 title('Force 3D space');
 xlabel('F_{x}');
 ylabel('F_{y}');

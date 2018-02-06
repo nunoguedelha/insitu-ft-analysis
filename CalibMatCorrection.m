@@ -68,15 +68,10 @@ if(calibOptions.saveMat)
         else
             filename=strcat('data/',experimentName,'/calibrationMatrices/',dataset.calibMatFileNames{i},lambdaName);
         end
-        if calibOptions.IITfirmwareFriendly
-            %CalibrationMatrix*rawData = [T,F]. When calibration flag = true, the values
-            %are swapped before sending them to yarp port [F,T]. This swap function
-            %accounts for this behavior
-            [firmwareMat,full_scale]=swapCMat(calibMatrices.(ft));
-            % enable when problem with fullscale is sovled in firmware
-            %[firmwareMat,full_scale]=swapCMat(calibMatrices.(ft),fullscale.(ft));
-        else
-            firmwareMat=calibMatrices.(ft);
+         firmwareMat=calibMatrices.(ft);
+        if calibOptions.IITfirmwareFriendly                      
+            full_scale = [32767,32767,32767,32767,32767,32767]; %% default fullscale
+        else % when problem with fullscale is sovled in firmware           
             full_scale=fullscale.(ft);
         end
         writeCalibMat(firmwareMat, full_scale, filename)

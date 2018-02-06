@@ -120,12 +120,7 @@ for i=1:length(experimentNames)
         for j=1:length(sensorsToAnalize)
             sIndx= find(strcmp(ftNames,sensorsToAnalize{j}));
             cMat.(names2use{(i-1)*length(lambdasNames)+1+lam}).(sensorsToAnalize{j}) = readCalibMat(strcat('../data/',experimentNames{i},'/calibrationMatrices/',input.calibMatFileNames{sIndx},lambdasNames{lam}));
-            if (scriptOptions.IITfirmwareFriendly) % assumes workbench is from the old way of doing. Need to verify if what we get from getWorkbenchCalibMat is the matrix in the sensor
-                cMat.(names2use{(i-1)*length(lambdasNames)+1+lam}).(sensorsToAnalize{j})=swapCMat(cMat.(names2use{(i-1)*length(lambdasNames)+1+lam}).(sensorsToAnalize{j}));  
-                secMat.(names2use{(i-1)*length(lambdasNames)+1+lam}).(sensorsToAnalize{j})= cMat.(names2use{(i-1)*length(lambdasNames)+1+lam}).(sensorsToAnalize{j})/swapCMat(WorkbenchMat.(sensorsToAnalize{j}));
-            else
             secMat.(names2use{(i-1)*length(lambdasNames)+1+lam}).(sensorsToAnalize{j})= cMat.(names2use{(i-1)*length(lambdasNames)+1+lam}).(sensorsToAnalize{j})/WorkbenchMat.(sensorsToAnalize{j});
-            end
             xmlStr=cMat2xml(secMat.(names2use{(i-1)*length(lambdasNames)+1+lam}).(sensorsToAnalize{j}),sensorName{j})% print in required format to use by WholeBodyDynamics
         end 
     end 

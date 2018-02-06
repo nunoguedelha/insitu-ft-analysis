@@ -16,7 +16,7 @@ compareExp='icub-insitu-ft-analysis-big-datasets/2017_12_20_Green_iCub_leftLegFo
 
 toCompare='icub-insitu-ft-analysis-big-datasets/2017_12_20_Green_iCub_leftLegFoot/poleGridLeftLeg';
 [calibMat,fullscale] = readCalibMat(strcat('../data/',toCompare,'/calibrationMatrices/',serialNumber));
-calibMat=swapCMat(calibMat);
+
 
 
 %simple comparison among matrices (some similarity index)
@@ -41,12 +41,11 @@ for ftIdx =1:length(sensorsToAnalize)
 end
 %recalibrate with matrix 1 experiment1
 
-%asuming calibratio flag is false then the channel order is found in the
-%ftData, rawData is swaped
+
 for ftIdx =1:length(sensorsToAnalize)
     ft = sensorsToAnalize{ftIdx};
     for j=1:size(e1.dataset.rawData.(ft),1)
-        ftDataNoOffset1(j,:)=workbench*(e1.dataset.ftData.(ft)(j,:)'-offset.(ft)([4,5,6,1,2,3])');
+        ftDataNoOffset1(j,:)=workbench*(e1.dataset.ftData.(ft)(j,:)'-offset.(ft)');
     end
 end
 
