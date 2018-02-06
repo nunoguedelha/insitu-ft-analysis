@@ -50,6 +50,9 @@ if(calibOptions.saveMat)
             scriptOptions.firstTime=false;
         end
         if (scriptOptions.firstTime)
+            if (any(strcmp('calibOutputNames', fieldnames(input))))                
+                 filename=strcat('data/',experimentName,'/calibrationMatrices/', input.calibOutputNames{i},lambdaName);
+            else
             prompt={'First time sensor:                 insert serial number or      desired sensor name'};
             name = 'Sensor name';
             defaultans = {'SN00001'};
@@ -60,6 +63,7 @@ if(calibOptions.saveMat)
                 disp('Sensor name canceled, not saving calibration matrix');
                 filename=strcat('data/',experimentName,'/calibrationMatrices/',defaultans{1},lambdaName);
                 break;
+            end
             end
         else
             filename=strcat('data/',experimentName,'/calibrationMatrices/',dataset.calibMatFileNames{i},lambdaName);
@@ -128,7 +132,7 @@ if(calibOptions.plot)
             end
             filteredNoOffset.(ft)=dataset.filteredFtData.(ft) -repmat(filteredOffset.(ft),size(dataset.filteredFtData.(ft),1),1);
             
-            figure,
+             figure('WindowStyle','docked'),
             if(~scriptOptions.firstTime)
                 plot3_matrix(filteredNoOffset.(ft)(:,1:3)); grid on;hold on;
             end
