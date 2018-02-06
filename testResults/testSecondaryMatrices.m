@@ -84,7 +84,7 @@ toCompare={'dataSamples/TestYogaExtendedLeft','dataSamples/TestYogaExtendedRight
 toCompareNames={'leftYoga','rightYoga'}; % short Name of the experiments
 
 compareDatasetOptions = {};
-compareDatasetOptions.forceCalculation=true;%false;
+compareDatasetOptions.forceCalculation=false;%false;
 compareDatasetOptions.saveData=true;%true
 compareDatasetOptions.matFileName='iCubDataset';
 compareDatasetOptions.testDir=true;
@@ -107,9 +107,11 @@ for c=1:length(toCompare)
     %inspect data to select where to calculate offset
     robotName='iCubGenova04';
     onTestDir=true;
-   % iCubVizWithSlider(data.(toCompareNames{c}),robotName,sensorsToAnalize,input.contactFrameName{1},onTestDir);
-    sampleInit=[1600,1600];
-    sampleEnd=[1650,1650];
+    %iCubVizWithSlider(data.(toCompareNames{c}),robotName,sensorsToAnalize,input.contactFrameName{1},onTestDir);
+    sampleInit=[125,92];
+    sampleEnd=[140,125];
+    %TODO: should consider to calculate the offset also applying secondary
+    %matrix
     [offset.(toCompareNames{c})]=calculateOffsetUsingWBD(estimator,data.(toCompareNames{c}),sampleInit(c),sampleEnd(c),input);
     
     
@@ -145,7 +147,7 @@ for c=1:length(toCompare)
     
 end
 %% Evaluate error
-useMean=true; %select which means of evaluation should be considered is either mean or standard deviation.
+useMean=false; %select which means of evaluation should be considered is either mean or standard deviation.
 for j=1:length(sensorsToAnalize) %why for each sensor? because there could be 2 sensors in the same leg
     for frN=1:length(framesToAnalize)
         
@@ -198,6 +200,9 @@ for j=1:length(sensorsToAnalize) %why for each sensor? because there could be 2 
                 [minErr,minInd]=min(totalerrorXaxis);
                 fprintf(' in %s is from %s , with a total of %d N or Nm on average \n',axisName{axis},names2use{minInd}, minErr);
                 frankieMatrix.(sensorsToAnalize{j})(axis,:)=cMat.(names2use{minInd}).(sensorsToAnalize{j})(axis,:);
+                fCalibMat.(sensorsToAnalize{j})=frankieMatrix.(sensorsToAnalize{j})/(WorkbenchMat.(sensorsToAnalize{j}));%calculate secondary calibration matrix
+            
+                xmlStrFrankie=cMat2xml(fCalibMat.(sensorsToAnalize{j}),sensorName{j});% print in required format to use by WholeBodyDynamics
                 frankieData.(framesToAnalize{frN})(:,axis)=stackedResults.(sensorsToAnalize{j}).(names2use{minInd}).externalForces.(framesToAnalize{frN})(:,axis);
             end
         else

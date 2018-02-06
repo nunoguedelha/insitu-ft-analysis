@@ -4,7 +4,7 @@ addpath external/quadfit
 %experimentName='2017_10_30';
 %experimentName='/green-iCub-Insitu-Datasets/2017_12_7_testYogaWithSensorLeft';% first sample with cable corrected ;
 %experimentName='dataSamples/First_Time_Sensor';% 
-experimentName='dataSamples/TestYogaExtendedRIght';% 
+experimentName='dataSamples/TestYogaExtendedRight';% 
 
 %% options when loading experiment dataset
 scriptOptions = {};
