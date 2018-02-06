@@ -87,7 +87,7 @@ names=fieldnames(dataset.ftData);
 for ftIdx =1:length(sensorsToAnalize)
     ft = sensorsToAnalize{ftIdx};
     names={'filtered','estimated'};
-    wrenchSpacePlots(names,ft,dataset.ftData.(ft), reference.estimatedFtData.(ft))    
+    force3DPlots(names,ft,dataset.ftData.(ft), reference.estimatedFtData.(ft))    
     
     if (sphereReference)
     else
