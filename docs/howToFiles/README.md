@@ -81,4 +81,15 @@ For more on the theory behind this script, check [1,2].
 [3]:https://gitlab.com/dynamic-interaction-control/icub-insitu-ft-analysis-big-datasets
 [4]:https://gitlab.com/dynamic-interaction-control/green-iCub-Insitu-Datasets
 
+## Use the experiment visualizer
+To visualize an experiment you can use [visualizeExperiment.m](https://github.com/robotology-playground/insitu-ft-analysis/blob/master/utils/visualizeExperiment.m).
 
+This function has the aim of been able to see the icub posture while seen the devolpment of the ft forces in the wrench space.
+Input
+- dataset: has the joint and forces information
+- input: variable resulting in reading the params.m files. For this variable it assumes it has the following fields
+  - robotName: is used to load the robot model to know which joints to add, it is asumed its the same type of robot than the one found in external/iCubViz/model.urdf
+  - calibFlag: if calibration flag form yarp device is enabled
+-sensorsToAnalize: has the names of the sensors to plot, the names correspond to fileds in the dataset structure
+
+More details can be found in [how to use experiment visualizer](https://github.com/robotology-playground/insitu-ft-analysis/blob/master/docs/howToFiles/visualizeExperiment.md)
