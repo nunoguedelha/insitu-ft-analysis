@@ -46,7 +46,7 @@ input.robotName='model'; %name of the robot being used (urdf file should be pres
 % calib variables will only be used when raw data needs to be calculated
 input.calibMatPath='';%path to where calibration matrices can be found
 input.calibMatFileNames={}; % name of the files containing the calibration matrics in the same order specified in ftNames
-
+input.calibOutputNames={}; % names to be used in case the sensor has an identity matrix (optional variable)
 
 %-----------------------------------------------------------
 %% Variables that depend on the urdf 
