@@ -30,7 +30,7 @@ experimentName='/green-iCub-Insitu-Datasets/2017_12_5_TestGrid';% first sample w
 
 % Script options, meant to control the behavior of this script
 scriptOptions = {};
-scriptOptions.forceCalculation=true;%false;
+scriptOptions.forceCalculation=false;%false;
 scriptOptions.printPlots=true;%true
 scriptOptions.raw=false;
 scriptOptions.saveData=false;

@@ -45,7 +45,7 @@ addpath utils
 
 %% general reading configuration options
 scriptOptions = {};
-scriptOptions.forceCalculation=true;%false;
+scriptOptions.forceCalculation=false;%false;
 scriptOptions.printPlots=true;%true
 scriptOptions.raw=true;
 scriptOptions.saveData=true;
@@ -53,21 +53,22 @@ scriptOptions.testDir=false;% to calculate the raw data, for recalibration alway
 scriptOptions.filterData=true;
 scriptOptions.estimateWrenches=true;
 scriptOptions.useInertial=false;
-scriptOptions.visualizeExp=true;
+scriptOptions.visualizeExp=false;
 
 % Script of the mat file used for save the intermediate results
 scriptOptions.matFileName='ftDataset';
 
 %% name and paths of the experiment files
 % change name to desired experiment folder
-experimentName='green-iCub-Insitu-Datasets/2018_01_18_poleWalkingLeftRight/poleLeftRight_1';
+%experimentName='green-iCub-Insitu-Datasets/2018_01_18_poleWalkingLeftRight/poleLeftRight_1';
+experimentName='dataSamples/First_Time_Sensor';
 
 %% We carry the calibration for just a subset of the sensors
 % the names are associated to the location of the sensor in the
 % in the iCub options are {'left_arm','right_arm','left_leg','right_leg','right_foot','left_foot'};
 
-sensorsToAnalize = {'left_leg','left_foot','right_leg','right_foot'};
-%sensorsToAnalize = {'right_leg'};
+%sensorsToAnalize = {'left_leg','left_foot','right_leg','right_foot'};
+sensorsToAnalize = {'right_leg'};
 
 %% Calibration options
 %Regularization parameter
@@ -75,7 +76,7 @@ lambda=0;
 lambdaName='';
 
 %calibration script options
-calibOptions.saveMat=false;
+calibOptions.saveMat=true;
 calibOptions.usingInsitu=true;
 calibOptions.plot=true;
 calibOptions.onlyWSpace=true;
@@ -98,6 +99,6 @@ if( scriptOptions.visualizeExp )
 end
 
 %Calibrate
-if ( scriptOptions.calibrate )
-    run('CalibMatCorrection.m');
-end
+
+run('CalibMatCorrection.m');
+
