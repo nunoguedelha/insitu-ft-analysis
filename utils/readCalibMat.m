@@ -1,6 +1,6 @@
 function [cMat,full_scale] = readCalibMat(filename)
 %read the calibration matrix delivered by the calibration procedure
-defaultFullScale=true;
+defaultFullScale=false;
 
 
 fid = fopen(filename);
