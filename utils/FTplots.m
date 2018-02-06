@@ -84,7 +84,7 @@ end
 
 if (~byChannel && isempty(reference))
     for i=1:size(fields,1)
-        figure,
+         figure('WindowStyle','docked'),
         plot(time-timeStampinit,data.(fields{i})(:,1),xPlotOptions);hold on;
         plot(time-timeStampinit,data.(fields{i})(:,2),yPlotOptions);hold on;
         plot(time-timeStampinit,data.(fields{i})(:,3),zPlotOptions);hold on;
@@ -99,7 +99,7 @@ if (~byChannel && isempty(reference))
     end
     if(~onlyForce)
         for  i=1:size(fields,1)
-            figure,
+             figure('WindowStyle','docked'),
             plot(time-timeStampinit,data.(fields{i})(:,4),xPlotOptions);hold on;
             plot(time-timeStampinit,data.(fields{i})(:,5),yPlotOptions);hold on;
             plot(time-timeStampinit,data.(fields{i})(:,6),zPlotOptions);hold on;
@@ -118,7 +118,7 @@ end
 
 if (~isempty(reference) && ~byChannel)
     for i=1:size(fields,1)
-        figure,
+         figure('WindowStyle','docked'),
         plot(time-timeStampinit,data.(fields{i})(:,1),xPlotOptions);hold on;
         plot(time-timeStampinit,data.(fields{i})(:,2),yPlotOptions);hold on;
         plot(time-timeStampinit,data.(fields{i})(:,3),zPlotOptions);hold on;
@@ -136,7 +136,7 @@ if (~isempty(reference) && ~byChannel)
     end
     if(~onlyForce)
         for  i=1:size(fields,1)
-            figure,
+             figure('WindowStyle','docked'),
             plot(time-timeStampinit,data.(fields{i})(:,4),xPlotOptions);hold on;
             plot(time-timeStampinit,data.(fields{i})(:,5),yPlotOptions);hold on;
             plot(time-timeStampinit,data.(fields{i})(:,6),zPlotOptions);hold on;
@@ -155,7 +155,7 @@ if (~isempty(reference) && ~byChannel)
         end
     end
     for  i=1:size(fields,1)
-        figure,
+         figure('WindowStyle','docked'),
         plot(time-timeStampinit,abs(data.(fields{i})(:,1))-abs(reference.(fields{i})(:,1)),xPlotOptions);hold on;
         plot(time-timeStampinit,abs(data.(fields{i})(:,2))-abs(reference.(fields{i})(:,2)),yPlotOptions);hold on;
         plot(time-timeStampinit,abs(data.(fields{i})(:,3))-abs(reference.(fields{i})(:,3)),zPlotOptions);hold on;
@@ -170,7 +170,7 @@ if (~isempty(reference) && ~byChannel)
     end
     if(~onlyForce)
         for  i=1:size(fields,1)
-            figure,
+             figure('WindowStyle','docked'),
             plot(time-timeStampinit,abs(data.(fields{i})(:,4))-abs(reference.(fields{i})(:,4)),xPlotOptions);hold on;
             plot(time-timeStampinit,abs(data.(fields{i})(:,5))-abs(reference.(fields{i})(:,5)),yPlotOptions);hold on;
             plot(time-timeStampinit,abs(data.(fields{i})(:,6))-abs(reference.(fields{i})(:,6)),zPlotOptions);hold on;
@@ -199,7 +199,7 @@ if (byChannel)
     end
     for i=1:size(fields,1)
         for n=1:count
-            figure,
+             figure('WindowStyle','docked'),
             plot(time-timeStampinit,data.(fields{i})(:,n),xPlotOptions);
             if ~isempty(reference)
                 hold on; plot(time-timeStampinit,reference.(fields{i})(:,n),zPlotOptions);
