@@ -23,6 +23,7 @@ raw=false;
 byChannel=false;
 reference={};
 referenceName='reference';
+forceComparison=false;
 if (length(varargin)==1)
     if(ischar(  varargin{1}))
         switch varargin{1}
@@ -32,6 +33,8 @@ if (length(varargin)==1)
                 raw=true;
             case {'byChannel','ByChannel','bychannel'}
                 byChannel=true;
+                 case {'forceComparison','forcecomparison','ForceComparison'}
+                forceComparison=true;
             otherwise
                 warning('Unexpected option going by default options.')
         end
@@ -40,7 +43,7 @@ if (length(varargin)==1)
         reference=varargin{1};
     end
 else
-    if (length(varargin)>1 && length(varargin)<6)
+    if (length(varargin)>1 && length(varargin)<7)
         for count=1:length(varargin)
             if(ischar(  varargin{count}))
                 switch varargin{count}
@@ -75,7 +78,7 @@ z2PlotOptions = 'c.';
 timeStampinit=time(1);
 fields=fieldnames(data);
 
-if (size(fields,1)==2)
+if (size(fields,1)==2 && forceComparison)
     temp.(fields{1})=data.(fields{1});
     reference.(fields{1})=data.(fields{2});
     referenceName=(fields{2});
