@@ -1,15 +1,15 @@
 %add required folders for use of functions
-addpath external/quadfit
-addpath utils
+addpath ../external/quadfit
+addpath ../utils
 
 % name and paths of the data files
-%experimentName='green-iCub-Insitu-Datasets/skinTest20170903';% 
+experimentName='green-iCub-Insitu-Datasets/skinTest20170903';% 
 %experimentName='green-iCub-Insitu-Datasets/skinTest20170911_3';
 %experimentName='green-iCub-Insitu-Datasets/skintest2017_09_14_1';
 %experimentName='dumper'
-%experimentName='green-iCub-Insitu-Datasets/heavyWeight'
+% experimentName='green-iCub-Insitu-Datasets/heavyWeight'
 %experimentName='green-iCub-Insitu-Datasets/skinMutipleWeights'
-experimentName='green-iCub-Insitu-Datasets/angles'
+%experimentName='green-iCub-Insitu-Datasets/angles'
 
 
 scriptOptions = {};
@@ -60,7 +60,8 @@ figure,plot (dataset.skinData.time-dataset.time(1),dataset.skinData.force); hold
 plot (dataset.time-dataset.time(1),dataset.ftData.right_leg(:,1:3)-dataset.ftData.right_leg(1,1:3)); hold on;
 legend ('skin force ','ft force ');
 end
-timeDiff=88.68-71.7;
+%timeDiff=88.68-71.7; %many angles time diff
+timeDiff=82.64-73.33; %many weights time diff
 %% estimate ft to calculate offset used when starting wbd
 sample=100;
 % estimateTorquesOneSample variables
@@ -94,16 +95,21 @@ sampleIni=16;
 sT=0;
 fT=0;
 time=0;
-for sample=sampleIni:50:length(dataset.time)-1000
+for sample=sampleIni:50:length(dataset.time)-100
 skinSample=findSkinSample(dataset.time,sample,dataset.skinData.time,timeDiff);
 contactIndex=estimator.model.getFrameIndex(input.skinFrame);
 link_h_skinFrame_temp=estimator.model.getFrameTransform(contactIndex);
 link_h_skinFrame=link_h_skinFrame_temp.asAdjointTransformWrench.toMatlab();
 % estimateTorquesOneSample variables
 framesNames={'l_sole','r_sole','l_lower_leg','root_link','l_elbow_1','r_elbow_1'}; %there has to be atleast 6
+% using the encoder data from the same time sample
 q=dataset.qj(sample,:);
 dq=zeros(size(dataset.dqj(sample,:)));
 ddq=dataset.ddqj(sample,:);
+% assume encoders never moved
+% q=dataset.qj(100,:);
+% dq=zeros(size(dataset.dqj(100,:)));
+% ddq=dataset.ddqj(100,:);
 externalWrench=link_h_skinFrame*dataset.skinData.wrench(skinSample,:)';
 %externalWrench=dataset.skinData.wrench(skinSample,:)'%*-1;
 
@@ -185,16 +191,54 @@ for i=1:size(temp,1)
     end
 %%
 
-n=110
+n=11
 figure,
 plot (time(12:end-n),sktF(12:end-n),'r'); hold on;
 plot (time(12:end-n),fTT(12:end-n),'b'); hold on;
 legend ('skin torque ','ft torque ');
-xlabel('Time')
+xlabel('Seconds')
 ylabel('N.m')
-title('1kg at different angles')
+%title('1kg at different angles')
+title('Multiple weights hanging from right lower leg')
+%title('3kg hanging from right lower leg')
+title('1kg on top of right lower leg')
 
 
+% angles rmse
+% %90
+% interval=(46:128);
+% % 85
+% interval=(300:389);
+% % % 80
+% interval=(590:708);
+% % % 75
+%  interval= (853:957);
+% 
+
+% many weights intervals
+% %1 kg
+% interval=(145:230);
+% % 1.5kg
+% interval=(264:416);
+% % 1.7kg
+% interval=(435:524);
+% % 1.9kg
+% interval= (546:631);
+% 
+% % 3kg
+% interval= (102:206);
+
+% rmseFilt=sqrt(mean((fTT(interval)-sktF(interval)).^2))
+% std(fTT(interval))
+% std(sktF(interval))
+%  mean(fTT(interval)) 
+%  mean(sktF(interval))
+
+%inspect forces
+%  normskin=sqrt(dataset.skinData.force(:,1).^2 +dataset.skinData.force(:,2).^2 +dataset.skinData.force(:,3).^2 )
+%  figure,plot(dataset.skinData.time-dataset.skinData.time(1)-timeDiff,normskin); hold on
+%  normFT= sqrt(dataset.ftData.right_leg(:,1).^2 +dataset.ftData.right_leg(:,2).^2 +dataset.ftData.right_leg(:,3).^2 )
+%   figure,plot(dataset.time-dataset.time(1),normFT) ;
 % figure, plot (dataset.qj(:,:))
 % contactIndex=estimator.model.getFrameIndex('r_sole');
 % link_h_skinFrame_temp=estimator.model.getFrameTransform(contactIndex);
