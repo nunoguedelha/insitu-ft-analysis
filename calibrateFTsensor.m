@@ -1,5 +1,4 @@
 clear all
-clear all
 close all
 clc
 
@@ -45,7 +44,7 @@ addpath utils
 
 %% general reading configuration options
 scriptOptions = {};
-scriptOptions.forceCalculation=false;%false;
+scriptOptions.forceCalculation=true;%false;
 scriptOptions.printPlots=true;%true
 scriptOptions.raw=true;
 scriptOptions.saveData=true;
@@ -61,7 +60,7 @@ scriptOptions.matFileName='ftDataset';
 %% name and paths of the experiment files
 % change name to desired experiment folder
 %experimentName='green-iCub-Insitu-Datasets/2018_01_18_poleWalkingLeftRight/poleLeftRight_1';
-experimentName='dataSamples/First_Time_Sensor';
+experimentName='iCubGenova04/exp_1/poleLeftRight';
 
 %% We carry the calibration for just a subset of the sensors
 % the names are associated to the location of the sensor in the
@@ -80,7 +79,7 @@ calibOptions.saveMat=true;
 calibOptions.usingInsitu=true;
 calibOptions.plot=true;
 calibOptions.onlyWSpace=true;
-calibOptions.IITfirmwareFriendly=true; % in case a calibration matrix that will not be used by iit firmware is estimated
+calibOptions.IITfirmwareFriendly=false; % in case a calibration matrix that will not be used by iit firmware is estimated
 %% Start
 %Read data
 %[dataset,extraSample]=read_estimate_experimentData(experimentName,scriptOptions);
