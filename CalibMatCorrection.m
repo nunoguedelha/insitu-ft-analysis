@@ -127,7 +127,7 @@ if(calibOptions.plot)
             end
             filteredNoOffset.(ft)=dataset.filteredFtData.(ft) -repmat(filteredOffset.(ft),size(dataset.filteredFtData.(ft),1),1);
             
-             figure('WindowStyle','docked'),
+            figure;
             if(~scriptOptions.firstTime)
                 plot3_matrix(filteredNoOffset.(ft)(:,1:3)); grid on;hold on;
             end
@@ -154,8 +154,8 @@ if(calibOptions.plot)
 end
 
 %% plot secondary matrix format
-% for ftIdx =1:length(sensorsToAnalize)
-%     ft = sensorsToAnalize{ftIdx};
-%     secMat.(ft)= calibMatrices.(ft)/dataset.cMat.(ft);
-%     xmlStr=cMat2xml(secMat.(ft),input.sensorName{j})% print in required format to use by WholeBodyDynamics    
-% end
+for ftIdx =1:length(sensorsToAnalize)
+    ft = sensorsToAnalize{ftIdx};
+    secMat.(ft)= calibMatrices.(ft)/dataset.cMat.(ft);
+    xmlStr=cMat2xml(secMat.(ft),ft)% print in required format to use by WholeBodyDynamics    
+end
