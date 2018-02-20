@@ -13,5 +13,6 @@ Thumbs.db
 ##########################
 external/ftSensCalib
 external/iCubViz
+data/iCubGenova04
 *.avi
 *.m~
