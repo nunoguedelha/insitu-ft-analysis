@@ -1,13 +1,17 @@
+clear all
+close all
+clc
+
 % clear all;
 addpath ../utils
 addpath ../external/quadfit
 %% Prepare options of the test
 
 scriptOptions = {};
-scriptOptions.testDir=true;% to calculate the raw data, for recalibration always true
+scriptOptions.testDir=false;% to calculate the raw data, for recalibration always true
 scriptOptions.matFileName='ftDataset';
 scriptOptions.printAll=true;
-scriptOptions.IITfirmwareFriendly=true;
+scriptOptions.IITfirmwareFriendly=false;
 % Script of the mat file used for save the intermediate results
 %scriptOptions.saveDataAll=true;
 
@@ -29,26 +33,25 @@ scriptOptions.IITfirmwareFriendly=true;
 
 %Use only datasets where the same sensor is used
 experimentNames={
-    'icub-insitu-ft-analysis-big-datasets/2017_12_20_Green_iCub_leftLegFoot/poleGridLeftLeg';
-  
-    }; %this set is from iCubGenova02
+    'iCubGenova04/exp_1/poleLeftRight';
+    }; %this set is from iCubGenova04
 names={'Workbench';
-    'fittedOnRaw';    
+    'exp1';
     };% except for the first one all others are short names for the expermients in experimentNames
 
 
-lambdas=[0];
-% lambdas=[0;
-%     10
-%     50;
-%     1000;
-%     10000;
-%     50000;
-%     100000;
-%     500000;
-%     1000000;
-%     5000000;
-%     10000000];
+%lambdas=[0];
+lambdas=[0;
+    10
+    50;
+    1000;
+    10000;
+    50000;
+    100000;
+    500000;
+    1000000;
+    5000000;
+    10000000];
 % Create appropiate names for the lambda variables
 for namingIndex=1:length(lambdas)
     if (lambdas(namingIndex)==0)
@@ -71,17 +74,18 @@ end
 names2use=names2use';
 
 %%  Select sensors and frames to analize
-sensorsToAnalize = {'left_leg'};  %load the new calibration matrices
-framesToAnalize={'l_lower_leg'};
-sensorName={'l_leg_ft_sensor'};
+sensorsToAnalize = {'right_leg'};  %load the new calibration matrices
+framesToAnalize={'r_upper_leg'};
+sensorName={'r_leg_ft_sensor'};
 
 %% Read the calibration matrices to evaluate
 
 [cMat,secMat,WorkbenchMat]=readGeneratedCalibMatrices(experimentNames,scriptOptions,sensorsToAnalize,names2use,lambdasNames);
 
 %% Select datasets in which the matrices will be evaluated
-toCompare={'dataSamples/TestYogaExtendedLeft','dataSamples/TestYogaExtendedRight'};%datasets name 'leftYoga' 'failedLeftYoga'
-toCompareNames={'leftYoga','rightYoga'}; % short Name of the experiments
+%toCompare={'iCubGenova04/exp_1/yogaLeft','iCubGenova04/exp_1/yogaRight'};%datasets name 'leftYoga' 'failedLeftYoga'
+toCompare={'iCubGenova04/exp_2/poleLeftRight'};
+toCompareNames={'exp2'}; % short Name of the experiments
 
 compareDatasetOptions = {};
 compareDatasetOptions.forceCalculation=false;%false;
@@ -89,7 +93,7 @@ compareDatasetOptions.saveData=true;%true
 compareDatasetOptions.matFileName='iCubDataset';
 compareDatasetOptions.testDir=true;
 compareDatasetOptions.raw=false;
-compareDatasetOptions.testDir=true;% to calculate the raw data, for recalibration always true
+%compareDatasetOptions.testDir=true;% to calculate the raw data, for recalibration always true
 compareDatasetOptions.filterData=false;
 compareDatasetOptions.estimateWrenches=true;
 compareDatasetOptions.useInertial=false;    
@@ -108,8 +112,8 @@ for c=1:length(toCompare)
     robotName='iCubGenova04';
     onTestDir=true;
     %iCubVizWithSlider(data.(toCompareNames{c}),robotName,sensorsToAnalize,input.contactFrameName{1},onTestDir);
-    sampleInit=[125,92];
-    sampleEnd=[140,125];
+    sampleInit=[40];
+    sampleEnd=[60];
     %TODO: should consider to calculate the offset also applying secondary
     %matrix
     [offset.(toCompareNames{c})]=calculateOffsetUsingWBD(estimator,data.(toCompareNames{c}),sampleInit(c),sampleEnd(c),input);
