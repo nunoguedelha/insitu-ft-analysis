@@ -29,7 +29,7 @@ clc
 addpath external/quadfit
 addpath utils
 % name and paths of the data files
-experimentName='iCubGenova04/exp_1/poleLeftRight';
+experimentName='icub-insitu-ft-analysis-big-datasets/iCubGenova04/exp_1/poleLeftRight';
 
 % Script options, meant to control the behavior of this script
 scriptOptions = {};

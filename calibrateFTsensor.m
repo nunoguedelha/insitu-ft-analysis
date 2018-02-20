@@ -60,7 +60,7 @@ scriptOptions.matFileName='ftDataset';
 %% name and paths of the experiment files
 % change name to desired experiment folder
 %experimentName='green-iCub-Insitu-Datasets/2018_01_18_poleWalkingLeftRight/poleLeftRight_1';
-experimentName='iCubGenova04/exp_1/poleLeftRight';
+experimentName='icub-insitu-ft-analysis-big-datasets/iCubGenova04/exp_1/poleLeftRight';
 
 %% We carry the calibration for just a subset of the sensors
 % the names are associated to the location of the sensor in the

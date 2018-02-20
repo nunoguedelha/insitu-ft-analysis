@@ -33,7 +33,7 @@ scriptOptions.IITfirmwareFriendly=false;
 
 %Use only datasets where the same sensor is used
 experimentNames={
-    'iCubGenova04/exp_1/poleLeftRight';
+    'icub-insitu-ft-analysis-big-datasets/iCubGenova04/exp_1/poleLeftRight';
     }; %this set is from iCubGenova04
 names={'Workbench';
     'exp1';
@@ -74,9 +74,9 @@ end
 names2use=names2use';
 
 %%  Select sensors and frames to analize
-sensorsToAnalize = {'right_leg'};  %load the new calibration matrices
-framesToAnalize={'r_upper_leg'};
-sensorName={'r_leg_ft_sensor'};
+sensorsToAnalize = {'left_leg'};  %load the new calibration matrices
+framesToAnalize={'l_lower_leg'};
+sensorName={'l_leg_ft_sensor'};
 
 %% Read the calibration matrices to evaluate
 
@@ -84,7 +84,7 @@ sensorName={'r_leg_ft_sensor'};
 
 %% Select datasets in which the matrices will be evaluated
 %toCompare={'iCubGenova04/exp_1/yogaLeft','iCubGenova04/exp_1/yogaRight'};%datasets name 'leftYoga' 'failedLeftYoga'
-toCompare={'iCubGenova04/exp_2/poleLeftRight'};
+toCompare={'icub-insitu-ft-analysis-big-datasets/iCubGenova04/exp_2/poleLeftRight'};
 toCompareNames={'exp2'}; % short Name of the experiments
 
 compareDatasetOptions = {};

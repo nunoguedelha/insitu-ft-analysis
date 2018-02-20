@@ -10,7 +10,7 @@ addpath utils
 
 % obtain data from all listed experiments
 experimentNames={
- 'iCubGenova04/exp_1/poleLeftRight';% Name of the experiment;
+ 'icub-insitu-ft-analysis-big-datasets/iCubGenova04/exp_1/poleLeftRight';% Name of the experiment;
     };
 scriptOptions = {};
 scriptOptions.forceCalculation=true;%false;
