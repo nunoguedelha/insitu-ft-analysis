@@ -3,8 +3,8 @@ close all
 clc
 
 % clear all;
-addpath ../utils
-addpath ../external/quadfit
+addpath utils
+addpath external/quadfit
 %% Prepare options of the test
 
 scriptOptions = {};
@@ -91,7 +91,7 @@ compareDatasetOptions = {};
 compareDatasetOptions.forceCalculation=false;%false;
 compareDatasetOptions.saveData=true;%true
 compareDatasetOptions.matFileName='iCubDataset';
-compareDatasetOptions.testDir=true;
+compareDatasetOptions.testDir=false;
 compareDatasetOptions.raw=false;
 %compareDatasetOptions.testDir=true;% to calculate the raw data, for recalibration always true
 compareDatasetOptions.filterData=false;
