@@ -8,7 +8,7 @@ addpath external/quadfit
 %% Prepare options of the test
 
 scriptOptions = {};
-scriptOptions.testDir=false;% to calculate the raw data, for recalibration always true
+scriptOptions.testDir=true;% to calculate the raw data, for recalibration always true
 scriptOptions.matFileName='ftDataset';
 scriptOptions.printAll=true;
 scriptOptions.IITfirmwareFriendly=false;
@@ -74,9 +74,9 @@ end
 names2use=names2use';
 
 %%  Select sensors and frames to analize
-sensorsToAnalize = {'left_leg'};  %load the new calibration matrices
-framesToAnalize={'l_lower_leg'};
-sensorName={'l_leg_ft_sensor'};
+sensorsToAnalize = {'left_leg','right_leg'};  %load the new calibration matrices
+framesToAnalize={'l_lower_leg','l_upper_leg','r_lower_leg','r_upper_leg'};
+sensorName={'l_leg_ft_sensor','r_leg_ft_sensor'};
 
 %% Read the calibration matrices to evaluate
 
@@ -84,14 +84,14 @@ sensorName={'l_leg_ft_sensor'};
 
 %% Select datasets in which the matrices will be evaluated
 %toCompare={'iCubGenova04/exp_1/yogaLeft','iCubGenova04/exp_1/yogaRight'};%datasets name 'leftYoga' 'failedLeftYoga'
-toCompare={'icub-insitu-ft-analysis-big-datasets/iCubGenova04/exp_2/poleLeftRight'};
+toCompare={'icub-insitu-ft-analysis-big-datasets/iCubGenova04/exp_2/yogaRight'};
 toCompareNames={'exp2'}; % short Name of the experiments
 
 compareDatasetOptions = {};
 compareDatasetOptions.forceCalculation=false;%false;
 compareDatasetOptions.saveData=true;%true
 compareDatasetOptions.matFileName='iCubDataset';
-compareDatasetOptions.testDir=false;
+compareDatasetOptions.testDir=true;
 compareDatasetOptions.raw=false;
 %compareDatasetOptions.testDir=true;% to calculate the raw data, for recalibration always true
 compareDatasetOptions.filterData=false;
@@ -130,7 +130,7 @@ for c=1:length(toCompare)
     
     
     %% Comparison
-    framesNames={'l_sole','r_sole','l_lower_leg','r_lower_leg','root_link','l_elbow_1','r_elbow_1'}; %there has to be atleast 6
+    framesNames={'l_sole','r_sole','l_lower_leg','r_lower_leg','l_upper_leg','r_upper_leg','root_link','l_elbow_1','r_elbow_1',}; %there has to be atleast 6
     timeFrame=[0,15000];
     sMat={};
     for j=1:length(sensorsToAnalize) %why for each sensor? because there could be 2 sensors in the same leg
@@ -151,7 +151,7 @@ for c=1:length(toCompare)
     
 end
 %% Evaluate error
-useMean=false; %select which means of evaluation should be considered is either mean or standard deviation.
+useMean=true; %select which means of evaluation should be considered is either mean or standard deviation.
 for j=1:length(sensorsToAnalize) %why for each sensor? because there could be 2 sensors in the same leg
     for frN=1:length(framesToAnalize)
         
