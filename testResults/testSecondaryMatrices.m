@@ -75,7 +75,7 @@ names2use=names2use';
 
 %%  Select sensors and frames to analize
 sensorsToAnalize = {'left_leg','right_leg'};  %load the new calibration matrices
-framesToAnalize={'l_lower_leg','l_upper_leg','r_lower_leg','r_upper_leg'};
+framesToAnalize={'l_upper_leg','r_upper_leg'};
 sensorName={'l_leg_ft_sensor','r_leg_ft_sensor'};
 
 %% Read the calibration matrices to evaluate
@@ -130,7 +130,7 @@ for c=1:length(toCompare)
     
     
     %% Comparison
-    framesNames={'l_sole','r_sole','l_lower_leg','r_lower_leg','l_upper_leg','r_upper_leg','root_link','l_elbow_1','r_elbow_1',}; %there has to be atleast 6
+    framesNames={'l_sole','r_sole','l_upper_leg','r_upper_leg','root_link','l_elbow_1','r_elbow_1',}; %there has to be atleast 6
     timeFrame=[0,15000];
     sMat={};
     for j=1:length(sensorsToAnalize) %why for each sensor? because there could be 2 sensors in the same leg
