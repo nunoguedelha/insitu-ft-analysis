@@ -150,6 +150,17 @@ for c=1:length(toCompare)
     end
     
 end
+
+%% SimpleOddometry init
+% This is to understand which axis from the ft Sensor affects each axis in the evaluation frame 
+odom = iDynTree.SimpleLeggedOdometry();
+odom.setModel(estimator.model());
+jointPos = iDynTree.JointPosDoubleArray(estimator.model());
+odom.updateKinematics(jointPos);
+odom.init('root_link','root_link');
+% Note: we will assume that mapping of the axis is a one to one
+% relationship
+
 %% Evaluate error
 useMean=true; %select which means of evaluation should be considered is either mean or standard deviation.
 for j=1:length(sensorsToAnalize) %why for each sensor? because there could be 2 sensors in the same leg
@@ -190,6 +201,17 @@ for j=1:length(sensorsToAnalize) %why for each sensor? because there could be 2 
             bestName.(sensorsToAnalize{j})=names2use{minIndall};
             xmlStr=cMat2xml(sCalibMat.(sensorsToAnalize{j}),sensorName{j});% print in required format to use by WholeBodyDynamics
             
+            % Get Indexes of the frames and links
+            frameToAnalizeIndex=odom.model.getLinkIndex((framesToAnalize{frN}));
+            frameIndex=odom.model.getFrameIndex((sensorName{j}));
+            sensorLinkIndex=odom.model.getFrameLink(frameIndex);
+            
+            % Get adjoint transformation matrices
+            sensor_H_w=odom.getWorldLinkTransform(sensorLinkIndex).inverse().asHomogeneousTransform().toMatlab();
+            w_h_frameToAnalize=odom.getWorldLinkTransform(frameToAnalizeIndex).asHomogeneousTransform().toMatlab();            
+            sensor_H_frameToAnalize=sensor_H_w*w_h_frameToAnalize;
+            
+            
             axisName={'fx','fy','fz','tx','ty','tz'};
             for axis=1:6
                 if useMean
@@ -200,15 +222,26 @@ for j=1:length(sensorsToAnalize) %why for each sensor? because there could be 2 
                     totalerrorXaxis=strd_axis.(sensorsToAnalize{j}).(framesToAnalize{frN})(:,:,axis);
                     fprintf('Matrix with least variation on %s sensor evaluted on %s frame',(sensorsToAnalize{j}),(framesToAnalize{frN}));
                     
-                end                
+                end          
+                
+                % select the correct axis based on the transformation
+                % sensor_H_frameToAnalize
+                axisSubspace=zeros(6,1);
+                axisSubspace(axis)=1;
+                axisMaping=sensor_H_frameToAnalize*axisSubspace;
+                [~,indexMap]=max(abs(axisMapping));
+                
+                % select the calibration matrix with less error for this
+                % axis
                 [minErr,minInd]=min(totalerrorXaxis);
                 fprintf(' in %s is from %s , with a total of %d N or Nm on average \n',axisName{axis},names2use{minInd}, minErr);
-                frankieMatrix.(sensorsToAnalize{j})(axis,:)=cMat.(names2use{minInd}).(sensorsToAnalize{j})(axis,:);
-                fCalibMat.(sensorsToAnalize{j})=frankieMatrix.(sensorsToAnalize{j})/(WorkbenchMat.(sensorsToAnalize{j}));%calculate secondary calibration matrix
-            
-                xmlStrFrankie=cMat2xml(fCalibMat.(sensorsToAnalize{j}),sensorName{j});% print in required format to use by WholeBodyDynamics
-                frankieData.(framesToAnalize{frN})(:,axis)=stackedResults.(sensorsToAnalize{j}).(names2use{minInd}).externalForces.(framesToAnalize{frN})(:,axis);
+                
+                frankieMatrix.(sensorsToAnalize{j})(indexMap,:)=cMat.(names2use{minInd}).(sensorsToAnalize{j})(indexMap,:);                
+               frankieData.(framesToAnalize{frN})(:,axis)=stackedResults.(sensorsToAnalize{j}).(names2use{minInd}).externalForces.(framesToAnalize{frN})(:,axis);
             end
+             fCalibMat.(sensorsToAnalize{j})=frankieMatrix.(sensorsToAnalize{j})/(WorkbenchMat.(sensorsToAnalize{j}));%calculate secondary calibration matrix
+                xmlStrFrankie=cMat2xml(fCalibMat.(sensorsToAnalize{j}),sensorName{j});% print in required format to use by WholeBodyDynamics
+                
         else
             fprintf('Effect of %s on %s frame is neglegible \n',(sensorsToAnalize{j}),(framesToAnalize{frN}));
         end
