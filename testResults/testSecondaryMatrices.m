@@ -234,7 +234,7 @@ for j=1:length(sensorsToAnalize) %why for each sensor? because there could be 2 
                 % select the calibration matrix with less error for this
                 % axis
                 [minErr,minInd]=min(totalerrorXaxis);
-                fprintf(' in %s is from %s , with a total of %d N or Nm on average \n',axisName{axis},names2use{minInd}, minErr);
+                fprintf(' in %s is from %s , with a total of %d N or Nm on average \n',axisName{indexMap},names2use{minInd}, minErr);
                 
                 frankieMatrix.(sensorsToAnalize{j})(indexMap,:)=cMat.(names2use{minInd}).(sensorsToAnalize{j})(indexMap,:);                
                frankieData.(framesToAnalize{frN})(:,axis)=stackedResults.(sensorsToAnalize{j}).(names2use{minInd}).externalForces.(framesToAnalize{frN})(:,axis);
