@@ -327,3 +327,15 @@ if (any(strcmp('extraSampleLeft', fieldnames(input))))
 else
     extraSample.left=nan;
 end
+
+if (any(strcmp('extraSampleTz', fieldnames(input))))
+    [extraSample.Tz,~]=readExperiment(input.extraSampleTz,scriptOptions);
+else
+    extraSample.Tz=nan;
+end
+
+if (any(strcmp('extraSampleGeneral', fieldnames(input))))
+    [extraSample.general,~]=readExperiment(input.extraSampleGeneral,scriptOptions);
+else
+    extraSample.general=nan;
+end

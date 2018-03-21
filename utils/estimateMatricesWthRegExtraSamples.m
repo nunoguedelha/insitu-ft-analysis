@@ -15,7 +15,7 @@ rawData=dataset.rawData;
 estimatedFtData=dataset.estimatedFtData;
 for ftIdx =1:length(sensorsToAnalize)
     ft = sensorsToAnalize{ftIdx}; 
-    if (~strcmp(ft,'right_arm') || ~strcmp(ft,'left_arm')) %new samples work mainly on legs
+    if (~strcmp(ft,'right_arm') && ~strcmp(ft,'left_arm')) %new samples work mainly on legs
         
         if (strcmp(ft,'right_leg') || strcmp(ft,'right_foot' )) % if calibrating right side use samples specific for the right
             if (isstruct(extraSample.right)) %check if there is extra samples on this side
