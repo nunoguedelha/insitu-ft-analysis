@@ -13,6 +13,6 @@ Thumbs.db
 ##########################
 external/ftSensCalib
 external/iCubViz
-data/
+data/icub-insitu-ft-analysis-big-datasets
 *.avi
 *.m~

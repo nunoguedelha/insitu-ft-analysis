@@ -1,10 +1,6 @@
-The serial numbers of the sensors of icub viola (iCubGenova02) are:
+The serial numbers of the iCub force/torque sensors are recapped in the following table.
 
-left_foot= SN229 
-left_leg= SN217 
-left_arm=SN153 
-right_arm=SN151 
-rigt_foot= SN230 
-right_leg=SN026
-
-The data recollected correspong to the yoga demo in left/right foot with/without fixedBase (calibration based on IMU or not).
+| iCub version | left_arm | left_leg | left_foot | right_arm | right_leg | right_foot |
+| : ---------: | : -----: | : -----: | : -----: | : -----: | : -----: | : -----: |
+| iCubeGenova02 | SN153   |   SN217  |   SN229  |   SN151   |  SN026  |  SN230  |
+| iCubGenova04  |         |   SN292  |   SN293  |           |  SN282  |  SN294  |

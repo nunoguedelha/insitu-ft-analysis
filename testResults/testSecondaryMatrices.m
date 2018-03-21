@@ -1,13 +1,17 @@
+clear all
+close all
+clc
+
 % clear all;
-addpath ../utils
-addpath ../external/quadfit
+addpath utils
+addpath external/quadfit
 %% Prepare options of the test
 
 scriptOptions = {};
 scriptOptions.testDir=true;% to calculate the raw data, for recalibration always true
 scriptOptions.matFileName='ftDataset';
 scriptOptions.printAll=true;
-scriptOptions.IITfirmwareFriendly=true;
+scriptOptions.IITfirmwareFriendly=false;
 % Script of the mat file used for save the intermediate results
 %scriptOptions.saveDataAll=true;
 
@@ -29,26 +33,25 @@ scriptOptions.IITfirmwareFriendly=true;
 
 %Use only datasets where the same sensor is used
 experimentNames={
-    'icub-insitu-ft-analysis-big-datasets/2017_12_20_Green_iCub_leftLegFoot/poleGridLeftLeg';
-  
-    }; %this set is from iCubGenova02
+    'icub-insitu-ft-analysis-big-datasets/iCubGenova04/exp_1/poleLeftRight';
+    }; %this set is from iCubGenova04
 names={'Workbench';
-    'fittedOnRaw';    
+    'exp1';
     };% except for the first one all others are short names for the expermients in experimentNames
 
 
-lambdas=[0];
-% lambdas=[0;
-%     10
-%     50;
-%     1000;
-%     10000;
-%     50000;
-%     100000;
-%     500000;
-%     1000000;
-%     5000000;
-%     10000000];
+%lambdas=[0];
+lambdas=[0;
+    10
+    50;
+    1000;
+    10000;
+    50000;
+    100000;
+    500000;
+    1000000;
+    5000000;
+    10000000];
 % Create appropiate names for the lambda variables
 for namingIndex=1:length(lambdas)
     if (lambdas(namingIndex)==0)
@@ -71,17 +74,18 @@ end
 names2use=names2use';
 
 %%  Select sensors and frames to analize
-sensorsToAnalize = {'left_leg'};  %load the new calibration matrices
-framesToAnalize={'l_lower_leg'};
-sensorName={'l_leg_ft_sensor'};
+sensorsToAnalize = {'left_leg','right_leg'};  %load the new calibration matrices
+framesToAnalize={'l_upper_leg','r_upper_leg'};
+sensorName={'l_leg_ft_sensor','r_leg_ft_sensor'};
 
 %% Read the calibration matrices to evaluate
 
 [cMat,secMat,WorkbenchMat]=readGeneratedCalibMatrices(experimentNames,scriptOptions,sensorsToAnalize,names2use,lambdasNames);
 
 %% Select datasets in which the matrices will be evaluated
-toCompare={'dataSamples/TestYogaExtendedLeft','dataSamples/TestYogaExtendedRight'};%datasets name 'leftYoga' 'failedLeftYoga'
-toCompareNames={'leftYoga','rightYoga'}; % short Name of the experiments
+%toCompare={'iCubGenova04/exp_1/yogaLeft','iCubGenova04/exp_1/yogaRight'};%datasets name 'leftYoga' 'failedLeftYoga'
+toCompare={'icub-insitu-ft-analysis-big-datasets/iCubGenova04/exp_2/yogaRight'};
+toCompareNames={'exp2'}; % short Name of the experiments
 
 compareDatasetOptions = {};
 compareDatasetOptions.forceCalculation=false;%false;
@@ -89,7 +93,7 @@ compareDatasetOptions.saveData=true;%true
 compareDatasetOptions.matFileName='iCubDataset';
 compareDatasetOptions.testDir=true;
 compareDatasetOptions.raw=false;
-compareDatasetOptions.testDir=true;% to calculate the raw data, for recalibration always true
+%compareDatasetOptions.testDir=true;% to calculate the raw data, for recalibration always true
 compareDatasetOptions.filterData=false;
 compareDatasetOptions.estimateWrenches=true;
 compareDatasetOptions.useInertial=false;    
@@ -108,8 +112,8 @@ for c=1:length(toCompare)
     robotName='iCubGenova04';
     onTestDir=true;
     %iCubVizWithSlider(data.(toCompareNames{c}),robotName,sensorsToAnalize,input.contactFrameName{1},onTestDir);
-    sampleInit=[125,92];
-    sampleEnd=[140,125];
+    sampleInit=[40];
+    sampleEnd=[60];
     %TODO: should consider to calculate the offset also applying secondary
     %matrix
     [offset.(toCompareNames{c})]=calculateOffsetUsingWBD(estimator,data.(toCompareNames{c}),sampleInit(c),sampleEnd(c),input);
@@ -126,7 +130,7 @@ for c=1:length(toCompare)
     
     
     %% Comparison
-    framesNames={'l_sole','r_sole','l_lower_leg','r_lower_leg','root_link','l_elbow_1','r_elbow_1'}; %there has to be atleast 6
+    framesNames={'l_sole','r_sole','l_upper_leg','r_upper_leg','root_link','l_elbow_1','r_elbow_1',}; %there has to be atleast 6
     timeFrame=[0,15000];
     sMat={};
     for j=1:length(sensorsToAnalize) %why for each sensor? because there could be 2 sensors in the same leg
@@ -146,8 +150,19 @@ for c=1:length(toCompare)
     end
     
 end
+
+%% SimpleOddometry init
+% This is to understand which axis from the ft Sensor affects each axis in the evaluation frame 
+odom = iDynTree.SimpleLeggedOdometry();
+odom.setModel(estimator.model());
+jointPos = iDynTree.JointPosDoubleArray(estimator.model());
+odom.updateKinematics(jointPos);
+odom.init('root_link','root_link');
+% Note: we will assume that mapping of the axis is a one to one
+% relationship
+
 %% Evaluate error
-useMean=false; %select which means of evaluation should be considered is either mean or standard deviation.
+useMean=true; %select which means of evaluation should be considered is either mean or standard deviation.
 for j=1:length(sensorsToAnalize) %why for each sensor? because there could be 2 sensors in the same leg
     for frN=1:length(framesToAnalize)
         
@@ -186,6 +201,17 @@ for j=1:length(sensorsToAnalize) %why for each sensor? because there could be 2 
             bestName.(sensorsToAnalize{j})=names2use{minIndall};
             xmlStr=cMat2xml(sCalibMat.(sensorsToAnalize{j}),sensorName{j});% print in required format to use by WholeBodyDynamics
             
+            % Get Indexes of the frames and links
+            frameToAnalizeIndex=odom.model.getLinkIndex((framesToAnalize{frN}));
+            frameIndex=odom.model.getFrameIndex((sensorName{j}));
+            sensorLinkIndex=odom.model.getFrameLink(frameIndex);
+            
+            % Get adjoint transformation matrices
+            sensor_H_w=odom.getWorldLinkTransform(sensorLinkIndex).inverse().asHomogeneousTransform().toMatlab();
+            w_h_frameToAnalize=odom.getWorldLinkTransform(frameToAnalizeIndex).asHomogeneousTransform().toMatlab();            
+            sensor_H_frameToAnalize=sensor_H_w*w_h_frameToAnalize;
+            
+            
             axisName={'fx','fy','fz','tx','ty','tz'};
             for axis=1:6
                 if useMean
@@ -196,15 +222,26 @@ for j=1:length(sensorsToAnalize) %why for each sensor? because there could be 2 
                     totalerrorXaxis=strd_axis.(sensorsToAnalize{j}).(framesToAnalize{frN})(:,:,axis);
                     fprintf('Matrix with least variation on %s sensor evaluted on %s frame',(sensorsToAnalize{j}),(framesToAnalize{frN}));
                     
-                end                
+                end          
+                
+                % select the correct axis based on the transformation
+                % sensor_H_frameToAnalize
+                axisSubspace=zeros(6,1);
+                axisSubspace(axis)=1;
+                axisMaping=sensor_H_frameToAnalize*axisSubspace;
+                [~,indexMap]=max(abs(axisMapping));
+                
+                % select the calibration matrix with less error for this
+                % axis
                 [minErr,minInd]=min(totalerrorXaxis);
-                fprintf(' in %s is from %s , with a total of %d N or Nm on average \n',axisName{axis},names2use{minInd}, minErr);
-                frankieMatrix.(sensorsToAnalize{j})(axis,:)=cMat.(names2use{minInd}).(sensorsToAnalize{j})(axis,:);
-                fCalibMat.(sensorsToAnalize{j})=frankieMatrix.(sensorsToAnalize{j})/(WorkbenchMat.(sensorsToAnalize{j}));%calculate secondary calibration matrix
-            
-                xmlStrFrankie=cMat2xml(fCalibMat.(sensorsToAnalize{j}),sensorName{j});% print in required format to use by WholeBodyDynamics
-                frankieData.(framesToAnalize{frN})(:,axis)=stackedResults.(sensorsToAnalize{j}).(names2use{minInd}).externalForces.(framesToAnalize{frN})(:,axis);
+                fprintf(' in %s is from %s , with a total of %d N or Nm on average \n',axisName{indexMap},names2use{minInd}, minErr);
+                
+                frankieMatrix.(sensorsToAnalize{j})(indexMap,:)=cMat.(names2use{minInd}).(sensorsToAnalize{j})(indexMap,:);                
+               frankieData.(framesToAnalize{frN})(:,axis)=stackedResults.(sensorsToAnalize{j}).(names2use{minInd}).externalForces.(framesToAnalize{frN})(:,axis);
             end
+             fCalibMat.(sensorsToAnalize{j})=frankieMatrix.(sensorsToAnalize{j})/(WorkbenchMat.(sensorsToAnalize{j}));%calculate secondary calibration matrix
+                xmlStrFrankie=cMat2xml(fCalibMat.(sensorsToAnalize{j}),sensorName{j});% print in required format to use by WholeBodyDynamics
+                
         else
             fprintf('Effect of %s on %s frame is neglegible \n',(sensorsToAnalize{j}),(framesToAnalize{frN}));
         end

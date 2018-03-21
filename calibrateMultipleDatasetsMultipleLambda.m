@@ -1,11 +1,16 @@
+clear all
+close all
+clc
+
+%%
+
 %add required folders for use of functions
 addpath external/quadfit
 addpath utils
 
 % obtain data from all listed experiments
 experimentNames={
- 'green-iCub-Insitu-Datasets/2017_08_29_2';
- 'green-iCub-Insitu-Datasets/2017_08_29_3';% Name of the experiment;
+ 'icub-insitu-ft-analysis-big-datasets/iCubGenova04/exp_1/poleLeftRight';% Name of the experiment;
     };
 scriptOptions = {};
 scriptOptions.forceCalculation=true;%false;
@@ -39,11 +44,11 @@ lambdasNames=lambdasNames';
 calculate=true;
 %%
 %calibration options
-calibOptions.saveMat=false;
+calibOptions.saveMat=true;
 calibOptions.usingInsitu=true;
 calibOptions.plot=true;
 calibOptions.onlyWSpace=true;
-calibOptions.IITfirmwareFriendly=true; % in case a calibration matrix that will not be used by iit firmware is estimated
+calibOptions.IITfirmwareFriendly=false; % in case a calibration matrix that will not be used by iit firmware is estimated
 
 %%
 for i=1:length(experimentNames)

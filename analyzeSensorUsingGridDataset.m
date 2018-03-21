@@ -20,17 +20,20 @@
 %       "Model based in situ calibration of six axis force torque sensors," 
 %       2016 IEEE-RAS 16th International Conference on Humanoid Robots (Humanoids), Cancun, 2016
 
+clear all
+close all
+clc
 
 %%
 %add required folders for use of functions
 addpath external/quadfit
 addpath utils
 % name and paths of the data files
-experimentName='/green-iCub-Insitu-Datasets/2017_12_5_TestGrid';% first sample with cable corrected ;
+experimentName='icub-insitu-ft-analysis-big-datasets/iCubGenova04/exp_1/poleLeftRight';
 
 % Script options, meant to control the behavior of this script
 scriptOptions = {};
-scriptOptions.forceCalculation=false;%false;
+scriptOptions.forceCalculation=true;%false;
 scriptOptions.printPlots=true;%true
 scriptOptions.raw=false;
 scriptOptions.saveData=false;
@@ -42,13 +45,19 @@ scriptOptions.useInertial=false;
 %scriptOptions.matFileName='dataEllipsoidAnalysis'; %newName
 scriptOptions.matFileName='ftDataset';
 %[dataset,~,~]=read_estimate_experimentData(experimentName,scriptOptions);
-[dataset,~,~]=readExperiment (experimentName,scriptOptions);
+[dataset,~,input,~]=readExperiment (experimentName,scriptOptions);
 % Sample to use less data
 dataset=dataSampling(dataset,5);
 
 % We carry the analysis just for a subset of the sensors
 %{'left_leg','right_leg','right_foot','left_foot'};
 sensorsToAnalize = {'right_leg'};
+time = dataset.time - dataset.time(1);
+
+%robotName='iCubGenova04';
+%onTestDir=false;
+%visualizeExperiment(dataset,input,sensorsToAnalize,'contactFrame','root_link');
+
 
 %% Check ellipsoid
 for ftIdx =1:length(sensorsToAnalize)

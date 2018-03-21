@@ -1,4 +1,4 @@
-   experimentName='2017_05_31';
+   experimentName='dataSamples/TestYogaExtendedLeft';
 
 scriptOptions = {};
 scriptOptions.forceCalculation=false;%false;
@@ -7,15 +7,15 @@ scriptOptions.raw=false;
 scriptOptions.saveData=true;
 % Script of the mat file used for save the intermediate results 
 %scriptOptions.matFileName='dataEllipsoidAnalysis'; %newName
-scriptOptions.matFileName='datasetEllipsoidAnalys';
+scriptOptions.matFileName='iCubDataset';
 % [dataset]=read_estimate_experimentData2(experimentName,scriptOptions);
 % % % load the script of parameters relative 
-  load(strcat('../data/',experimentName,'/',scriptOptions.matFileName,'.mat'),'dataset')
+  load(strcat('../../data/',experimentName,'/',scriptOptions.matFileName,'.mat'),'dataset')
 
  q_des=dataset.qj;
   q_meas=q_des;
  
- q_des=dataset.qj(:,1:23);
+
 
   % Create estimator class
     estimator = iDynTree.ExtWrenchesAndJointTorquesEstimator();
@@ -25,7 +25,7 @@ scriptOptions.matFileName='datasetEllipsoidAnalys';
     
      dofs = estimator.model().getNrOfDOFs();
    
-
+ q_des=dataset.qj(:,1:dofs-3);
 
 
 mdlLdr = iDynTree.ModelLoader();
@@ -73,8 +73,8 @@ jointPos3.fromMatlab(joints3);
 odom2 = iDynTree.SimpleLeggedOdometry();
 odom2.setModel(model);
 odom2.updateKinematics(jointPos3);
-odom2.init('root_link','r_sole');
-% odom2.init('l_sole','l_sole');
+%odom2.init('root_link','r_sole');
+ odom2.init('l_sole','l_sole');
 
 viz3.modelViz(0).setPositions(odom2.getWorldLinkTransform(model.getDefaultBaseLink()),jointPos3);
 
