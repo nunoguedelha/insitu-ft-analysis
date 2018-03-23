@@ -19,7 +19,7 @@ if (length(namesDatasets) <=length(varargin))
         end
     end
     legend(namesDatasets,'Location','west');
-    title(strcat({'Wrench space '},escapeUnderscores(graphName)));
+    title(strcat({'Force 3D space '},escapeUnderscores(graphName)));
     xlabel('F_{x}');
     ylabel('F_{y}');
     zlabel('F_{z}');
