@@ -11,6 +11,8 @@ Variables:
          - input.intervals.leftLeg=struct('initTime',0,'endTime',0,'contactFrame','l_sole');
       - input.extraSampleRight='': this can contain a link to another experiment where it is interesting to analyze the sensors on the right leg during the experiment. 
       - input.extraSampleLeft='': this can contain a link to another experiment where it is interesting to analyze the sensors on the left leg during the experiment
+      - input.extraSampleTz='': this can contain a link to another experiment where the sensors are excited specifically with moments in the z axis
+      - input.extraSampleGeneral='': this can contain a link to another experiment considered interesting for all sensors
       
           **Note**: This info can also be used to augment the calibration data, although it will assume this experiments have the same offset as the main experiment.
             
