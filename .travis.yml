@@ -15,7 +15,10 @@ before_script:
   
   # Install octave 
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install -y octave; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install ccache; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install ccache octave; fi
+  
+  # Check Octave version 
+  - octave --version
   
   # Install MOxUnit
   - git clone https://github.com/MOxUnit/MOxUnit
