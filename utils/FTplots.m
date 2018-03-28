@@ -23,6 +23,7 @@ byChannel=false;
 reference={};
 referenceName='reference';
 forceComparison=false;
+referenceTime=[];
 if (length(varargin)==1)
     if(ischar(  varargin{1}))
         switch varargin{1}
@@ -35,7 +36,7 @@ if (length(varargin)==1)
                  case {'forceComparison','forcecomparison','ForceComparison'}
                 forceComparison=true;
             otherwise
-                warning('Unexpected option going by default options.')
+                warning('FTplots: Unexpected option going by default options.')
         end
     end
     if(isstruct(varargin{1}))
@@ -59,12 +60,17 @@ else
                 if(isstruct(varargin{count}))
                     reference=varargin{count};
                 else
-                    warning('Not an option for FTplots. Ignored');
+                    if (isvector(varargin{count}))
+                        referenceTime=varargin{count};
+                    else                        
+                    warning('FTplots: Not an option for FTplots. Ignored');
+                    end
                 end
             end
         end
     end
 end
+
 
 
 xPlotOptions = 'r.';
@@ -76,6 +82,17 @@ z2PlotOptions = 'c.';
 
 timeStampinit=time(1);
 fields=fieldnames(data);
+if ~isempty(reference)
+    rfields=fieldnames(reference);
+end
+
+if (isempty(referenceTime) && ~isempty(reference) && (size(time,1) == size(reference.(rfields{1}),1)))
+    referenceTime=time    ;
+else
+    if(~isempty(reference) && (size(referenceTime,1) ~= size(reference.(rfields{1}),1)))
+    error('FTplots: mismatch between size of the time vector for the reference and the reference size');
+    end
+end
 
 if (size(fields,1)==2 && forceComparison)
     temp.(fields{1})=data.(fields{1});
@@ -124,15 +141,15 @@ if (~isempty(reference) && ~byChannel)
         plot(time-timeStampinit,data.(fields{i})(:,1),xPlotOptions);hold on;
         plot(time-timeStampinit,data.(fields{i})(:,2),yPlotOptions);hold on;
         plot(time-timeStampinit,data.(fields{i})(:,3),zPlotOptions);hold on;
-        plot(time-timeStampinit,reference.(fields{i})(:,1),x2PlotOptions);hold on;
-        plot(time-timeStampinit,reference.(fields{i})(:,2),y2PlotOptions);hold on;
-        plot(time-timeStampinit,reference.(fields{i})(:,3),z2PlotOptions);hold on;
+        plot(referenceTime-referenceTime(1),reference.(rfields{i})(:,1),x2PlotOptions);hold on;
+        plot(referenceTime-referenceTime(1),reference.(rfields{i})(:,2),y2PlotOptions);hold on;
+        plot(referenceTime-referenceTime(1),reference.(rfields{i})(:,3),z2PlotOptions);hold on;
         if raw
             legend('ch1','ch2','ch3','ch1_2','ch2_2','ch3_2','Location','west');
         else
             legend('F_{x}','F_{y}','F_{z}','F_{x2}','F_{y2}','F_{z2}','Location','west');
         end
-        title(escapeUnderscores( strcat((fields{i}),{' and  '},referenceName)));
+        title(escapeUnderscores( strcat((fields{i}),{' and  '},referenceName,{' '},(rfields{i}))));
         xlabel('TimeStamp');
         ylabel('N');
     end
@@ -142,50 +159,54 @@ if (~isempty(reference) && ~byChannel)
             plot(time-timeStampinit,data.(fields{i})(:,4),xPlotOptions);hold on;
             plot(time-timeStampinit,data.(fields{i})(:,5),yPlotOptions);hold on;
             plot(time-timeStampinit,data.(fields{i})(:,6),zPlotOptions);hold on;
-            plot(time-timeStampinit,reference.(fields{i})(:,4),x2PlotOptions);hold on;
-            plot(time-timeStampinit,reference.(fields{i})(:,5),y2PlotOptions);hold on;
-            plot(time-timeStampinit,reference.(fields{i})(:,6),z2PlotOptions);hold on;
+            plot(referenceTime-referenceTime(1),reference.(rfields{i})(:,4),x2PlotOptions);hold on;
+            plot(referenceTime-referenceTime(1),reference.(rfields{i})(:,5),y2PlotOptions);hold on;
+            plot(referenceTime-referenceTime(1),reference.(rfields{i})(:,6),z2PlotOptions);hold on;
             if raw                
                 legend('ch4','ch5','ch6','ch4_2','ch5_2','ch6_2','Location','west');
             else
                 legend('\tau_{x}','\tau_{y}','\tau_{z}','\tau_{x2}','\tau_{y2}','\tau_{z2}','Location','west');
             end
-            title(escapeUnderscores( strcat((fields{i}),{' and  '},referenceName)));
+            title(escapeUnderscores( strcat((fields{i}),{' and  '},referenceName,{' '},(rfields{i}))));
             xlabel('TimeStamp');
             ylabel('Nm');
             
         end
     end
-    for  i=1:size(fields,1)
-         figure('WindowStyle','docked'),
-        plot(time-timeStampinit,abs(data.(fields{i})(:,1))-abs(reference.(fields{i})(:,1)),xPlotOptions);hold on;
-        plot(time-timeStampinit,abs(data.(fields{i})(:,2))-abs(reference.(fields{i})(:,2)),yPlotOptions);hold on;
-        plot(time-timeStampinit,abs(data.(fields{i})(:,3))-abs(reference.(fields{i})(:,3)),zPlotOptions);hold on;
-        if raw
-            
-                legend('ch1','ch2','ch3','Location','west');
-        else
-            legend('F_{x}','F_{y}','F_{z}','Location','west');
-        end
-        title(escapeUnderscores( strcat((fields{i}),{' -  '},referenceName)));
-        xlabel('TimeStamp');
-        ylabel('N');
-    end
-    if(~onlyForce)
+    if (length(time)== length(referenceTime))
+    if (sum(referenceTime==time)==size(time,1))
         for  i=1:size(fields,1)
-             figure('WindowStyle','docked'),
-            plot(time-timeStampinit,abs(data.(fields{i})(:,4))-abs(reference.(fields{i})(:,4)),xPlotOptions);hold on;
-            plot(time-timeStampinit,abs(data.(fields{i})(:,5))-abs(reference.(fields{i})(:,5)),yPlotOptions);hold on;
-            plot(time-timeStampinit,abs(data.(fields{i})(:,6))-abs(reference.(fields{i})(:,6)),zPlotOptions);hold on;
+            figure('WindowStyle','docked'),
+            plot(time-timeStampinit,abs(data.(fields{i})(:,1))-abs(reference.(rfields{i})(:,1)),xPlotOptions);hold on;
+            plot(time-timeStampinit,abs(data.(fields{i})(:,2))-abs(reference.(rfields{i})(:,2)),yPlotOptions);hold on;
+            plot(time-timeStampinit,abs(data.(fields{i})(:,3))-abs(reference.(rfields{i})(:,3)),zPlotOptions);hold on;
             if raw
-                legend('ch4','ch5','ch6','Location','west');
+                
+                legend('ch1','ch2','ch3','Location','west');
             else
-                legend('\tau_{x}','\tau_{y}','\tau_{z}','Location','west');
+                legend('F_{x}','F_{y}','F_{z}','Location','west');
             end
-            title(escapeUnderscores( strcat((fields{i}),{' -  '},referenceName)));
+            title(escapeUnderscores( strcat((fields{i}),{' -  '},referenceName,{' '},(rfields{i}))));
             xlabel('TimeStamp');
-            ylabel('Nm');
+            ylabel('N');
         end
+        if(~onlyForce)
+            for  i=1:size(fields,1)
+                figure('WindowStyle','docked'),
+                plot(time-timeStampinit,abs(data.(fields{i})(:,4))-abs(reference.(rfields{i})(:,4)),xPlotOptions);hold on;
+                plot(time-timeStampinit,abs(data.(fields{i})(:,5))-abs(reference.(rfields{i})(:,5)),yPlotOptions);hold on;
+                plot(time-timeStampinit,abs(data.(fields{i})(:,6))-abs(reference.(rfields{i})(:,6)),zPlotOptions);hold on;
+                if raw
+                    legend('ch4','ch5','ch6','Location','west');
+                else
+                    legend('\tau_{x}','\tau_{y}','\tau_{z}','Location','west');
+                end
+                title(escapeUnderscores( strcat((fields{i}),{' -  '},referenceName,{' '},(rfields{i}))));
+                xlabel('TimeStamp');
+                ylabel('Nm');
+            end
+        end
+    end
     end
 end
 
@@ -205,9 +226,9 @@ if (byChannel)
              figure('WindowStyle','docked'),
             plot(time-timeStampinit,data.(fields{i})(:,n),xPlotOptions);
             if ~isempty(reference)
-                hold on; plot(time-timeStampinit,reference.(fields{i})(:,n),zPlotOptions);
+                hold on; plot(referenceTime-referenceTime(1),reference.(rfields{i})(:,n),zPlotOptions);
                 legend((legendNames{n}),strcat((legendNames{n}),'_2'));
-                title(strcat((legendNames{n}),{' : '},escapeUnderscores((fields{i})),{' and  '},escapeUnderscores(referenceName)));
+                title(strcat((legendNames{n}),{' : '},escapeUnderscores((fields{i})),{' and  '},escapeUnderscores(strcat(referenceName,{' '},(rfields{i})))));
             else
                 legend((legendNames{n}));
                 title(strcat((legendNames{n}),{' : '},escapeUnderscores((fields{i})),(legendNames{n})));
