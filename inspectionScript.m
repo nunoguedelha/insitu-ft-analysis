@@ -9,6 +9,7 @@ addpath utils
 addpath external/quadfit
 
 experimentName='dataSamples/First_Time_Sensor';% 
+experimentName='dataSamples/TestGrid';% 
 
 
 %Desired inspection sections
@@ -45,11 +46,12 @@ referenceExp.right_leg='dataSamples/First_Time_Sensor';% Grid experiment with id
 referenceExp.right_leg_yoga='dataSamples/TestYogaExtendedRight';% Run without feedback
 referenceExp.left_leg_yoga='dataSamples/TestYogaExtendedLeft';% Run without feedback
 referenceExp.grid='dataSamples/TestGrid';% Should replace this one with a grid on bothlegs
+%referenceExp.walking=% Collect a walking example
 refNames=fieldnames(referenceExp);
 
 %% Read data
 scriptOptions = {};
-scriptOptions.forceCalculation=false;%false;
+scriptOptions.forceCalculation=true;%false;
 if(checkSaturation)
 scriptOptions.raw=true;
 end
@@ -58,13 +60,15 @@ scriptOptions.testDir=false;% to calculate the raw data, for recalibration alway
 scriptOptions.filterData=true;
 if(strcmp(type,'random'))
 scriptOptions.estimateWrenches=true;
+else
+    scriptOptions.estimateWrenches=false;
 end
 scriptOptions.useInertial=false;    
 % Script of the mat file used for save the intermediate results 
 scriptOptions.matFileName='iCubDataset';
  [dataset,estimator,input,extraSample]=readExperiment (experimentName,scriptOptions);
  
-
+ sensorsToAnalize={'right_leg'};
 %%
 if(checkSaturation)
     names=fieldnames(dataset.ftData);
@@ -72,11 +76,10 @@ if(checkSaturation)
         ft = sensorsToAnalize{ftIdx};
         if (any(strcmp(ft, refNames)) && strcmp(type,'grid'))
             [reference,estimator,input,extraSample]=readExperiment (referenceExp.(ft),refOptions);
-            FTplots(dataset.rawData,dataset.time,reference.filteredFtData,'raw','referenceRaw')
+             FTplots(dataset.rawData,dataset.time,reference.ftData,'raw','referenceRaw',reference.time)
         else
             FTplots(dataset.rawData,dataset.time,'raw')
-        end
-        
+        end        
     end
 end
 %%
@@ -87,7 +90,7 @@ names=fieldnames(dataset.ftData);
 for ftIdx =1:length(sensorsToAnalize)
     ft = sensorsToAnalize{ftIdx};
     names={'filtered','estimated'};
-    force3DPlots(names,ft,dataset.ftData.(ft), reference.estimatedFtData.(ft))    
+    force3DPlots(names,ft,dataset.filteredFtData.(ft), reference.estimatedFtData.(ft))    
     
     if (sphereReference)
     else

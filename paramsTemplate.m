@@ -17,6 +17,8 @@ input.intervals=struct(); %this will have the relevant intervals of the demos 4 
 %input.extraSampleRight='';  %input here the name of the other experiment from
 %which to take the samples
 %input.extraSampleLeft='';
+%input.extraSampleTz='';
+%input.extraSampleGeneral='';
 
 % skin torque experiment variables
 % input.torquesPortName='';

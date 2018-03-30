@@ -18,8 +18,15 @@ if(calibOptions.usingInsitu)
           if (isstruct(extraSample.left))
          dataset=addDatasets(dataset,extraSample.left);
           end
-         
+%          [calibMatrices,fullscale,augmentedDataset]= estimateMatricesWthRegExtraSamples2(dataset,sensorsToAnalize, dataset.cMat,lambda...
+%              ,extraSample,offset,calibMatrices);
+%          dataset=augmentedDataset;
           dataset.cMat=tempCmat;
+   end
+    
+    if (isstruct(extraSample.right)||isstruct(extraSample.left))
+       tempCmat=dataset.cMat;
+       
     end
     
 else
