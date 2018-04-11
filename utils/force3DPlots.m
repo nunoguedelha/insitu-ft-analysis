@@ -26,3 +26,13 @@ if (length(namesDatasets) <=length(varargin))
 else
     warning('Insuficient arguments');
 end
+
+
+%% merge different images example
+% figure,
+% h=force3DPlots({'calculated'},ft,calibratedCalculated.(ft),'b') 
+% hold on
+% h2=force3DPlots({'refereence'},ft, dataset.ftData.(ft),'r')
+% 
+% L = findobj(h.force,'type','line');
+% copyobj(L,findobj(h2.force,'type','axes'));
