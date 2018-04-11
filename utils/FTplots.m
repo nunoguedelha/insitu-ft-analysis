@@ -76,9 +76,9 @@ end
 xPlotOptions = 'r.';
 yPlotOptions = 'g.';
 zPlotOptions = 'b.';
-x2PlotOptions = 'm.';
-y2PlotOptions = 'y.';
-z2PlotOptions = 'c.';
+x2PlotOptions = 'c.';% 'm.';
+y2PlotOptions = 'm.';% 'y.';
+z2PlotOptions = 'y.';% 'c.';
 
 timeStampinit=time(1);
 fields=fieldnames(data);
