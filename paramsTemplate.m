@@ -26,15 +26,24 @@ input.intervals=struct(); %this will have the relevant intervals of the demos 4 
 % input.wbdNames='';
 % input.subModels='';
 
-%input.type='';%
+%input.type='';% 
+%   Type options:
+%       right_leg_yoga
+%       left_leg_yoga
+%       grid
+%       tz
+%       random
+%       contactSwitching
+%       standUp
+%       walking
 
 %-----------------------------------------------------------
 %% Variables that depend on the way information was logged
 
 input.inertialName='inertial'; %enable in case there is info read from the
 %IMU
-input.ftPortName='analog:o'; % (arm, foot and leg have FT data), usually is 'analog:o'
-input.statePortName='stateExt:i'; % (only foot has no state data), usually is 'stateExt:i'
+input.ftPortName='analog'; % (arm, foot and leg have FT data), usually is 'analog:o'
+input.statePortName='stateExt'; % (only foot has no state data), usually is 'stateExt:i'
 input.ftNames={'left_arm';'right_arm';'left_leg';'right_leg';'left_foot';'right_foot'};
 %usual values are {'left_arm';'right_arm';'left_leg';'right_leg';'left_foot';'right_foot'}; %name of folders that contain ft measures
 input.calibFlag=true; %if the flag for obtaining calibrated data is on ( by default
