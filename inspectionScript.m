@@ -8,14 +8,14 @@
 addpath utils
 addpath external/quadfit
 
-experimentName='dataSamples/First_Time_Sensor';% 
-experimentName='dataSamples/TestGrid';% 
+%experimentName='dataSamples/First_Time_Sensor';%
+experimentName='green-iCub-Insitu-Datasets/2018_04_09_left_leg';
 
 
 %Desired inspection sections
-checkSaturation=true;
-sphereReference=true;
-Force3Dspace=true;
+checkSaturation=false;
+sphereReference=false;
+Force3Dspace=false;
 ForceVsTime=true;
 PromptForIntervals=true;
 
@@ -24,11 +24,12 @@ PromptForIntervals=true;
 % right_leg_yoga
 % left_leg_yoga
 % grid
+% tz
 % random
 % contactSwitching
 % standUp
 % walking
-type='grid';
+type='right_leg_yoga';
 %% set references
 useReference=true;
 refOptions = {};
@@ -37,8 +38,8 @@ refOptions.saveData=false;
 refOptions.testDir=false;% to calculate the raw data, for recalibration always true
 refOptions.filterData=true;
 refOptions.estimateWrenches=true;
-refOptions.useInertial=false;  
-refOptions.matFileName='ftDataset';   
+refOptions.useInertial=false;
+refOptions.matFileName='ftDataset';
 
 % Datasets to be used as reference mainly the estimated part.
 referenceExp= {};
@@ -53,56 +54,92 @@ refNames=fieldnames(referenceExp);
 scriptOptions = {};
 scriptOptions.forceCalculation=true;%false;
 if(checkSaturation)
-scriptOptions.raw=true;
+    scriptOptions.raw=true;
 end
 scriptOptions.saveData=false;
 scriptOptions.testDir=false;% to calculate the raw data, for recalibration always true
 scriptOptions.filterData=true;
 if(strcmp(type,'random'))
-scriptOptions.estimateWrenches=true;
+    scriptOptions.estimateWrenches=true;
 else
     scriptOptions.estimateWrenches=false;
 end
-scriptOptions.useInertial=false;    
-% Script of the mat file used for save the intermediate results 
+scriptOptions.useInertial=false;
+% Script of the mat file used for save the intermediate results
 scriptOptions.matFileName='iCubDataset';
- [dataset,estimator,input,extraSample]=readExperiment (experimentName,scriptOptions);
- 
- sensorsToAnalize={'right_leg'};
+[dataset,estimator,input,extraSample]=readExperiment (experimentName,scriptOptions);
+names=fieldnames(dataset.ftData);
+sensorsToAnalize={'right_leg','left_leg'};
 %%
 if(checkSaturation)
-    names=fieldnames(dataset.ftData);
     for ftIdx =1:length(sensorsToAnalize)
         ft = sensorsToAnalize{ftIdx};
         if (any(strcmp(ft, refNames)) && strcmp(type,'grid'))
             [reference,estimator,input,extraSample]=readExperiment (referenceExp.(ft),refOptions);
-             FTplots(dataset.rawData,dataset.time,reference.ftData,'raw','referenceRaw',reference.time)
+            FTplots(dataset.rawData,dataset.time,reference.ftData,'raw','referenceRaw',reference.time)
         else
             FTplots(dataset.rawData,dataset.time,'raw')
-        end        
+        end
     end
 end
 %%
 if(Force3Dspace)
-%% TODO consider to test if the reference type exist and what to do in case it dont
-[reference,estimator,input,extraSample]=readExperiment (referenceExp.(type),refOptions);
-names=fieldnames(dataset.ftData);
-for ftIdx =1:length(sensorsToAnalize)
-    ft = sensorsToAnalize{ftIdx};
-    names={'filtered','estimated'};
-    force3DPlots(names,ft,dataset.filteredFtData.(ft), reference.estimatedFtData.(ft))    
-    
-    if (sphereReference)
-    else
+    %% TODO consider to test if the reference type exist and what to do in case it dont
+    [reference,estimator,input,extraSample]=readExperiment (referenceExp.(type),refOptions);
+    for ftIdx =1:length(sensorsToAnalize)
+        ft = sensorsToAnalize{ftIdx};
+        plotNames={'filtered','estimated'};
+        force3DPlots(plotNames,ft,dataset.filteredFtData.(ft), reference.estimatedFtData.(ft))
         
-        
+        if (sphereReference)
+        else
+            
+            
+        end
     end
-end
 end
 %%
 if(ForceVsTime)
-    
+    if (length(names)>length(sensorsToAnalize))
+        for ftIdx =1:length(sensorsToAnalize)
+            ft = sensorsToAnalize{ftIdx};
+            toPlot.(ft)=dataset.ftData.(ft);
+            toPlotFiltered.(ft)=dataset.filteredFtData.(ft);
+        end
+    end
+    FTplots(toPlot,dataset.time);
+    FTplots(toPlotFiltered,dataset.time);
     %%
     if(PromptForIntervals)
+        switch type
+            case 'right_leg_yoga'
+                oneLegSection=find(dataset.filteredFtData.right_leg(:,3)<-200);
+                startTime=dataset.time(oneLegSection(1))+1-dataset.time(1);
+                endOnelegSection=find(dataset.filteredFtData.right_leg(oneLegSection(1):end,3)>-200);
+                endTime=dataset.time(endOnelegSection(1)+oneLegSection(1))-1-dataset.time(1);
+                %fprintf('input.intervals.rightLeg=struct(''initTime'',%.4f,''endTime'',%.4f,''contactFrame'',''r_sole'');',startTime,endTime)
+                intervalString=sprintf('input.intervals.leftLeg=struct(''initTime'',%.4f,''endTime'',%.4f,''contactFrame'',''l_sole'');',startTime,endTime);
+                
+            case 'left_leg_yoga'
+                oneLegSection=find(dataset.filteredFtData.left_leg(:,3)<-200);
+                startTime=dataset.time(oneLegSection(1))+1-dataset.time(1);
+                endOnelegSection=find(dataset.filteredFtData.left_leg(oneLegSection(1):end,3)>-200);
+                endTime=dataset.time(endOnelegSection(1)+oneLegSection(1))-1-dataset.time(1);
+                %fprintf('input.intervals.leftLeg=struct(''initTime'',%.4f,''endTime'',%.4f,''contactFrame'',''l_sole'');',startTime,endTime)
+                intervalString=sprintf('input.intervals.leftLeg=struct(''initTime'',%.4f,''endTime'',%.4f,''contactFrame'',''l_sole'');',startTime,endTime);
+                
+            case 'grid'
+                %fprintf('input.intervals.fixed=struct(''initTime'',%.4f,''endTime'',%.4f,''contactFrame'',''r_sole'');',startTime,endTime)
+                intervalString=sprintf('input.intervals.fixed=struct(''initTime'',%.4f,''endTime'',%.4f,''contactFrame'',''root_link'');',0,1500);
+               
+                
+        end
+        disp(intervalString);
+    end
+    
+    if( checKJointValues)
+      nonEmptyIndexes= find(~cellfun(@isempty,dataset.jointNames)) 
+       dataset.jointNames.jointNames(nonEmptyIndexes)
+        
     end
 end
