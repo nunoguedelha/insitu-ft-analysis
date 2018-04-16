@@ -48,6 +48,9 @@ reCabData.fullscale=fullscale;
 
 if(calibOptions.saveMat)
     names=fieldnames(dataset.ftData);
+    if ~exist(strcat('data/',experimentName,'/calibrationMatrices'),'dir')
+        mkdir(strcat('data/',experimentName,'/calibrationMatrices'));
+    end
      for ftIdx =1:length(sensorsToAnalize)
         ft = sensorsToAnalize{ftIdx};
         i=find(strcmp(ft, names));
@@ -155,7 +158,9 @@ if(calibOptions.plot)
         %% FTPLOTs
         for ftIdx =1:length(sensorsToAnalize)
             ft = sensorsToAnalize{ftIdx};
-            FTplots(struct(ft,reCalibData.(ft),strcat('estimated',ft),dataset.estimatedFtData.(ft)),dataset.time);
+            FTplots(struct(ft,reCalibData.(ft),strcat('estimate',ft),dataset.estimatedFtData.(ft)),dataset.time,'forcecomparison');
+            %FTplots(struct(strcat('measure',ft),filteredNoOffset.(ft),strcat('estimate',ft),dataset.estimatedFtData.(ft)),dataset.time,'forcecomparison');
+            %FTplots(struct(ft,reCalibData.(ft),strcat('measure',ft),filteredNoOffset.(ft)),dataset.time,'forcecomparison');
         end
     end
 end
