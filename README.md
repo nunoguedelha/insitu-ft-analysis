@@ -5,6 +5,10 @@ Data and code for analysis of 6 axis force torque sensors, the majority of the t
 ## Installation 
 The scripts in this repo uses the [iDynTree matlab bindings](https://github.com/robotology/idyntree). To estimate wrenches based on the iCub robot model.
 
+## How to ... files
+[Here](https://github.com/robotology-playground/insitu-ft-analysis/tree/master/docs/howToFiles) there can be found a series of files aiming to document, in a informal way, how to use the main functionalities of this repository.
+
+
 ### External repositories 
 
 #### quadfit 
