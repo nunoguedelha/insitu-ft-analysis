@@ -8,10 +8,12 @@ Inputs
 - time: a vector the same size as the rows of data containing the timestamp
 - varargin: this allows to receive multiple configuration parameters.
     - if varargin is a string it assumes it is one of the configuration variables:
-       - onlyForce: if enabled it will only plot the forces (first 3 columns)
-       - raw: if enabled it will change the legends to reflect the raw channels
-       - byChannel: if enable it will generate a different plot for every axis or
+       - onlyForce: if enabled, it will only plot the forces (first 3 columns)
+       - raw: if enabled, it will change the legends to reflect the raw channels
+       - byChannel: if enable, it will generate a different plot for every axis or
  channel.
+       - forceComparison: if enabled, it will fill the reference information with a second field of the data structure (if there are only 2). It will also try to plot the difference between data-reference when option byChannel is enabled.
+       - noTimeStamp: if enabled, it will use the sample number as the x axis instead of the time of the experiment. It can also be enabled by typying  useSamples
       - otherwise it assumes that is the desired name for the  reference data
     - if varagin is a struct it assumes is another set of FT sensor data that will be used to compare the main data information configurations
     - if varagin is a vector it assumes is the time vector that corresponds to the struct reference that will be used to compare the main data information configurations
@@ -56,3 +58,7 @@ Options : byChannel, reference
 Options:reference, onlyForce, referenceName
 > FTplots(dataset1,dataset.time,dataset2,'onlyforce','the Other one')
 ![refName](https://user-images.githubusercontent.com/11043189/38040530-009cb87e-32b0-11e8-9ef3-399fe8e13073.png)
+
+Options: useSamples/noTimeStamp
+>FTplots(toPlot,dataset.time,'useSamples');
+![samples](https://user-images.githubusercontent.com/11043189/38932094-84c91a00-4315-11e8-8eb3-7eaa4c375372.png)
