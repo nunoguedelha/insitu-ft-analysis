@@ -14,8 +14,9 @@ function [externalWrenches,time,jointTorques]= estimateExternalForces(robotName,
 %% Check varargin
 useInertial=false;
 mask=[];
+sensorsToAnalize=NaN;
 if(~isempty(varargin))
-    if (length(varargin)<2)
+    if (length(varargin)<4)
         for v=1:length(varargin)
             if (islogical(varargin{v}))% it means mask available
                 maskTemp=varargin{v};
@@ -34,7 +35,11 @@ if(~isempty(varargin))
                         disp('Error! Expected inertial data that has only 2 fields');
                     end
                 else
+                    if (iscell(varargin{v}))
+                        sensorsToAnalize=varargin{v};
+                    else
                     disp('Not valid argument');
+                    end
                 end
             end
         end
@@ -48,6 +53,11 @@ if (isempty(mask))
     mask=dataset.time>dataset.time(1)+timeFrame(1) & dataset.time<dataset.time(1)+timeFrame(2);
 end
 dataset=applyMask(dataset,mask);
+
+sNames=fieldnames(dataset.ftData);
+if ~iscell(sensorsToAnalize)
+sensorsToAnalize=fieldnames(secMat);
+end
 %TODO: might be easier to just get the indexes of the time start and finish
 %of the time frame and just take those values for t
 %% Load the estimator
@@ -95,25 +105,6 @@ estFTmeasurements = iDynTree.SensorsMeasurements(estimator.sensors());
 % each submodel in the estimator
 fullBodyUnknownsExtWrenchEst = iDynTree.LinkUnknownWrenchContacts(estimator.model());
 
-% We could fill this automatically, but in this example is interesting to have full control
-% of the frames in which this wrenches are expressed (to see the link and frames of a model,
-% just type idyntree-model-info -m nameOfUrdfFile.urdf -p in a terminal 
-
-% % Foot contacts
-% fullBodyUnknownsExtWrenchEst.addNewUnknownFullWrenchInFrameOrigin(estimator.model(),estimator.model().getFrameIndex('l_sole'));
-% fullBodyUnknownsExtWrenchEst.addNewUnknownFullWrenchInFrameOrigin(estimator.model(),estimator.model().getFrameIndex('r_sole'));
-% 
-% % Knee contacts
-% fullBodyUnknownsExtWrenchEst.addNewUnknownFullWrenchInFrameOrigin(estimator.model(),estimator.model().getFrameIndex('l_lower_leg'));
-% fullBodyUnknownsExtWrenchEst.addNewUnknownFullWrenchInFrameOrigin(estimator.model(),estimator.model().getFrameIndex('r_lower_leg'));
-% 
-% % Contact on the central body
-% fullBodyUnknownsExtWrenchEst.addNewUnknownFullWrenchInFrameOrigin(estimator.model(),estimator.model().getFrameIndex('root_link'));
-% 
-% % Contacts on the hands
-% fullBodyUnknownsExtWrenchEst.addNewUnknownFullWrenchInFrameOrigin(estimator.model(),estimator.model().getFrameIndex('l_elbow_1'));
-% fullBodyUnknownsExtWrenchEst.addNewUnknownFullWrenchInFrameOrigin(estimator.model(),estimator.model().getFrameIndex('r_elbow_1'));
-% %
 % framesNames={'l_sole','r_sole','l_lower_leg','r_lower_leg','root_link','l_elbow_1','r_elbow_1'};
 for frame=1:length(framesNames) 
     fullBodyUnknownsExtWrenchEst.addNewUnknownFullWrenchInFrameOrigin(estimator.model(),estimator.model().getFrameIndex(framesNames{frame}));
@@ -136,8 +127,7 @@ for ftIndex = 0:(nrOfFTSensors-1)
     matchup(ftIndex+1) = find(strcmp(sensorNames,sens ));
 end
 
-sNames=fieldnames(dataset.ftData);
-sensorsToAnalize=fieldnames(secMat);
+
 
 %size of array with the expected Data
 ftData=zeros(length(framesNames),size(dataset.time,1),6);
@@ -169,7 +159,6 @@ for t=1:length(dataset.time)
        
         if(~isempty(sIndx))
         wrench_idyn.fromMatlab( (secMat.(sensorsToAnalize{sIndx})*dataset.ftData.(sNames{matchup(ftIndex+1)})(t,:)')+offset.(sNames{matchup(ftIndex+1)}));
-        %wrench_idyn.fromMatlab( secMat.(sensorsToAnalize{sIndx})*dataset.ftData.(sNames{matchup(ftIndex+1)})(t,:)'+[0;0;0;0;0;0]);
         else
         wrench_idyn.fromMatlab( dataset.estimatedFtData.(sNames{matchup(ftIndex+1)})(t,:)');
         end

@@ -1,20 +1,28 @@
-function [offset]=calculateOffsetUsingWBD(estimator,dataset,sampleInit,sampleEnd,input)
+function [offset]=calculateOffsetUsingWBD(estimator,dataset,sampleInit,sampleEnd,input,varargin)
 %% estimate ft to calculate offset used when starting wbd using iterative mean
-sNames=fieldnames(dataset.ftData);
-for n=1:length(sNames)        
-    offset.(sNames{n})=[0;0;0;0;0;0];
-end
-
-% OBTAINESTIMATEDWRENCH Get (model) estimated wrenches for a iCub dataset
+% calculateOffsetUsingWBD estimated wrenches for a iCub dataset to
+% calculate the offset
 %   estimator       : variable which contains the model of the robot
 %   dataset         : contains the joint position velocities and
 %   accelerations
-%   resampleTime   : time that will be used as reference time
-%   contactFrameName : the name of the frame on which it is assumed that an
-%                      external contact is (tipically the
-%                      root_link, r_sole or l_sole)
-
+%   sampleInit   : first sample from which we asume is only on one contact and
+%   relatively still
+%   sampleEnd : last sample from which we asume is only on one contact and
+%   relatively still
+%   input: information regarding the params.m file
+%   varargin: able to have secondary matrixes or not
 % assuming contact doesnt change%
+secMat=NaN;
+if (length(varargin)==1)
+    if (isstruct(varargin{1}))
+        secMat= varargin{1};
+        sensorsToAnalize=fieldnames(secMat);
+    end
+end
+sensorNames=fieldnames(dataset.ftData);
+for n=1:length(sensorNames)          
+    offset.(sensorNames{n})=[0;0;0;0;0;0];     
+end
 %% Prerpare joint variables
 
 dofs = estimator.model().getNrOfDOFs();
@@ -92,30 +100,48 @@ for sample=sampleInit:sampleEnd
     fullBodyUnknowns = iDynTree.LinkUnknownWrenchContacts(estimator.model());
     fullBodyUnknowns.clear();
     unknownWrench.unknownType = iDynTree.FULL_WRENCH;
+    unknownWrench.contactPoint = iDynTree.Position.Zero();
     %fullBodyUnknowns.addNewContactForLink(contact_index,unknownWrench);
     fullBodyUnknowns.addNewContactInFrame(estimator.model(),contact_index,unknownWrench);
+    
     % Print the unknowns to make sure that everything is properly working
     %fullBodyUnknowns.toString(estimator.model())
     % Sensor wrench buffer
     estimatedSensorWrench = iDynTree.Wrench();
+    estimatedSensorWrench.fromMatlab(zeros(1,6));
     % run the estimation
     
-    estimator.computeExpectedFTSensorsMeasurements(fullBodyUnknowns,estFTmeasurements,estContactForces,estJointTorques);
+    ok=estimator.computeExpectedFTSensorsMeasurements(fullBodyUnknowns,estFTmeasurements,estContactForces,estJointTorques);
     
     % store the estimated measurements
     for ftIndex = 0:(nrOfFTSensors-1)
         ok = estFTmeasurements.getMeasurement(iDynTree.SIX_AXIS_FORCE_TORQUE,ftIndex,estimatedSensorWrench);
-        estimatedFT.(sNames{matchup(ftIndex+1)})=estimatedSensorWrench.toMatlab()';
+        estimatedFT.(sensorNames{matchup(ftIndex+1)})=estimatedSensorWrench.toMatlab()';
+%         if sum(abs(estimatedFT.(sensorNames{matchup(ftIndex+1)})) >330)
+%             guilty=(abs(estimatedFT.(sensorNames{matchup(ftIndex+1)})) >330)
+%             indexes=find(guilty)
+%             for gg=1:length(indexes)
+%                 sprintf('huge number %d for sensor %s axis %d at sample %d \n', estimatedFT.(sensorNames{matchup(ftIndex+1)})(indexes(gg)),(sensorNames{matchup(ftIndex+1)}),indexes(gg),sample)
+%             end
+%         end
     end
     %estimatedFT
     
     %% Calculate offset with iterative mean
     count=sample-sampleInit+1;
-    for n=1:length(sNames)
-       
-        offset.(sNames{n})=((count-1)/count)*offset.(sNames{n}) + (1/count)*(estimatedFT.(sNames{n})-dataset.ftData.(sNames{n})(sample,:))';
-       
-    end
-    
+    for n=1:length(sensorNames)
+        sIndx= find(strcmp(sensorsToAnalize,sensorNames(n)));        
+        if(isempty(sIndx))
+            offset.(sensorNames{n})=((count-1)/count)*offset.(sensorNames{n}) + (1/count)*(estimatedFT.(sensorNames{n})-dataset.ftData.(sensorNames{n})(sample,:))';
+        else
+            recalibData=(secMat.(sensorsToAnalize{sIndx})*dataset.ftData.(sensorNames{n})(sample,:)')';
+             offset.(sensorNames{n})=((count-1)/count)*offset.(sensorNames{n}) + (1/count)*(estimatedFT.(sensorNames{n})-recalibData)';
+%              if sum(abs(offset.(sensorNames{n}))>300 )
+%                      sprintf('offset exceeded 300N is now  %d for sensor %s at sample %d', offset.(sensorNames{n}),(sensorNames{n}),sample)      
+%              end
+        end
+    end   
+end
+
     
 end
