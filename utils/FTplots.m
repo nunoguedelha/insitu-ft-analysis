@@ -84,10 +84,12 @@ xPlotOptions = 'r.';
 yPlotOptions = 'g.';
 zPlotOptions = 'b.';
 x2PlotOptions = 'c.';% 'm.';
-y2PlotOptions = 'm.';% 'y.';
-z2PlotOptions = 'y.';% 'c.';
+y2PlotOptions = {'Color',[0.5412 0.1686 0.8863],'Marker','.','LineStyle','none'};
+%z2PlotOptions = 'y.';% 'c.';
+z2PlotOptions = {'Color',[1.0000 0.5490 0],'Marker','.','LineStyle','none'};
+% z2PlotOptions{:}
 
-
+locationLegend='northeast';
 fields=fieldnames(data);
 if ~isempty(reference)
     rfields=fieldnames(reference);
@@ -130,9 +132,9 @@ if (~byChannel && isempty(reference))
         plot(xAxis,data.(fields{i})(:,2),yPlotOptions);hold on;
         plot(xAxis,data.(fields{i})(:,3),zPlotOptions);hold on;
         if raw
-             legend('ch1','ch2','ch3','Location','west');
+             legend('ch1','ch2','ch3','Location',locationLegend);
         else
-            legend('F_{x}','F_{y}','F_{z}','Location','west');
+            legend('F_{x}','F_{y}','F_{z}','Location',locationLegend);
         end
         title(escapeUnderscores((fields{i})));
         xlabel(xAxisOption);
@@ -145,9 +147,9 @@ if (~byChannel && isempty(reference))
             plot(xAxis,data.(fields{i})(:,5),yPlotOptions);hold on;
             plot(xAxis,data.(fields{i})(:,6),zPlotOptions);hold on;
             if raw               
-                legend('ch4','ch5','ch6','Location','west');
+                legend('ch4','ch5','ch6','Location',locationLegend);
             else
-                legend('\tau_{x}','\tau_{y}','\tau_{z}','Location','west');
+                legend('\tau_{x}','\tau_{y}','\tau_{z}','Location',locationLegend);
             end
             title(escapeUnderscores((fields{i})));
             xlabel(xAxisOption);
@@ -164,12 +166,12 @@ if (~isempty(reference) && ~byChannel)
         plot(xAxis,data.(fields{i})(:,2),yPlotOptions);hold on;
         plot(xAxis,data.(fields{i})(:,3),zPlotOptions);hold on;
         plot(xAxisReference,reference.(rfields{i})(:,1),x2PlotOptions);hold on;
-        plot(xAxisReference,reference.(rfields{i})(:,2),y2PlotOptions);hold on;
-        plot(xAxisReference,reference.(rfields{i})(:,3),z2PlotOptions);hold on;
+        plot(xAxisReference,reference.(rfields{i})(:,2),y2PlotOptions{:});hold on;
+        plot(xAxisReference,reference.(rfields{i})(:,3),z2PlotOptions{:});hold on;
         if raw
-            legend('ch1','ch2','ch3','ch1_2','ch2_2','ch3_2','Location','west');
+            legend('ch1','ch2','ch3','ch1_2','ch2_2','ch3_2','Location',locationLegend);
         else
-            legend('F_{x}','F_{y}','F_{z}','F_{x2}','F_{y2}','F_{z2}','Location','west');
+            legend('F_{x}','F_{y}','F_{z}','F_{x2}','F_{y2}','F_{z2}','Location',locationLegend);
         end
         title(escapeUnderscores( strcat((fields{i}),{' and  '},referenceName,{' '},(rfields{i}))));
         xlabel(xAxisOption);
@@ -182,12 +184,12 @@ if (~isempty(reference) && ~byChannel)
             plot(xAxis,data.(fields{i})(:,5),yPlotOptions);hold on;
             plot(xAxis,data.(fields{i})(:,6),zPlotOptions);hold on;
             plot(xAxisReference,reference.(rfields{i})(:,4),x2PlotOptions);hold on;
-            plot(xAxisReference,reference.(rfields{i})(:,5),y2PlotOptions);hold on;
-            plot(xAxisReference,reference.(rfields{i})(:,6),z2PlotOptions);hold on;
+            plot(xAxisReference,reference.(rfields{i})(:,5),y2PlotOptions{:});hold on;
+            plot(xAxisReference,reference.(rfields{i})(:,6), z2PlotOptions{:});hold on;
             if raw                
-                legend('ch4','ch5','ch6','ch4_2','ch5_2','ch6_2','Location','west');
+                legend('ch4','ch5','ch6','ch4_2','ch5_2','ch6_2','Location',locationLegend);
             else
-                legend('\tau_{x}','\tau_{y}','\tau_{z}','\tau_{x2}','\tau_{y2}','\tau_{z2}','Location','west');
+                legend('\tau_{x}','\tau_{y}','\tau_{z}','\tau_{x2}','\tau_{y2}','\tau_{z2}','Location',locationLegend);
             end
             title(escapeUnderscores( strcat((fields{i}),{' and  '},referenceName,{' '},(rfields{i}))));
             xlabel(xAxisOption);
@@ -204,9 +206,9 @@ if (~isempty(reference) && ~byChannel)
             plot(xAxis,abs(data.(fields{i})(:,3))-abs(reference.(rfields{i})(:,3)),zPlotOptions);hold on;
             if raw
                 
-                legend('ch1','ch2','ch3','Location','west');
+                legend('ch1','ch2','ch3','Location',locationLegend);
             else
-                legend('F_{x}','F_{y}','F_{z}','Location','west');
+                legend('F_{x}','F_{y}','F_{z}','Location',locationLegend);
             end
             title(escapeUnderscores( strcat((fields{i}),{' -  '},referenceName,{' '},(rfields{i}))));
             xlabel(xAxisOption);
@@ -219,9 +221,9 @@ if (~isempty(reference) && ~byChannel)
                 plot(xAxis,abs(data.(fields{i})(:,5))-abs(reference.(rfields{i})(:,5)),yPlotOptions);hold on;
                 plot(xAxis,abs(data.(fields{i})(:,6))-abs(reference.(rfields{i})(:,6)),zPlotOptions);hold on;
                 if raw
-                    legend('ch4','ch5','ch6','Location','west');
+                    legend('ch4','ch5','ch6','Location',locationLegend);
                 else
-                    legend('\tau_{x}','\tau_{y}','\tau_{z}','Location','west');
+                    legend('\tau_{x}','\tau_{y}','\tau_{z}','Location',locationLegend);
                 end
                 title(escapeUnderscores( strcat((fields{i}),{' -  '},referenceName,{' '},(rfields{i}))));
                 xlabel(xAxisOption);
