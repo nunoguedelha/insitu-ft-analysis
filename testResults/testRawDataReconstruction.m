@@ -58,9 +58,8 @@ reference.(ft)=refDataset.ftData.(ft);
 FTplots(rawCalculated,dataset.time,reference,refDataset.time,'byChannel','raw');
 FTplots(rawCalculated,dataset.time,reference,refDataset.time,'raw');
 
-ft = 'right_leg';
     names={'calculatedRawData','referenceRawData'};
-force3DPlots(names,ft,rawCalculated.(ft), refDataset.ftData.(ft)) ;
+force3DPlots(names,(ft),rawCalculated.(ft), refDataset.ftData.(ft)) ;
 
 referenceFiltered.(ft)=refDataset.filteredFtData.(ft);
 
