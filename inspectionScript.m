@@ -18,7 +18,7 @@ sphereReference=false;
 Force3Dspace=false;
 ForceVsTime=true;
 PromptForIntervals=true;
-
+checKJointValues= false;
 %Experiment conditions to know to what compare
 %options:
 % right_leg_yoga
