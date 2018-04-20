@@ -12,7 +12,7 @@ Inputs
        - raw: if enabled, it will change the legends to reflect the raw channels
        - byChannel: if enable, it will generate a different plot for every axis or
  channel.
-       - forceComparison: if enabled, it will fill the reference information with a second field of the data structure (if there are only 2). It will also try to plot the difference between data-reference when option byChannel is enabled.
+       - showDifference: if enabled, it will fill the reference information with a second field of the data structure (if there are only 2). It will also try to plot the difference between data-reference if the length of the matrices is the same.
        - noTimeStamp: if enabled, it will use the sample number as the x axis instead of the time of the experiment. It can also be enabled by typying  useSamples
       - otherwise it assumes that is the desired name for the  reference data
     - if varagin is a struct it assumes is another set of FT sensor data that will be used to compare the main data information configurations
@@ -28,7 +28,7 @@ Inputs
      - Plot when comparison is consider active it will also plot the difference of the absolute values of the axis in another plot.
    - Plot each axis separately be it raw or wrench data
    - Plot a comparison for each axis separately between a dataset and a given reference
-   - If the structure has only 2 fields and forceComparison is active then it will make a comparison between the two fields
+   - If the structure has only 2 fields and showDifference is active then it will make a comparison between the two fields
 
 
 ### Examples of usage
