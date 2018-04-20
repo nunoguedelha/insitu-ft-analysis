@@ -52,7 +52,6 @@ calibOptions.saveMat=true;
 calibOptions.usingInsitu=true;
 calibOptions.plot=true;
 calibOptions.onlyWSpace=true;
-calibOptions.IITfirmwareFriendly=true; 
 ```
 ### Explaining calibOptions
 The options are the following:
@@ -69,9 +68,6 @@ The options are the following:
 -  calibOptions.onlyWSpace=true;
        - posible values:true ,false
        - behavior: if `calibOptions.plot=true` then it will plot only the [wrench space plot](https://github.com/robotology-playground/insitu-ft-analysis/blob/master/utils/wrenchSpacePlots.m). Otherwise it will plot the [forces vs time](https://github.com/robotology-playground/insitu-ft-analysis/blob/master/utils/FTplots.m)
--  calibOptions.IITfirmwareFriendly=true;
-       - posible values:true ,false
-       - behavior: if true it will save calibration matrix such that it avoids [bugs detected](https://github.com/loc2/component_ft-sensors/issues/1#issuecomment-349793471) and a swap in channels from interaction with the IIT firmware
        
 - scriptOptions.firstTime : is a hidden feature that activates when it detects that the calibration matrix is the identity. This assumes that the sensor has not been calibrated before and will prompt the user to give it a name.
 ![hidden feature](https://user-images.githubusercontent.com/11043189/33843192-f9f32c04-de9c-11e7-9007-9ad5083fd389.png)

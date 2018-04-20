@@ -79,11 +79,7 @@ if(calibOptions.saveMat)
             filename=strcat('data/',experimentName,'/calibrationMatrices/',dataset.calibMatFileNames{i},lambdaName);
         end
          firmwareMat=calibMatrices.(ft);
-        if calibOptions.IITfirmwareFriendly                      
-            full_scale = [32767,32767,32767,32767,32767,32767]; %% default fullscale
-        else % when problem with fullscale is sovled in firmware           
             full_scale=fullscale.(ft);
-        end
         writeCalibMat(firmwareMat, full_scale, filename)
     end
 end
@@ -166,12 +162,12 @@ if(calibOptions.plot)
 end
 
 %% plot secondary matrix format
-for ftIdx =1:length(sensorsToAnalize)
-    ft = sensorsToAnalize{ftIdx};
-    secMat.(ft)= calibMatrices.(ft)/dataset.cMat.(ft);
-    xmlStr=cMat2xml(secMat.(ft),ft)% print in required format to use by WholeBodyDynamics    
-    
-    Workbench_no_offset=mean((filteredNoOffset.(ft)-dataset.estimatedFtData.(ft)).^2)
-	New_calibration_no_offset=mean((reCalibData.(ft)-dataset.estimatedFtData.(ft)).^2)
-	Workbench=mean((dataset.ftData.(ft)-dataset.estimatedFtData.(ft)).^2)
-end
+% for ftIdx =1:length(sensorsToAnalize)
+%     ft = sensorsToAnalize{ftIdx};
+%     secMat.(ft)= calibMatrices.(ft)/dataset.cMat.(ft);
+%     xmlStr=cMat2xml(secMat.(ft),ft)% print in required format to use by WholeBodyDynamics    
+%     
+%     Workbench_no_offset=mean((filteredNoOffset.(ft)-dataset.estimatedFtData.(ft)).^2)
+% 	New_calibration_no_offset=mean((reCalibData.(ft)-dataset.estimatedFtData.(ft)).^2)
+% 	Workbench=mean((dataset.ftData.(ft)-dataset.estimatedFtData.(ft)).^2)
+% end

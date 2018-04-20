@@ -11,9 +11,10 @@ addpath utils
 % obtain data from all listed experiments
 experimentNames={
  'icub-insitu-ft-analysis-big-datasets/iCubGenova04/exp_1/poleLeftRight';% Name of the experiment;
+ '/green-iCub-Insitu-Datasets/2018_04_09_Grid_2';% Name of the experiment;
     };
 scriptOptions = {};
-scriptOptions.forceCalculation=true;%false;
+scriptOptions.forceCalculation=false;%false;
 scriptOptions.printPlots=false;%true
 scriptOptions.saveData=true;%true
 scriptOptions.raw=true;
@@ -48,13 +49,8 @@ calibOptions.saveMat=true;
 calibOptions.usingInsitu=true;
 calibOptions.plot=true;
 calibOptions.onlyWSpace=true;
-calibOptions.IITfirmwareFriendly=false; % in case a calibration matrix that will not be used by iit firmware is estimated
-
 %%
-for i=1:length(experimentNames)
-    %TODO: create a variable for having extrasample variable for each
-    %expermient
-    %[data.(strcat('e',num2str(i))),data.(strcat('extra',num2str(i)))]=read_estimate_experimentData(experimentNames{i},scriptOptions);
+for i=1:length(experimentNames)    
     [data.(strcat('e',num2str(i))),~,~,data.(strcat('extra',num2str(i)))]=readExperiment(experimentNames{i},scriptOptions);
     
     if(calculate)

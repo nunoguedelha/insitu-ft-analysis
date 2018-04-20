@@ -44,7 +44,7 @@ addpath utils
 
 %% general reading configuration options
 scriptOptions = {};
-scriptOptions.forceCalculation=true;%false;
+scriptOptions.forceCalculation=false;%false;
 scriptOptions.printPlots=true;%true
 scriptOptions.raw=true;
 scriptOptions.saveData=true;
@@ -59,15 +59,15 @@ scriptOptions.matFileName='ftDataset';
 
 %% name and paths of the experiment files
 % change name to desired experiment folder
-%experimentName='green-iCub-Insitu-Datasets/2018_01_18_poleWalkingLeftRight/poleLeftRight_1';
 experimentName='icub-insitu-ft-analysis-big-datasets/iCubGenova04/exp_1/poleLeftRight';
+%experimentName='/green-iCub-Insitu-Datasets/2018_04_09_Grid_2';
 
 %% We carry the calibration for just a subset of the sensors
 % the names are associated to the location of the sensor in the
 % in the iCub options are {'left_arm','right_arm','left_leg','right_leg','right_foot','left_foot'};
 
 %sensorsToAnalize = {'left_leg','left_foot','right_leg','right_foot'};
-sensorsToAnalize = {'right_leg'};
+sensorsToAnalize = {'right_leg','left_leg'};
 
 %% Calibration options
 %Regularization parameter
@@ -79,7 +79,6 @@ calibOptions.saveMat=true;
 calibOptions.usingInsitu=true;
 calibOptions.plot=true;
 calibOptions.onlyWSpace=true;
-calibOptions.IITfirmwareFriendly=false; % in case a calibration matrix that will not be used by iit firmware is estimated
 %% Start
 %Read data
 %[dataset,extraSample]=read_estimate_experimentData(experimentName,scriptOptions);

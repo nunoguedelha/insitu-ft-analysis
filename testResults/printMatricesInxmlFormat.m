@@ -3,7 +3,6 @@ scriptOptions.testDir=true;% to calculate the raw data, for recalibration always
 scriptOptions.matFileName='ftDataset';
 scriptOptions.insituVar='reCabDataInsitu';
 scriptOptions.printAll=true;
-scriptOptions.IITfirmwareFriendly=true;
 % Script of the mat file used for save the intermediate results
 %scriptOptions.saveDataAll=true;
 % clear all;

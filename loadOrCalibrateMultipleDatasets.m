@@ -29,8 +29,6 @@ calibOptions.saveMat=false;
 calibOptions.usingInsitu=true;
 calibOptions.plot=true;
 calibOptions.onlyWSpace=true;
-calibOptions.IITfirmwareFriendly=true; % in case a calibration matrix that will not be used by iit firmware is estimated
-
 %%
 for i=1:length(experimentNames)
     
