@@ -22,7 +22,7 @@ raw=false;
 byChannel=false;
 reference={};
 referenceName='reference';
-forceComparison=false;
+showDifference=false;
 referenceTime=[];
 xAxisOption='TimeStamp';
 if (length(varargin)==1)
@@ -35,7 +35,7 @@ if (length(varargin)==1)
             case {'byChannel','ByChannel','bychannel'}
                 byChannel=true;
             case {'forceComparison','forcecomparison','ForceComparison'}
-                forceComparison=true;
+                showDifference=true;
             case {'noTimeStamp','NOTIMESTAMP','USESAMPLES','useSamples'}
                 xAxisOption='Samples';
             otherwise
@@ -56,8 +56,8 @@ else
                         raw=true;
                     case {'byChannel','ByChannel','bychannel'}
                         byChannel=true;
-                    case {'forceComparison','forcecomparison','ForceComparison'}
-                        forceComparison=true;
+                    case {'showDifference','showdifference','ShowDifference'}
+                        showDifference=true;
                     case {'noTimeStamp','NOTIMESTAMP','notimestamp','USESAMPLES','useSamples','usesamples'}
                         xAxisOption='Samples';
                     otherwise
@@ -103,7 +103,7 @@ else
     end
 end
 
-if (size(fields,1)==2 && forceComparison)
+if (size(fields,1)==2 && showDifference && isempty(reference))
     temp.(fields{1})=data.(fields{1});
     reference.(fields{1})=data.(fields{2});
     referenceName=(fields{2});
@@ -197,7 +197,7 @@ if (~isempty(reference) && ~byChannel)
             
         end
     end
-    if (length(time)== length(referenceTime))
+    if (length(time)== length(referenceTime) && showDifference)
     if (sum(referenceTime==time)==size(time,1))
         for  i=1:size(fields,1)
             figure('WindowStyle','docked'),
@@ -266,7 +266,7 @@ if (byChannel)
             end
         end
     end
-    if forceComparison
+    if showDifference
         if (length(time)== length(referenceTime))
             if (sum(referenceTime==time)==size(time,1))
                 for i=1:size(fields,1)
