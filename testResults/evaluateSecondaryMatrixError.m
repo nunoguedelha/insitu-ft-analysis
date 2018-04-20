@@ -1,5 +1,6 @@
 %% Evaluate error
-useMean=true; %select which means of evaluation should be considered is either mean or standard deviation.
+useMean=false; %select which means of evaluation should be considered is either mean or standard deviation.
+plotResults=true;
 for j=1:length(sensorsToAnalize) %why for each sensor? because there could be 2 sensors in the same leg
     for frN=1:length(framesToAnalize)
         
@@ -86,9 +87,20 @@ for j=1:length(sensorsToAnalize) %why for each sensor? because there could be 2 
              fCalibMat.(sensorsToAnalize{j})=frankieMatrix.(sensorsToAnalize{j})/(WorkbenchMat.(sensorsToAnalize{j}));%calculate secondary calibration matrix
                 xmlStrFrankie=cMat2xml(fCalibMat.(sensorsToAnalize{j}),sensorName{j});% print in required format to use by WholeBodyDynamics
                 
+                if plotResults
+                    comparisonData.(framesToAnalize{frN})=stackedResults.(sensorsToAnalize{j}).Workbench.externalForces.(framesToAnalize{frN});
+                    newData.(framesToAnalize{frN})=stackedResults.(sensorsToAnalize{j}).(names2use{minIndall}).externalForces.(framesToAnalize{frN});                   
+                end
+
+
         else
             fprintf('Effect of %s on %s frame is neglegible \n',(sensorsToAnalize{j}),(framesToAnalize{frN}));
         end
         
     end
 end
+
+ if plotResults
+FTplots(newData,stackedResults.(sensorsToAnalize{j}).(names2use{minIndall}).eForcesTime,stackedResults.(sensorsToAnalize{j}).Workbench.eForcesTime, comparisonData,'Best General');
+FTplots(frankieData,stackedResults.(sensorsToAnalize{j}).(names2use{minIndall}).eForcesTime,stackedResults.(sensorsToAnalize{j}).Workbench.eForcesTime, comparisonData,'Best axis');
+ end

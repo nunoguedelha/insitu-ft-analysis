@@ -33,24 +33,26 @@ scriptOptions.printAll=true;
 %Use only datasets where the same sensor is used
 experimentNames={
     'green-iCub-Insitu-Datasets/2018_04_09_Grid_2';
+     'icub-insitu-ft-analysis-big-datasets/iCubGenova04/exp_1/poleLeftRight';
     }; %this set is from iCubGenova04
 names={'Workbench';
-    'exp1';
+    'withTz';
+    'DecemberData';
     };% except for the first one all others are short names for the expermients in experimentNames
 
 
-lambdas=[0];
-% lambdas=[0;
-%     10
-%     50;
-%     1000;
-%     10000;
-%     50000;
-%     100000;
-%     500000;
-%     1000000;
-%     5000000;
-%     10000000];
+%lambdas=[0];
+lambdas=[0;
+    10
+    50;
+    1000;
+    10000;
+    50000;
+    100000;
+    500000;
+    1000000;
+    5000000;
+    10000000];
 % Create appropiate names for the lambda variables
 for namingIndex=1:length(lambdas)
     if (lambdas(namingIndex)==0)
@@ -88,8 +90,8 @@ sensorName={'l_leg_ft_sensor','r_leg_ft_sensor'};
 
 %% Select datasets in which the matrices will be evaluated
 %toCompare={'iCubGenova04/exp_1/yogaLeft','iCubGenova04/exp_1/yogaRight'};%datasets name 'leftYoga' 'failedLeftYoga'
-toCompare={'icub-insitu-ft-analysis-big-datasets/iCubGenova04/exp_2/yogaRight'};
-toCompareNames={'exp2'}; % short Name of the experiments
+toCompare={'icub-insitu-ft-analysis-big-datasets/iCubGenova04/exp_2/yogaRight','icub-insitu-ft-analysis-big-datasets/iCubGenova04/exp_2/yogaLeft'};
+toCompareNames={'yogaRight','yogaLeft'}; % short Name of the experiments
 
 compareDatasetOptions = {};
 compareDatasetOptions.forceCalculation=false;%false;
@@ -118,8 +120,8 @@ for c=1:length(toCompare)
     %iCubVizWithSlider(data.(toCompareNames{c}),robotName,sensorsToAnalize,input.contactFrameName{1},onTestDir);
     
     %% Calculate offsets for each secondary matrix for each comparison dataset
-    sampleInit=[40];
-    sampleEnd=[60];
+    sampleInit=[40,40];
+    sampleEnd=[60,60];
     % subsample dataset to speed up computations
      for i=1:length(names2use)
       [offset.(toCompareNames{c}).(names2use{i})]=calculateOffsetUsingWBD(estimator,data.(toCompareNames{c}),sampleInit(c),sampleEnd(c),input,secMat.(names2use{i}));
@@ -129,7 +131,7 @@ for c=1:length(toCompare)
     fprintf('Filtering %s \n',(toCompareNames{c}));
     [data.(toCompareNames{c}).ftData,mask]=filterFtData(data.(toCompareNames{c}).ftData);
     data.(toCompareNames{c})=applyMask(data.(toCompareNames{c}),mask);
-    [data.(toCompareNames{c}),~]= dataSampling(data.(toCompareNames{c}),15);
+    [data.(toCompareNames{c}),~]= dataSampling(data.(toCompareNames{c}),2);
     
    
     
