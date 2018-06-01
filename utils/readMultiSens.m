@@ -1,8 +1,9 @@
-function [gyroscope, accelerometer, magnetometer, orientation, temperature, ft, loadCell, encoderArray, skinPatch] = readMultiSens(filename)
+function [sensors] = readMultiSens(filename)
+% This function is meant to read the ports using the MultipleAnalogSensors
+% device
 
-
-fid    = fopen('test.txt');
-temporal=textscan(fid,'%s','delimiter','\n')
+fid    = fopen(filename);
+temporal=textscan(fid,'%s','delimiter','\n');
 text=temporal{1};
 sensorType={'gyroscope', 'accelerometer', 'magnetometer', 'orientation', 'temperature', 'ft', 'loadCell', 'encoderArray', 'skinPatch'};
 timestamp=false;
@@ -13,14 +14,15 @@ for line=1:length(text)
     for j=1:length(separated)
         if ~timestamp
             if (strcmp('(',separated(j)) || strcmp('()',separated(j)))
+                if (line==1)
                 disp(strcat(sensorType{sensorNumber},' not active '))
-                
+                end
             else
                 timestamp=true;
-                noParenthesis=(separated{j})
+                noParenthesis=(separated{j});
                 noParenthesis=noParenthesis(4:end);
                 sensors.(sensorType{sensorNumber}).measures(line,:)=cell2mat(textscan(noParenthesis, '%f'));
-                noParenthesis=(separated{j+1})
+                noParenthesis=(separated{j+1});
                 noParenthesis=noParenthesis(1:end-1);
                 sensors.(sensorType{sensorNumber}).time(line)=cell2mat(textscan(noParenthesis, '%f'));
                 if (line==1) % if is the first time generating the structure
