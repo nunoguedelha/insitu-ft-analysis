@@ -167,6 +167,7 @@ end
 %     secMat.(ft)= calibMatrices.(ft)/dataset.cMat.(ft);
 %     xmlStr=cMat2xml(secMat.(ft),ft)% print in required format to use by WholeBodyDynamics    
 %     
+%% Evaluation of results
 %     Workbench_no_offset=mean((filteredNoOffset.(ft)-dataset.estimatedFtData.(ft)).^2)
 % 	New_calibration_no_offset=mean((reCalibData.(ft)-dataset.estimatedFtData.(ft)).^2)
 % 	Workbench=mean((dataset.ftData.(ft)-dataset.estimatedFtData.(ft)).^2)
