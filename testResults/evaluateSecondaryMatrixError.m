@@ -1,5 +1,5 @@
 %% Evaluate error
-useMean=false; %select which means of evaluation should be considered is either mean or standard deviation.
+useMean=true; %select which means of evaluation should be considered is either mean or standard deviation.
 plotResults=true;
 for j=1:length(sensorsToAnalize) %why for each sensor? because there could be 2 sensors in the same leg
     for frN=1:length(framesToAnalize)
@@ -37,7 +37,7 @@ for j=1:length(sensorsToAnalize) %why for each sensor? because there could be 2 
             sCalibMat.(sensorsToAnalize{j})=cMat.(names2use{minIndall}).(sensorsToAnalize{j})/(WorkbenchMat.(sensorsToAnalize{j}));%calculate secondary calibration matrix
             bestCMat.(sensorsToAnalize{j})=cMat.(names2use{minIndall}).(sensorsToAnalize{j});
             bestName.(sensorsToAnalize{j})=names2use{minIndall};
-            xmlStr=cMat2xml(sCalibMat.(sensorsToAnalize{j}),sensorName{j});% print in required format to use by WholeBodyDynamics
+            xmlStr.(sensorName{j})=cMat2xml(sCalibMat.(sensorsToAnalize{j}),sensorName{j});% print in required format to use by WholeBodyDynamics
             
             % Get Indexes of the frames and links
             frameToAnalizeIndex=odom.model.getLinkIndex((framesToAnalize{frN}));
@@ -85,7 +85,7 @@ for j=1:length(sensorsToAnalize) %why for each sensor? because there could be 2 
                frankieData.(framesToAnalize{frN})(:,axis)=stackedResults.(sensorsToAnalize{j}).(names2use{minInd}).externalForces.(framesToAnalize{frN})(:,axis);
             end
              fCalibMat.(sensorsToAnalize{j})=frankieMatrix.(sensorsToAnalize{j})/(WorkbenchMat.(sensorsToAnalize{j}));%calculate secondary calibration matrix
-                xmlStrFrankie=cMat2xml(fCalibMat.(sensorsToAnalize{j}),sensorName{j});% print in required format to use by WholeBodyDynamics
+                xmlStrFrankie.(sensorName{j})=cMat2xml(fCalibMat.(sensorsToAnalize{j}),sensorName{j});% print in required format to use by WholeBodyDynamics
                 
                 if plotResults
                     comparisonData.(framesToAnalize{frN})=stackedResults.(sensorsToAnalize{j}).Workbench.externalForces.(framesToAnalize{frN});
@@ -98,6 +98,14 @@ for j=1:length(sensorsToAnalize) %why for each sensor? because there could be 2 
         end
         
     end
+end
+
+for j=1:length(sensorName)
+   disp('BEST over all')
+   disp(xmlStr.(sensorName{j}))
+   fprintf('\n');
+   disp('BEST by axis ')
+   disp( xmlStrFrankie.(sensorName{j})   ) 
 end
 
  if plotResults
