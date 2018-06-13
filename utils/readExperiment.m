@@ -61,6 +61,10 @@ if (~any(strcmp('useInertial', fieldnames(scriptOptions))))
     scriptOptions.useInertial=false;
     disp(' Using default value useInertial=false');
 end
+if (~any(strcmp('multiSens', fieldnames(scriptOptions))))
+    scriptOptions.multiSens=false;
+    disp(' Using default value multiSens=false');
+end
 %%
 % convertion to radians
 deg2rad = pi/180.0;
@@ -100,20 +104,52 @@ else
         dataFTDirs{i}=strcat(prefixDir,'data/',experimentName,'/icub/',input.ftNames{i},'/',ftDataName);
         
     end
-    disp('readExperiment: reading FT data');
-    [ftData.(input.ftNames{1}),time]=readDataDumper(dataFTDirs{1});
-    fprintf('readExperiment: Reading the FT data for the part %s\n',input.ftNames{1});
-    for i=2:size(input.ftNames,1)
-        %read from dataDumper
-        [ftData_temp,time_temp]=readDataDumper(dataFTDirs{i});
-        %resample FT data
-        ftData.(input.ftNames{i})=resampleFt(time,time_temp,ftData_temp);
-        fprintf('readExperiment: Resampling the FT data for the part %s\n',input.ftNames{i});
+    if ~scriptOptions.multiSens
+        disp('readExperiment: reading FT data');
+        [ftData.(input.ftNames{1}),time]=readDataDumper(dataFTDirs{1});
+        fprintf('readExperiment: Reading the FT data for the part %s\n',input.ftNames{1});
+        for i=2:size(input.ftNames,1)
+            %read from dataDumper
+            [ftData_temp,time_temp]=readDataDumper(dataFTDirs{i});
+            %resample FT data
+            ftData.(input.ftNames{i})=resampleFt(time,time_temp,ftData_temp);
+            fprintf('readExperiment: Resampling the FT data for the part %s\n',input.ftNames{i});
+        end
+    else
+         fprintf('readExperiment: Getting the FT data for the part %s\n',input.ftNames{1});
+        [sensors]=readMultiSens(dataFTDirs{1});
+        time=sensors.ft.time;
+       
+        ftData.(input.ftNames{1})=sensors.ft.measures;
+        [uniqueValues,uniqueIndex]=unique(sensors.temperature.measures(:,1));
+        if ( length(uniqueValues)>1)
+            temperature.(input.ftNames{1})=interp1(sensors.temperature.time(uniqueIndex), uniqueValues  , time)';
+        else
+            temperature.(input.ftNames{1})(1:length(time),1)=uniqueValues*ones(size(time));
+        end
+        fprintf('readExperiment: Getting the FT temperature for the part %s\n',input.ftNames{1});
+        for i=2:size(input.ftNames,1)
+            %read from dataDumper
+            [sensors_temp]=readMultiSens(dataFTDirs{i});
+            %resample FT data
+            ftData.(input.ftNames{i})=resampleFt(time,sensors_temp.ft.time,sensors_temp.ft.measures);
+            fprintf('readExperiment: Resampling the FT data for the part %s\n',input.ftNames{i});
+            % temperature.(input.ftNames{i})=interp1(sensors_temp.temperature.time, sensors_temp.temperature.measures(:,1)  , time)';
+            [uniqueValues,uniqueIndex]=unique(sensors_temp.temperature.measures(:,1));
+            if ( length(uniqueValues)>1)
+                temperature.(input.ftNames{i})=interp1(sensors_temp.temperature.time(uniqueIndex), uniqueValues  , time)';
+            else
+                temperature.(input.ftNames{i})(1:length(time),1)=uniqueValues*ones(size(time));
+            end
+            fprintf('readExperiment: Resampling the FT temperature for the part %s\n',input.ftNames{i});
+        end
+        dataset.temperature=temperature;
     end
     
     % Insert into final output
     dataset.time=time;
     dataset.ftData=ftData;
+    
     
     %% load Inertial data
     if (any(strcmp('inertialName', fieldnames(input))))
