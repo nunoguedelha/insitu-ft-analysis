@@ -43,4 +43,6 @@ for ftIdx =1:length(sensorsToAnalize)
     ft = sensorsToAnalize{ftIdx};
     toCsv=[dataset.ftData.(ft),dataset.temperature.(ft),dataset.estimatedFtData.(ft)];
     csvwrite(strcat('data/',experimentName,'/csvFiles/',ft,'.txt'),toCsv);
+     toCsv=[dataset.rawData.(ft),dataset.temperature.(ft),dataset.estimatedFtData.(ft)];
+    csvwrite(strcat('data/',experimentName,'/csvFiles/',ft,'_raw.txt'),toCsv);
 end
