@@ -42,7 +42,7 @@ for ftIdx =1:length(sensorsToAnalize)
                 end
                 
                 if (strcmp(ft,'left_leg') || strcmp(ft,'left_foot') ) % if calibrating left side use samples specific for the left
-                    if (isstruct(extraSample.left)&& strcmp(eSampleID,'right' )) %check if there is extra samples on this side
+                    if (isstruct(extraSample.left)&& strcmp(eSampleID,'left' )) %check if there is extra samples on this side
                         rawData2=extraSample.left.rawData;
                         rawDataFiltered2=extraSample.left.rawDataFiltered;
                         estimatedFtData2=extraSample.left.estimatedFtData;
