@@ -31,6 +31,7 @@ if(calibOptions.usingInsitu)
     
 else
     %not using insitu    
+    if offsetOnMainDataset
    [calibMatrices,offsetC,fullscale]=...
             estimateMatricesAndOffset(...
             dataset.rawDataFiltered,... %raw data input
@@ -47,6 +48,15 @@ else
             dataset,sensorsToAnalize, dataset.cMat,lambda...
             ,extraSample,offset,calibMatrices);
          dataset=augmentedDataset;
+    else
+        
+        
+        
+        
+         offset=getRawData(offsetC,calibMatrices); 
+        reCabData.offset=offset; % REMARK:This offset is dependent on the calibration matrix, since the calibration matrix changes when using extra sample the offset needs re-estimation or being substracted from the raw.
+        
+    end
         
 end
 reCabData.calibMatrices=calibMatrices;
@@ -162,8 +172,9 @@ for ftIdx =1:length(sensorsToAnalize)
     end
     % Evaluation of results
     if (calibOptions.resultEvaluation)
-        Workbench_no_offset=mean((filteredNoOffset.(ft)-dataset.estimatedFtData.(ft)).^2)
-        New_calibration_no_offset=mean((reCalibData.(ft)-dataset.estimatedFtData.(ft)).^2)
-        Workbench=mean((dataset.ftData.(ft)-dataset.estimatedFtData.(ft)).^2)
+        disp(ft)
+        Workbench_no_offset_mse=mean((filteredNoOffset.(ft)-dataset.estimatedFtData.(ft)).^2)
+        New_calibration_no_offset_mse=mean((reCalibData.(ft)-dataset.estimatedFtData.(ft)).^2)
+        %Workbench_mse=mean((dataset.ftData.(ft)-dataset.estimatedFtData.(ft)).^2)
     end
 end
