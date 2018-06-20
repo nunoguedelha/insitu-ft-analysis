@@ -50,7 +50,7 @@ if (index~=0)
             [inerOffset,inertialRaw]=calculateOffset(sensorsToAnalize,data.(toCompareWith).inertial.ftData,data.(toCompareWith).inertial.estimatedFtData,data.(toCompareWith).cMat,cMat.(names2use{i}));
             for j=1:size(data.(toCompareWith).rawData.( sensorsToAnalize),1)
                 reCalibData.(names2use{i})(j,:)=cMat.(names2use{i})*(data.(toCompareWith).rawData.( sensorsToAnalize)(j,:)');
-                ftDataNoOffset.(names2use{i})(j,:)=  reCalibData.(names2use{i})(j,:)+inerOffset.(sensorsToAnalize)';
+                ftDataNoOffset.(names2use{i})(j,:)=  reCalibData.(names2use{i})(j,:)-inerOffset.(sensorsToAnalize)';
             end
             
          end

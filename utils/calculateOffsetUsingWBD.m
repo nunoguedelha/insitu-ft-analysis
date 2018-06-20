@@ -132,10 +132,10 @@ for sample=sampleInit:sampleEnd
     for n=1:length(sensorNames)
         sIndx= find(strcmp(sensorsToAnalize,sensorNames(n)));        
         if(isempty(sIndx))
-            offset.(sensorNames{n})=((count-1)/count)*offset.(sensorNames{n}) + (1/count)*(estimatedFT.(sensorNames{n})-dataset.ftData.(sensorNames{n})(sample,:))';
+            offset.(sensorNames{n})=((count-1)/count)*offset.(sensorNames{n}) + (1/count)*(dataset.ftData.(sensorNames{n})(sample,:)-estimatedFT.(sensorNames{n}))';
         else
             recalibData=(secMat.(sensorsToAnalize{sIndx})*dataset.ftData.(sensorNames{n})(sample,:)')';
-             offset.(sensorNames{n})=((count-1)/count)*offset.(sensorNames{n}) + (1/count)*(estimatedFT.(sensorNames{n})-recalibData)';
+             offset.(sensorNames{n})=((count-1)/count)*offset.(sensorNames{n}) + (1/count)*(recalibData-estimatedFT.(sensorNames{n}))';
 %              if sum(abs(offset.(sensorNames{n}))>300 )
 %                      sprintf('offset exceeded 300N is now  %d for sensor %s at sample %d', offset.(sensorNames{n}),(sensorNames{n}),sample)      
 %              end

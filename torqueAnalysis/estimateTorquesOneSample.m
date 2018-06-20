@@ -137,7 +137,7 @@ else
     
     % store the measurements
     for ftIndex = 0:(nrOfFTSensors-1)   %TODO: how to get the offset used by wholebodydynamics or load the forces used by wbd
-        wrench_idyn.fromMatlab(ftData.(sNames{matchup(ftIndex+1)})(:)'+offset.(sNames{matchup(ftIndex+1)}));
+        wrench_idyn.fromMatlab(ftData.(sNames{matchup(ftIndex+1)})(:)'-offset.(sNames{matchup(ftIndex+1)}));
         ok = estFTmeasurements.setMeasurement(iDynTree.SIX_AXIS_FORCE_TORQUE,ftIndex,wrench_idyn);
         
     end

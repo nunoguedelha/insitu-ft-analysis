@@ -87,9 +87,9 @@ offset.(sNames{n})=estimated.(sNames{n})-ftData1.(sNames{n});
 end
 %% check correction
 % for s=1:length(dataset.time)
-%     newFT(s,:)=dataset.ftData.right_leg(s,1:3)+offset.right_leg(1:3);
+%     newFT(s,:)=dataset.ftData.right_leg(s,1:3)-offset.right_leg(1:3);
 % end
-% plot (dataset.time-dataset.time(1),dataset.ftData.right_leg(:,1:3)-dataset.ftData.right_leg(1,1:3))+offset.right_leg; hold on;
+% plot (dataset.time-dataset.time(1),dataset.ftData.right_leg(:,1:3)-dataset.ftData.right_leg(1,1:3))-offset.right_leg; hold on;
 %% do the torque calculation with skin
 sampleIni=16;
 sT=0;

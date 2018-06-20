@@ -175,9 +175,9 @@ for t=1:length(dataset.time)
        sIndx= find(strcmp(sensorsToAnalize,sNames(matchup(ftIndex+1))));
        
         if(~isempty(sIndx))
-        wrench_idyn.fromMatlab( secMat.(sensorsToAnalize{sIndx})*dataset.ftData.(sNames{matchup(ftIndex+1)})(t,:)'+offset.(sNames{matchup(ftIndex+1)}));
+        wrench_idyn.fromMatlab( secMat.(sensorsToAnalize{sIndx})*dataset.ftData.(sNames{matchup(ftIndex+1)})(t,:)'-offset.(sNames{matchup(ftIndex+1)}));
         else
-        wrench_idyn.fromMatlab( dataset.ftData.(sNames{matchup(ftIndex+1)})(t,:)'+offset.(sNames{matchup(ftIndex+1)}));
+        wrench_idyn.fromMatlab( dataset.ftData.(sNames{matchup(ftIndex+1)})(t,:)'-offset.(sNames{matchup(ftIndex+1)}));
         end
         ok = estFTmeasurements.setMeasurement(iDynTree.SIX_AXIS_FORCE_TORQUE,ftIndex,wrench_idyn);
         
