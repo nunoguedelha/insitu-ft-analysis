@@ -17,6 +17,10 @@ for ftIdx =1:length(sensorsToAnalize)
     else
         O_w=[0,0,0,0,0,0]';
         [calibMatrices.(ft),fullscale.(ft),offset.(ft)]=estimateCalibMatrixWithRegAndOff(rawData.(ft),estimatedFtData.(ft),cMat.(ft),lambda,O_w);
+    
     end
-  
+  [rows,columns]=size(offset.(ft));
+        if rows==6 && columns==1
+           offset.(ft)=offset.(ft)';
+        end
 end

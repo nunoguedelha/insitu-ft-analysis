@@ -78,6 +78,12 @@ for ftIdx =1:length(sensorsToAnalize)
     end
     
     if calibrationRequired   
+        %% check correct dimensions of the offset
+        [rows,columns]=size(offset.(ft));
+        if rows==6 && columns==1
+           offset.(ft)=offset.(ft)';
+        end
+        
         if useFiltered
             rawNoOffset=stackedRawFiltered-repmat(offset.(ft),size(stackedRaw,1),1);
         else
