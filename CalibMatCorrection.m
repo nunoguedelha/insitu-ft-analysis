@@ -38,9 +38,14 @@ else
             dataset.cMat,...% previous calibration matrix for regularization
             lambda,...
             sensorsToAnalize);% weighting coefficient
-        reCabData.offset=offsetC;
-        
+        reCabData.offset=offsetC; % REMARK:This offset is dependent on the calibration matrix, since the calibration matrix changes when using extra sample the offset needs re-estimation or being substracted from the raw.
+        offset=getRawData(offsetC,calibMatrices);        
         % stack all extra samples together for calculation
+        [calibMatrices,fullscale,augmentedDataset]= ...
+            estimateMatricesWthRegExtraSamples2(...
+            dataset,sensorsToAnalize, dataset.cMat,lambda...
+            ,extraSample,offset,calibMatrices);
+         dataset=augmentedDataset;
         
 end
 reCabData.calibMatrices=calibMatrices;
@@ -87,24 +92,15 @@ if(calibOptions.saveMat)
     end
 end
 %% generate wrenches with new calibration matrix
-if(calibOptions.usingInsitu)   
-    
     for ftIdx =1:length(sensorsToAnalize)
         ft = sensorsToAnalize{ftIdx};
         for j=1:size(dataset.rawData.(ft),1)
-            reCalibData.(ft)(j,:)=calibMatrices.(ft)*(dataset.rawData.(ft)(j,:)'-offset.(ft)');            
-            offsetInsitu.(ft)=calibMatrices.(ft)*offset.(ft)';
+            reCalibData.(ft)(j,:)=calibMatrices.(ft)*(dataset.rawData.(ft)(j,:)'-offset.(ft)'); 
         end
+        offsetInsitu.(ft)=calibMatrices.(ft)*offset.(ft)';
     end
     reCabData.offsetInsitu=offsetInsitu;
-else
-    for ftIdx =1:length(sensorsToAnalize)
-        ft = sensorsToAnalize{ftIdx};
-        for j=1:size(dataset.rawData.(ft),1)
-            reCalibData.(ft)(j,:)=calibMatrices.(ft)*(dataset.rawData.(ft)(j,:)')-offsetC.(ft);
-        end
-    end
-end
+
 reCabData.reCalibData=reCalibData;
 reCabData.calibMatFileNames=dataset.calibMatFileNames;
 % Save the workspace again to include calib Matrices, scale and offset
@@ -129,13 +125,8 @@ if(calibOptions.plot)
             else
                 scriptOptions.firstTime=false;
             end
-            if(calibOptions.usingInsitu)
+         
                 filteredOffset.(ft)=(dataset.cMat.(ft)*offset.(ft)')';  
-              
-            else
-                filteredOffset.(ft)=offsetC.(ft)';
-            
-            end
                filteredNoOffset.(ft)=dataset.filteredFtData.(ft) -repmat(filteredOffset.(ft),size(dataset.filteredFtData.(ft),1),1);
                        
             figure;
@@ -154,6 +145,17 @@ if(calibOptions.plot)
             xlabel('F_{x}');
             ylabel('F_{y}');
             zlabel('F_{z}');
+            
+            %Using force3Dplots 
+            if(~scriptOptions.firstTime)              
+                namesdatasets={'measuredDataNoOffset','estimatedData','reCalibratedData'};
+                force3DPlots(namesdatasets,(ft),filteredNoOffset.(ft),dataset.estimatedFtData.(ft),reCalibData.(ft));
+            else
+                namesdatasets={'estimatedData','reCalibratedData','Location','west'};
+               
+                force3DPlots(namesdatasets,(ft),dataset.estimatedFtData.(ft),reCalibData.(ft));
+            end
+            
         end
     else
         %% FTPLOTs
