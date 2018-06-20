@@ -1,5 +1,7 @@
 function  [calibMatrices,fullscale]=estimateMatricesWthRegExtraSamples(dataset,sensorsToAnalize,cMat,lambda,extraSample,offset,preCalibMat)
-%% Inputs
+%% Description
+% Inputs
+
 % dataset: is the main data from de experiment.
 % sensorsToAnalize: are the sensors which are required to be recalibrated
 % cMat: the calibration matrix currently used in the sensor
@@ -7,10 +9,11 @@ function  [calibMatrices,fullscale]=estimateMatricesWthRegExtraSamples(dataset,s
 % extraSample: data coming from another experiment composed of some extra positions to be considered for calibration
 % offset: offset in the raw data calculated previously on the main data contained in dataset
 % preCalibMat: calibration matrix obtained without considering the extra samples
-%% Outputs
-% calibMatrices: calibration matrices of the sensors to be analized 
-%
+% Outputs
 
+% calibMatrices: calibration matrices of the sensors to be analized 
+
+ %% Code
 rawData=dataset.rawData;
 estimatedFtData=dataset.estimatedFtData;
 for ftIdx =1:length(sensorsToAnalize)

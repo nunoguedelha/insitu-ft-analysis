@@ -39,6 +39,9 @@ else
             lambda,...
             sensorsToAnalize);% weighting coefficient
         reCabData.offset=offsetC;
+        
+        % stack all extra samples together for calculation
+        
 end
 reCabData.calibMatrices=calibMatrices;
 
@@ -98,7 +101,7 @@ else
     for ftIdx =1:length(sensorsToAnalize)
         ft = sensorsToAnalize{ftIdx};
         for j=1:size(dataset.rawData.(ft),1)
-            reCalibData.(ft)(j,:)=calibMatrices.(ft)*(dataset.rawData.(ft)(j,:)')+offsetC.(ft);
+            reCalibData.(ft)(j,:)=calibMatrices.(ft)*(dataset.rawData.(ft)(j,:)')-offsetC.(ft);
         end
     end
 end
@@ -121,18 +124,20 @@ if(calibOptions.plot)
     if (calibOptions.onlyWSpace)
         for ftIdx =1:length(sensorsToAnalize)
             ft = sensorsToAnalize{ftIdx};
-            if(calibOptions.usingInsitu)
-                filteredOffset.(ft)=(dataset.cMat.(ft)*offset.(ft)')';               
-            else
-                filteredOffset.(ft)=offsetC.(ft)';
-            end
-            if (round(dataset.cMat.(ft))==eye(6))
+             if (round(dataset.cMat.(ft))==eye(6))
                 scriptOptions.firstTime=true;
             else
                 scriptOptions.firstTime=false;
             end
-            filteredNoOffset.(ft)=dataset.filteredFtData.(ft) -repmat(filteredOffset.(ft),size(dataset.filteredFtData.(ft),1),1);
+            if(calibOptions.usingInsitu)
+                filteredOffset.(ft)=(dataset.cMat.(ft)*offset.(ft)')';  
+              
+            else
+                filteredOffset.(ft)=offsetC.(ft)';
             
+            end
+               filteredNoOffset.(ft)=dataset.filteredFtData.(ft) -repmat(filteredOffset.(ft),size(dataset.filteredFtData.(ft),1),1);
+                       
             figure;
             if(~scriptOptions.firstTime)
                 plot3_matrix(filteredNoOffset.(ft)(:,1:3)); grid on;hold on;

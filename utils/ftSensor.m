@@ -58,11 +58,8 @@ classdef ftSensor
         end
         
         %gets the data without the offset
-        function data= getDataNoOffset(obj)
-            %TODO: should generalize what the offset is in case of insitu is + in
-            %case of others is -
-            data=obj.data-repmat(obj.offset,size(obj.data,1),1);%  data - offset
-            % data=obj.data+repmat(obj.offset,size(obj.data,1),1);%  data + offset
+        function data= getDataNoOffset(obj)            
+            data=obj.data-repmat(obj.offset,size(obj.data,1),1); 
         end
         
         %filters the data using sgolay filter, can be forced to filter

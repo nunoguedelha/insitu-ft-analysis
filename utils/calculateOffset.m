@@ -16,7 +16,7 @@ if (iscell(sensorsToAnalize))
         end
         meanFt=mean(rawData.(ft));
         meanEst=mean(estimatedFtData.(ft));
-        offset.(ft)=meanEst'-calibMatrices.(ft)*meanFt';
+        offset.(ft)=calibMatrices.(ft)*meanFt'-meanEst';
     end
     
 else %it means there is only one matrix in the struct
@@ -26,5 +26,5 @@ else %it means there is only one matrix in the struct
     end
     meanFt=mean(rawData.(ft));
     meanEst=mean(estimatedFtData.(ft));
-    offset.(ft)=meanEst'-calibMatrices*meanFt';
+    offset.(ft)=calibMatrices.(ft)*meanFt'-meanEst';
 end
