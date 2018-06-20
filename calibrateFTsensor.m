@@ -59,8 +59,8 @@ scriptOptions.matFileName='ftDataset';
 
 %% name and paths of the experiment files
 % change name to desired experiment folder
-experimentName='icub-insitu-ft-analysis-big-datasets/iCubGenova04/exp_1/poleLeftRight';
-%experimentName='/green-iCub-Insitu-Datasets/2018_04_09_Grid_2';
+%experimentName='icub-insitu-ft-analysis-big-datasets/iCubGenova04/exp_1/poleLeftRight';
+experimentName='/green-iCub-Insitu-Datasets/2018_04_09_Grid_2';
 
 %% We carry the calibration for just a subset of the sensors
 % the names are associated to the location of the sensor in the
@@ -76,9 +76,11 @@ lambdaName='';
 
 %calibration script options
 calibOptions.saveMat=true;
-calibOptions.usingInsitu=true;
+calibOptions.usingInsitu=false;
 calibOptions.plot=true;
 calibOptions.onlyWSpace=true;
+calibOptions.secMatrixFormat=false;
+calibOptions.resultEvaluation=false;
 %% Start
 %Read data
 %[dataset,extraSample]=read_estimate_experimentData(experimentName,scriptOptions);

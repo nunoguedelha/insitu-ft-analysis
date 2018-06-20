@@ -38,8 +38,9 @@ else
             dataset.cMat,...% previous calibration matrix for regularization
             lambda,...
             sensorsToAnalize);% weighting coefficient
-        reCabData.offset=offsetC; % REMARK:This offset is dependent on the calibration matrix, since the calibration matrix changes when using extra sample the offset needs re-estimation or being substracted from the raw.
-        offset=getRawData(offsetC,calibMatrices);        
+        offset=getRawData(offsetC,calibMatrices); 
+        reCabData.offset=offset; % REMARK:This offset is dependent on the calibration matrix, since the calibration matrix changes when using extra sample the offset needs re-estimation or being substracted from the raw.
+        
         % stack all extra samples together for calculation
         [calibMatrices,fullscale,augmentedDataset]= ...
             estimateMatricesWthRegExtraSamples2(...
@@ -97,9 +98,9 @@ end
         for j=1:size(dataset.rawData.(ft),1)
             reCalibData.(ft)(j,:)=calibMatrices.(ft)*(dataset.rawData.(ft)(j,:)'-offset.(ft)'); 
         end
-        offsetInsitu.(ft)=calibMatrices.(ft)*offset.(ft)';
+        offsetInWrenchSpace.(ft)=calibMatrices.(ft)*offset.(ft)';
     end
-    reCabData.offsetInsitu=offsetInsitu;
+    reCabData.offsetInWrenchSpace=offsetInWrenchSpace;
 
 reCabData.reCalibData=reCalibData;
 reCabData.calibMatFileNames=dataset.calibMatFileNames;
@@ -128,25 +129,8 @@ if(calibOptions.plot)
          
                 filteredOffset.(ft)=(dataset.cMat.(ft)*offset.(ft)')';  
                filteredNoOffset.(ft)=dataset.filteredFtData.(ft) -repmat(filteredOffset.(ft),size(dataset.filteredFtData.(ft),1),1);
-                       
-            figure;
-            if(~scriptOptions.firstTime)
-                plot3_matrix(filteredNoOffset.(ft)(:,1:3)); grid on;hold on;
-            end
-            plot3_matrix(dataset.estimatedFtData.(ft)(:,1:3)); grid on;hold on;
-            plot3_matrix(reCalibData.(ft)(:,1:3));
             
-            if(~scriptOptions.firstTime)
-                legend('measuredDataNoOffset','estimatedData','reCalibratedData','Location','west');
-            else
-                legend('estimatedData','reCalibratedData','Location','west');
-            end
-            title(strcat({'Wrench space '},escapeUnderscores(ft),{' '},escapeUnderscores(lambdaName)));
-            xlabel('F_{x}');
-            ylabel('F_{y}');
-            zlabel('F_{z}');
             
-            %Using force3Dplots 
             if(~scriptOptions.firstTime)              
                 namesdatasets={'measuredDataNoOffset','estimatedData','reCalibratedData'};
                 force3DPlots(namesdatasets,(ft),filteredNoOffset.(ft),dataset.estimatedFtData.(ft),reCalibData.(ft));
@@ -168,14 +152,18 @@ if(calibOptions.plot)
     end
 end
 
-%% plot secondary matrix format
-% for ftIdx =1:length(sensorsToAnalize)
-%     ft = sensorsToAnalize{ftIdx};
-%     secMat.(ft)= calibMatrices.(ft)/dataset.cMat.(ft);
-%     xmlStr=cMat2xml(secMat.(ft),ft)% print in required format to use by WholeBodyDynamics    
-%     
-%% Evaluation of results
-%     Workbench_no_offset=mean((filteredNoOffset.(ft)-dataset.estimatedFtData.(ft)).^2)
-% 	New_calibration_no_offset=mean((reCalibData.(ft)-dataset.estimatedFtData.(ft)).^2)
-% 	Workbench=mean((dataset.ftData.(ft)-dataset.estimatedFtData.(ft)).^2)
-% end
+% plot secondary matrix format
+for ftIdx =1:length(sensorsToAnalize)
+    ft = sensorsToAnalize{ftIdx};
+    
+    if (calibOptions.secMatrixFormat)
+        secMat.(ft)= calibMatrices.(ft)/dataset.cMat.(ft);
+        xmlStr=cMat2xml(secMat.(ft),ft)% print in required format to use by WholeBodyDynamics
+    end
+    % Evaluation of results
+    if (calibOptions.resultEvaluation)
+        Workbench_no_offset=mean((filteredNoOffset.(ft)-dataset.estimatedFtData.(ft)).^2)
+        New_calibration_no_offset=mean((reCalibData.(ft)-dataset.estimatedFtData.(ft)).^2)
+        Workbench=mean((dataset.ftData.(ft)-dataset.estimatedFtData.(ft)).^2)
+    end
+end
