@@ -14,5 +14,6 @@ Thumbs.db
 external/ftSensCalib
 external/iCubViz
 data/
+testResults/temporal
 *.avi
 *.m~
