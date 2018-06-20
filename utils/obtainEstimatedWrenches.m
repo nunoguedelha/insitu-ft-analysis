@@ -145,12 +145,12 @@ for t=1:length(resampledTime)
     
     qj=qj_all(t,:);
     dqj=dqj_all(t,:);
-    ddqj=ddqj_all(t,:);
+    %ddqj=ddqj_all(t,:);
     
     %    % velocity and acceleration to 0 to prove if they are neglegible. (slow
     %    % experiment scenario)
     %     dqj=zeros(size(qj));
-    %     ddqj=zeros(size(qj));
+         ddqj=zeros(size(qj)); % temprorary change due to problem with the acc in the firmware
     
     qj_idyn.fromMatlab(qj);
     dqj_idyn.fromMatlab(dqj);
