@@ -8,29 +8,13 @@
 if(calibOptions.usingInsitu) 
  [calibMatrices,offset,fullscale]= estimateMatricesWthReg(dataset.rawDataFiltered,dataset.estimatedFtData,sensorsToAnalize, dataset.cMat,lambda);
  
-   if (isstruct(extraSample.right)||isstruct(extraSample.left))
-       tempCmat=dataset.cMat;
-         [calibMatrices,fullscale]= estimateMatricesWthRegExtraSamples(dataset,sensorsToAnalize, dataset.cMat,lambda...
-             ,extraSample,offset,calibMatrices);
-         if (isstruct(extraSample.right))
-         dataset=addDatasets(dataset,extraSample.right);
-         end
-          if (isstruct(extraSample.left))
-         dataset=addDatasets(dataset,extraSample.left);
-          end
-%          [calibMatrices,fullscale,augmentedDataset]= estimateMatricesWthRegExtraSamples2(dataset,sensorsToAnalize, dataset.cMat,lambda...
-%              ,extraSample,offset,calibMatrices);
-%          dataset=augmentedDataset;
-          dataset.cMat=tempCmat;
-   end
-    
-    if (isstruct(extraSample.right)||isstruct(extraSample.left))
-       tempCmat=dataset.cMat;
-       
-    end
+      [calibMatrices,fullscale,augmentedDataset]= estimateMatricesWthRegExtraSamples2(dataset,sensorsToAnalize, dataset.cMat,lambda...
+              ,extraSample,offset,calibMatrices);
+          dataset=augmentedDataset;
     
 else
-    %not using insitu    
+    %not using insitu   
+    offsetOnMainDataset=false;
     if offsetOnMainDataset
    [calibMatrices,offsetC,fullscale]=...
             estimateMatricesAndOffset(...
@@ -49,10 +33,12 @@ else
             ,extraSample,offset,calibMatrices);
          dataset=augmentedDataset;
     else
-        
-        
-        
-        
+        %% Under develpment
+        [calibMatrices,fullscale,augmentedDataset,offsetC]= ...
+            estimateMatricesWthRegExtraSamples2(...
+            dataset,sensorsToAnalize, dataset.cMat,lambda...
+            ,extraSample);
+         dataset=augmentedDataset;
          offset=getRawData(offsetC,calibMatrices); 
         reCabData.offset=offset; % REMARK:This offset is dependent on the calibration matrix, since the calibration matrix changes when using extra sample the offset needs re-estimation or being substracted from the raw.
         
@@ -173,7 +159,7 @@ for ftIdx =1:length(sensorsToAnalize)
     % Evaluation of results
     if (calibOptions.resultEvaluation)
         disp(ft)
-        Workbench_no_offset_mse=mean((filteredNoOffset.(ft)-dataset.estimatedFtData.(ft)).^2)
+        %Workbench_no_offset_mse=mean((filteredNoOffset.(ft)-dataset.estimatedFtData.(ft)).^2)
         New_calibration_no_offset_mse=mean((reCalibData.(ft)-dataset.estimatedFtData.(ft)).^2)
         %Workbench_mse=mean((dataset.ftData.(ft)-dataset.estimatedFtData.(ft)).^2)
     end

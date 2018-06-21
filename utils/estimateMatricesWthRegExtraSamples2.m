@@ -1,4 +1,4 @@
-function [calibMatrices,fullscale,augmentedDataset]=estimateMatricesWthRegExtraSamples2(dataset,sensorsToAnalize,cMat,lambda,extraSample,offset,preCalibMat)
+function [calibMatrices,fullscale,augmentedDataset,varargout]=estimateMatricesWthRegExtraSamples2(dataset,sensorsToAnalize,cMat,lambda,extraSample,varargin)
 %% Inputs
 % dataset: is the main data from de experiment.
 % sensorsToAnalize: are the sensors which are required to be recalibrated
@@ -9,12 +9,52 @@ function [calibMatrices,fullscale,augmentedDataset]=estimateMatricesWthRegExtraS
 % preCalibMat: calibration matrix obtained without considering the extra samples
 %% Outputs
 % calibMatrices: calibration matrices of the sensors to be analized
-%
 
-
+% initialize some values
 extraSampleNames=fieldnames(extraSample);
 augmentedDataset=dataset;
 useFiltered=false;
+
+%% deal with varargin
+offset=[];
+preCalibMat=[];
+offsetAvailable=false;
+calibrationDimension=size(dataset.rawData.(sensorsToAnalize{1}),2);
+for v=1:length(varargin)
+if (isstruct(varargin{v}))
+   vnames= fieldnames(varargin{v});
+   if (~strcmp((vnames{1}),(sensorsToAnalize{1})) && length(vnames)>=length(sensorsToAnalize))
+       error('estimateMatricesWthRegExtraSamples2:Not matching field names between structures');
+   end
+   tempV=varargin{v};
+    if (isvector(tempV.(vnames{1})))
+        if (sum(size(tempV.(vnames{1}))) ==(calibrationDimension+1) && (size(tempV.(vnames{1}),1)==calibrationDimension || size(tempV.(vnames{1}),2)==calibrationDimension) )
+            offset=tempV;
+            offsetAvailable=true;
+        else
+            warning('estimateMatricesWthRegExtraSamples2: this vector is not an offset of the right dimensions, ignoring vector');
+        end
+     
+        else
+        if (ismatrix(tempV.(vnames{1})))
+            if (size(tempV.(vnames{1}),1)==calibrationDimension && size(tempV.(vnames{1}),2)==calibrationDimension) % check if this is true when including temperature
+                preCalibMat=tempV;
+            else
+                warning('estimateMatricesWthRegExtraSamples2: matrix inerted is ot 6 by 6 so not a calibration matrix');
+            end
+        end
+    end
+else
+    warning('estimateMatricesWthRegExtraSamples2: no struct in varargin, variable will not be used');
+end
+end
+if isempty(preCalibMat)
+   preCalibMat= cMat;
+   info('estimateMatricesWthRegExtraSamples2: no other calibration matrix available so if required workbench matrix will be used');
+end
+
+
+%% start estimating
 for ftIdx =1:length(sensorsToAnalize)
     ft = sensorsToAnalize{ftIdx};
     % initialize stacking variables for the sensor in turn
@@ -37,7 +77,6 @@ for ftIdx =1:length(sensorsToAnalize)
                         rawDataFiltered2=extraSample.right.rawDataFiltered;
                         estimatedFtData2=extraSample.right.estimatedFtData;
                         calibrationRequired=true;
-                        augmentedDataset=addDatasets(augmentedDataset,extraSample.(eSampleID));
                     end
                 end
                 
@@ -47,7 +86,6 @@ for ftIdx =1:length(sensorsToAnalize)
                         rawDataFiltered2=extraSample.left.rawDataFiltered;
                         estimatedFtData2=extraSample.left.estimatedFtData;
                         calibrationRequired=true;
-                        augmentedDataset=addDatasets(augmentedDataset,extraSample.(eSampleID));
                     end
                 end
             else % if is not the right or left extra sample is should be Tz or general. Tz only to be considered in the legs
@@ -56,7 +94,6 @@ for ftIdx =1:length(sensorsToAnalize)
                     rawDataFiltered2=extraSample.(eSampleID).rawDataFiltered;
                     estimatedFtData2=extraSample.(eSampleID).estimatedFtData;
                     calibrationRequired=true;
-                    augmentedDataset=addDatasets(augmentedDataset,extraSample.(eSampleID));
                 end
             end
             
@@ -66,7 +103,6 @@ for ftIdx =1:length(sensorsToAnalize)
                 rawDataFiltered2=extraSample.(eSampleID).rawDataFiltered;
                 estimatedFtData2=extraSample.(eSampleID).estimatedFtData;
                 calibrationRequired=true;
-                augmentedDataset=addDatasets(augmentedDataset,extraSample.(eSampleID));
             end
         end
         %% stack them
@@ -75,24 +111,46 @@ for ftIdx =1:length(sensorsToAnalize)
         stackedEstimated=[stackedEstimated;estimatedFtData2.(ft)];
         stackedRawFiltered=[stackedRawFiltered;rawDataFiltered2.(ft)];
         end
+        
+        % augment dataset only once for each extra sample, regardless if
+        % the extra sample will be used to calibrate or not, so we do it
+        % only in the first loop of sensors
+        if (ftIdx==1 && isstruct(extraSample.(eSampleID)))
+            augmentedDataset=addDatasets(augmentedDataset,extraSample.(eSampleID));
+        end
     end
     
-    if calibrationRequired   
-        %% check correct dimensions of the offset
-        [rows,columns]=size(offset.(ft));
-        if rows==6 && columns==1
-           offset.(ft)=offset.(ft)';
-        end
-        
-        if useFiltered
-            rawNoOffset=stackedRawFiltered-repmat(offset.(ft),size(stackedRaw,1),1);
+    if calibrationRequired
+        if offsetAvailable
+            %% check correct dimensions of the offset
+            [rows,columns]=size(offset.(ft));
+            if rows==6 && columns==1
+                offset.(ft)=offset.(ft)';
+            end
+            
+            if useFiltered
+                rawNoOffset=stackedRawFiltered-repmat(offset.(ft),size(stackedRaw,1),1);
+            else
+                rawNoOffset = stackedRaw-repmat(offset.(ft),size(stackedRaw,1),1);
+            end
+            [calibMatrices.(ft),fullscale.(ft)]=estimateCalibMatrixWithReg(rawNoOffset,stackedEstimated,cMat.(ft),lambda);
         else
-            rawNoOffset = stackedRaw-repmat(offset.(ft),size(stackedRaw,1),1);
+            %% no offset provided so we attempt the one shot.
+            if useFiltered
+                [calibMatrices.(ft),fullscale.(ft),offset]=estimateCalibMatrixWithRegAndOff(stackedRawFiltered,stackedEstimated,cMat.(ft),lambda);
+            else
+                [calibMatrices.(ft),fullscale.(ft),offset.(ft)]=estimateCalibMatrixWithRegAndOff(stackedRaw,stackedEstimated,cMat.(ft),lambda);
+            end
+            %% put offset correctly just in case
+            [rows,columns]=size(offset.(ft));
+            if rows==6 && columns==1
+                offset.(ft)=offset.(ft)';
+            end
         end
-        [calibMatrices.(ft),fullscale.(ft)]=estimateCalibMatrixWithReg(rawNoOffset,stackedEstimated,cMat.(ft),lambda);
     else
         calibMatrices.(ft)=preCalibMat.(ft);
         
     end
-    
+   
 end
+ varargout{1}=offset;
