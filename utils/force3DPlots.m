@@ -5,7 +5,7 @@ function H=force3DPlots(namesDatasets,graphName,varargin)
 % graphName: the title of the resulting figurea
 % varargin: variable that should contain either the data to plot. Plotting options
 % can be included but only after the datasets.
-H.force=figure,
+H.force=figure;
 if (length(namesDatasets) <=length(varargin))    
     for n=1:length(namesDatasets)
         if ismatrix(varargin{n})
