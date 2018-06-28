@@ -131,7 +131,7 @@ if(calibOptions.plot)
                 namesdatasets={'measuredDataNoOffset','estimatedData','reCalibratedData'};
                 force3DPlots(namesdatasets,(ft),filteredNoOffset.(ft),dataset.estimatedFtData.(ft),reCalibData.(ft));
             else
-                namesdatasets={'estimatedData','reCalibratedData','Location','west'};
+                namesdatasets={'estimatedData','reCalibratedData'};
                
                 force3DPlots(namesdatasets,(ft),dataset.estimatedFtData.(ft),reCalibData.(ft));
             end
