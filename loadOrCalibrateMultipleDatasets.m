@@ -8,19 +8,31 @@ experimentNames={
 % 
 % 'icub-insitu-ft-analysis-big-datasets/2016_07_04/normal';% Name of the experiment;
 % 'icub-insitu-ft-analysis-big-datasets/2016_07_04/fast';% Name of the experiment;
-'green-iCub-Insitu-Datasets/2017_08_29_3';% Name of the experiment;
-  'green-iCub-Insitu-Datasets/2017_08_29_2';
- 
+% 'green-iCub-Insitu-Datasets/2017_08_29_3';% Name of the experiment;
+%   'green-iCub-Insitu-Datasets/2017_08_29_2';
+ 'green-iCub-Insitu-Datasets/baseline_16_24';
+ 'green-iCub-Insitu-Datasets/yoga_16_29';
+ 'green-iCub-Insitu-Datasets/2_yogas_16_32';
+ 'green-iCub-Insitu-Datasets/3_yogas_16_36';
+ 'green-iCub-Insitu-Datasets/stanby_16_42';
+ 'green-iCub-Insitu-Datasets/stanby_16_58';
+ 'green-iCub-Insitu-Datasets/stanby_17_13';
+ 'green-iCub-Insitu-Datasets/3_yogas_17_18';
+ 'green-iCub-Insitu-Datasets/stanby_17_35';
+ 'green-iCub-Insitu-Datasets/4_yogas_17_39_1_fail';
+ 'green-iCub-Insitu-Datasets/stanby_18_06';
+ 'green-iCub-Insitu-Datasets/3_yogas_18_10';
     };
    
 scriptOptions = {};
-scriptOptions.forceCalculation=false;%false;
+scriptOptions.forceCalculation=true;%false;
 scriptOptions.printPlots=false;%true
 scriptOptions.saveData=true;%
 scriptOptions.raw=true;
 % Script of the mat file used for save the intermediate results
 scriptOptions.saveDataAll=true;
 scriptOptions.matFileName='ftDataset';
+scriptOptions.multiSens=true;
 
 calculate=false;
 %%
