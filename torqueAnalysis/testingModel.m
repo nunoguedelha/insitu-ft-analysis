@@ -275,3 +275,77 @@ totalMass*9.81
 %          [36] r_arm_ft_sensor (dofs: 0) : r_shoulder_3<-->r_upper_arm
 %          [37] l_arm_ft_sensor (dofs: 0) : l_shoulder_3<-->l_upper_arm
 %      '
+
+comp = iDynTree.KinDynComputations();
+    
+    % Load model from an URDF file
+    comp.loadRobotModelFromFile('robots/model.urdf');
+    
+    % Check if the model was correctly created by printing the model
+    comp.getRobotModel().toString()
+    
+    %% Set kinematics information
+    
+    % For computing the forward kinematics, we need to set the robot position
+    % and velocity with respect to an inertial frame and the joint positions
+    % and velocities. In this case we will just put the joint in the 0 position
+    % and the world_H_base to identity and all the velocities to 0
+    
+    robotState = {};
+    robotState.world_H_base = iDynTree.Transform.Identity();
+    robotState.base_vel     = iDynTree.Twist.Zero();
+    % The joint pos/vel vectors are automatically resize with a constructor
+    % that takes in input the robot model
+    robotState.qj           = iDynTree.VectorDynSize();
+    robotState.qj.resize(comp.getRobotModel().getNrOfPosCoords());
+    robotState.qj.zero();
+    robotState.dqj          = iDynTree.VectorDynSize();
+    robotState.dqj.resize(comp.getRobotModel().getNrOfDOFs());
+    robotState.dqj.zero();
+    % Gravity expressed in the world frame
+    robotState.gravity      = iDynTree.Vector3();
+    robotState.gravity.fromMatlab([0,0,-9.81]);
+    
+    
+    
+       % robotState.qj.fromMatlab(dataset.qj(i,:));
+        comp.setRobotState(robotState.qj,robotState.dqj,robotState.gravity);
+        linkName='l_leg_ft_sensor';
+        %% Compute relative transform between frames
+        
+        % To compute the transform f1_H_f2 between two frames f1, f2,
+        % you can just call the getRelativeTransform
+        % Note: a list of available frames can be obtained by printing the model
+
+            root_link_H_link = comp.getRelativeTransform('root_link',linkName);
+            tempH=root_link_H_link.asHomogeneousTransform.toMatlab;
+            linksPosition(j,:)=tempH(1:3,4);
+
+%         
+%         plot3_matrix(linksPosition,'r'); hold on;
+%         plot3_matrix(linksPosition(4,:),'b*'); grid on;
+%         plot3_matrix(linksPosition([1,2,3,5,6],:),'go'); 
+%         title('Links ');
+%         xlabel('{x}');
+%         ylabel('{y}');
+%         zlabel('{z}');
+%         axis equal;
+
+
+        world_H_l_sole = comp.getWorldTransform(linkName);
+        
+        r2l4= world_H_l_sole.asHomogeneousTransform.toMatlab;
+        ep(i,:)=r2l4(1:3,4);
+        
+        
+totalMass=0;
+for j=3:7
+  contactIndex=comp.model.getLinkName(j)
+link_h_skinFrame_temp=comp.model.getFrameTransform(j);
+link_h_skinFrame=link_h_skinFrame_temp.asAdjointTransformWrench.toMatlab();
+    mass=comp.model.getLink(j).inertia.getMass()
+    totalMass=totalMass+mass
+    
+end
+totalMass*9.81
+ 
