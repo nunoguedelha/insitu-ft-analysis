@@ -23,7 +23,7 @@
 	</module>
 	<connection>
 		<from>/icub/head/stateExt:o</from>
-		<to>/dumper/icub/head/stateExt:o</to>
+		<to>/dumper/icub/head/stateExt</to>
 		<protocol>udp</protocol>
 	</connection>
 	<module>
@@ -34,7 +34,7 @@
 	</module>
 	<connection>
 		<from>/icub/left_arm/stateExt:o</from>
-		<to>/dumper/icub/left_arm/stateExt:o</to>
+		<to>/dumper/icub/left_arm/stateExt</to>
 		<protocol>udp</protocol>
 	</connection>
 	<module>
@@ -45,7 +45,7 @@
 	</module>
 	<connection>
 		<from>/icub/left_leg/stateExt:o</from>
-		<to>/dumper/icub/left_leg/stateExt:o</to>
+		<to>/dumper/icub/left_leg/stateExt</to>
 		<protocol>udp</protocol>
 	</connection>
 	<module>
@@ -56,7 +56,7 @@
 	</module>
 	<connection>
 		<from>/icub/right_arm/stateExt:o</from>
-		<to>/dumper/icub/right_arm/stateExt:o</to>
+		<to>/dumper/icub/right_arm/stateExt</to>
 		<protocol>udp</protocol>
 	</connection>
 	<module>
@@ -67,7 +67,7 @@
 	</module>
 	<connection>
 		<from>/icub/right_leg/stateExt:o</from>
-		<to>/dumper/icub/right_leg/stateExt:o</to>
+		<to>/dumper/icub/right_leg/stateExt</to>
 		<protocol>udp</protocol>
 	</connection>
 	<module>
@@ -78,7 +78,7 @@
 	</module>
 	<connection>
 		<from>/icub/torso/stateExt:o</from>
-		<to>/dumper/icub/torso/stateExt:o</to>
+		<to>/dumper/icub/torso/stateExt</to>
 		<protocol>udp</protocol>
 	</connection>
 	<module>
@@ -89,7 +89,7 @@
 	</module>
 	<connection>
 		<from>/icub/left_arm/measures:o</from>
-		<to>/dumper/icub/left_arm/measures:o</to>
+		<to>/dumper/icub/left_arm/measures</to>
 		<protocol>udp</protocol>
 	</connection>
 	<module>
@@ -100,7 +100,7 @@
 	</module>
 	<connection>
 		<from>/icub/left_leg/measures:o</from>
-		<to>/dumper/icub/left_leg/measures:o</to>
+		<to>/dumper/icub/left_leg/measures</to>
 		<protocol>udp</protocol>
 	</connection>
 	<module>
@@ -111,7 +111,7 @@
 	</module>
 	<connection>
 		<from>/icub/right_arm/measures:o</from>
-		<to>/dumper/icub/right_arm/measures:o</to>
+		<to>/dumper/icub/right_arm/measures</to>
 		<protocol>udp</protocol>
 	</connection>
 	<module>
@@ -122,7 +122,7 @@
 	</module>
 	<connection>
 		<from>/icub/right_leg/measures:o</from>
-		<to>/dumper/icub/right_leg/measures:o</to>
+		<to>/dumper/icub/right_leg/measures</to>
 		<protocol>udp</protocol>
 	</connection>
 	<module>
@@ -133,7 +133,7 @@
 	</module>
 	<connection>
 		<from>/icub/left_foot/measures:o</from>
-		<to>/dumper/icub/left_foot/measures:o</to>
+		<to>/dumper/icub/left_foot/measures</to>
 		<protocol>udp</protocol>
 	</connection>
 	<module>
@@ -144,7 +144,7 @@
 	</module>
 	<connection>
 		<from>/icub/right_foot/measures:o</from>
-		<to>/dumper/icub/right_foot/measures:o</to>
+		<to>/dumper/icub/right_foot/measures</to>
 		<protocol>udp</protocol>
 	</connection>
     <module>
