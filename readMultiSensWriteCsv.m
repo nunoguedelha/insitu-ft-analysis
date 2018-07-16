@@ -12,7 +12,7 @@ scriptOptions.forceCalculation=false;%false;
 scriptOptions.raw=true;
 scriptOptions.saveData=true;
 scriptOptions.testDir=false;% to calculate the raw data, for recalibration always true
-scriptOptions.filterData=false;
+scriptOptions.filterData=true;
 scriptOptions.estimateWrenches=true;
 scriptOptions.useInertial=false;
 scriptOptions.multiSens=true;
@@ -23,14 +23,14 @@ scriptOptions.matFileName='ftDataset';
 %% name and paths of the experiment files
 % change name to desired experiment folder
 %experimentName='icub-insitu-ft-analysis-big-datasets/iCubGenova04/exp_1/poleLeftRight';
-experimentName='/green-iCub-Insitu-Datasets/dumper_yoga_cold_1';
+experimentName='/green-iCub-Insitu-Datasets/2018_07_05_Grid';
 
 %% We carry the calibration for just a subset of the sensors
 % the names are associated to the location of the sensor in the
 % in the iCub options are {'left_arm','right_arm','left_leg','right_leg','right_foot','left_foot'};
 
-%sensorsToAnalize = {'left_leg','left_foot','right_leg','right_foot'};
-sensorsToAnalize = {'right_leg','left_leg'};
+sensorsToAnalize = {'left_leg','left_foot','right_leg','right_foot'};
+%sensorsToAnalize = {'right_leg','left_leg'};
 
 %% Start
 %Read data
@@ -41,8 +41,20 @@ if ~exist(strcat('data/',experimentName,'/csvFiles'),'dir')
 end
 for ftIdx =1:length(sensorsToAnalize)
     ft = sensorsToAnalize{ftIdx};
-    toCsv=[dataset.ftData.(ft),dataset.temperature.(ft),dataset.estimatedFtData.(ft)];
-    csvwrite(strcat('data/',experimentName,'/csvFiles/',ft,'.txt'),toCsv);
-     toCsv=[dataset.rawData.(ft),dataset.temperature.(ft),dataset.estimatedFtData.(ft)];
-    csvwrite(strcat('data/',experimentName,'/csvFiles/',ft,'_raw.txt'),toCsv);
+    toTable=[dataset.ftData.(ft),dataset.temperature.(ft),dataset.estimatedFtData.(ft)];
+    toCSV=array2table(toTable,...
+        'VariableNames',{'fx','fy','fz','tx','ty','tz','temperature','ref_fx','ref_fy','ref_fz','ref_tx','ref_ty','ref_tz'});
+    writetable(toCSV,strcat('data/',experimentName,'/csvFiles/',ft,'.txt'),'Delimiter',',');
+    %csvwrite(strcat('data/',experimentName,'/csvFiles/',ft,'.txt'),toCsv);
+    toTable=[dataset.rawData.(ft),dataset.temperature.(ft),dataset.estimatedFtData.(ft)];
+    toCSV=array2table(toTable,...
+        'VariableNames',{'ch1','ch2','ch3','ch4','ch5','ch6','temperature','ref_fx','ref_fy','ref_fz','ref_tx','ref_ty','ref_tz'});
+    writetable(toCSV,strcat('data/',experimentName,'/csvFiles/',ft,'_raw.txt'),'Delimiter',',');
+    %csvwrite(strcat('data/',experimentName,'/csvFiles/',ft,'_raw.txt'),toCsv);
 end
+
+%% add header to files:
+% normal files
+% fx,fy,fz,tx,ty,tz,temperature,ref_fx,ref_fy,ref_fz,ref_tx,ref_ty,ref_tz
+% raw files
+% ch1,ch2,ch3,ch4,ch5,ch6,temperature,ref_fx,ref_fy,ref_fz,ref_tx,ref_ty,ref_tz
