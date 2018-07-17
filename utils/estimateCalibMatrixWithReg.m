@@ -1,4 +1,16 @@
 function [calibM,full_scale]=estimateCalibMatrixWithReg(rawData,expectedWrench,C_w,lambda)
+% This functions augments the calibration matrix to consider also a
+% previous calibrtion matrix
+% inputs:
+%  rawData: is the raw data coming from ft sensors
+%  expectedWrench: is the reference of the regression
+%  C_w: is a previous calibration matrix
+%  lambda: is the regularization parameter
+%
+% outputs:
+%  calibM: the resulting calibration matrix
+%  full_scale: the values obtained if the raw values are maxed out
+%%
 C_w=C_w'; 
 kIA = kron(eye(6), rawData);
 n=size(kIA,1);

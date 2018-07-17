@@ -1,36 +1,36 @@
 % inspect variation of ft due to temperature.
 
-run ('loadOrCalibrateMultipleDatasets.m'); 
+run ('loadOrCalibrateMultipleDatasets.m');
 % we assume the variable experimentNames has the following experiments
 experimentNames={
- 'green-iCub-Insitu-Datasets/baseline_16_24';
- 'green-iCub-Insitu-Datasets/yoga_16_29';
- 'green-iCub-Insitu-Datasets/2_yogas_16_32';
- 'green-iCub-Insitu-Datasets/3_yogas_16_36';
- 'green-iCub-Insitu-Datasets/stanby_16_42';
- 'green-iCub-Insitu-Datasets/stanby_16_58';
- 'green-iCub-Insitu-Datasets/stanby_17_13';
- 'green-iCub-Insitu-Datasets/3_yogas_17_18';
- 'green-iCub-Insitu-Datasets/stanby_17_35';
- 'green-iCub-Insitu-Datasets/4_yogas_17_39_1_fail';
- 'green-iCub-Insitu-Datasets/stanby_18_06';
- 'green-iCub-Insitu-Datasets/3_yogas_18_10';
+    'green-iCub-Insitu-Datasets/baseline_16_24';
+    'green-iCub-Insitu-Datasets/yoga_16_29';
+    'green-iCub-Insitu-Datasets/2_yogas_16_32';
+    'green-iCub-Insitu-Datasets/3_yogas_16_36';
+    'green-iCub-Insitu-Datasets/stanby_16_42';
+    'green-iCub-Insitu-Datasets/stanby_16_58';
+    'green-iCub-Insitu-Datasets/stanby_17_13';
+    'green-iCub-Insitu-Datasets/3_yogas_17_18';
+    'green-iCub-Insitu-Datasets/stanby_17_35';
+    'green-iCub-Insitu-Datasets/4_yogas_17_39_1_fail';
+    'green-iCub-Insitu-Datasets/stanby_18_06';
+    'green-iCub-Insitu-Datasets/3_yogas_18_10';
     };
 
 names={
-  'baseline';
-  'yoga1';
-  'yoga2';
-  'yoga3';
-  'stanby1';
-  'stanby2';
-  'stanby3';
-  'yoga4';
-  'stanby4';
-  'yoga5';
-  'stanby5';
-  %'yoga6'
-};
+    'baseline';
+    'yoga1';
+    'yoga2';
+    'yoga3';
+    'stanby1';
+    'stanby2';
+    'stanby3';
+    'yoga4';
+    'stanby4';
+    'yoga5';
+    'stanby5';
+    %'yoga6'
+    };
 
 
 yogas=[2;3;4;8;10];%;12];
@@ -61,66 +61,66 @@ exp=strcat('e',num2str(stanby(1)));
 allStanby=data.(exp);
 for st=2:length(stanby)
     exp=strcat('e',num2str(stanby(st)));
-   allStanby= addDatasets(allStanby,data.(exp));
+    allStanby= addDatasets(allStanby,data.(exp));
 end
 
 exp=strcat('e',num2str(yogas(1)));
 allYogas=data.(exp);
 for yg=2:length(yogas)
     exp=strcat('e',num2str(yogas(yg)));
-   allYogas= addDatasets(allYogas,data.(exp));
+    allYogas= addDatasets(allYogas,data.(exp));
 end
 
 % check normal ft data
- ftnames=fieldnames(data.(exp).temperature)
-    for ftIdx=1:length(ftnames)
-        ft=ftnames{ftIdx};
-        figure,
-plot(allStanby.temperature.(ft),allStanby.ftData.(ft),'.')
- legend('F_{x}','F_{y}','F_{z}','\tau_{x}','\tau_{y}','\tau_{z}','Location','west');
-        
-        title(escapeUnderscores(ft));
-        xlabel('Degrees (C)');
-        ylabel('N');
-        legendmarkeradjust(30)
-
-    end
+ftnames=fieldnames(data.(exp).temperature)
+for ftIdx=1:length(ftnames)
+    ft=ftnames{ftIdx};
+    figure,
+    plot(allStanby.temperature.(ft),allStanby.ftData.(ft),'.')
+    legend('F_{x}','F_{y}','F_{z}','\tau_{x}','\tau_{y}','\tau_{z}','Location','west');
     
+    title(escapeUnderscores(ft));
+    xlabel('Degrees (C)');
+    ylabel('N');
+    legendmarkeradjust(30)
     
-    %check raw data filtered
-    ftnames=fieldnames(data.(exp).temperature)
-    for ftIdx=1:length(ftnames)
-        ft=ftnames{ftIdx};
-        figure,
-plot(allStanby.temperature.(ft),allStanby.rawDataFiltered.(ft),'.')
- legend('ch1','ch2','ch3','ch4','ch5','ch6','Location','west');
-        
-        title(escapeUnderscores(ft));
-        xlabel('Degrees (C)');
-        ylabel('N');
-        legendmarkeradjust(30)
+end
 
-    end
 
+%check raw data filtered
+ftnames=fieldnames(data.(exp).temperature)
+for ftIdx=1:length(ftnames)
+    ft=ftnames{ftIdx};
+    figure,
+    plot(allStanby.temperature.(ft),allStanby.rawDataFiltered.(ft),'.')
+    legend('ch1','ch2','ch3','ch4','ch5','ch6','Location','west');
     
-        %check raw data filtered in yogas
-    ftnames=fieldnames(data.(exp).temperature)
-    for ftIdx=1:length(ftnames)
-        ft=ftnames{ftIdx};
-        figure,
-plot(allYogas.temperature.(ft),allYogas.rawDataFiltered.(ft),'.')
- legend('ch1','ch2','ch3','ch4','ch5','ch6','Location','west');
-        
-        title(escapeUnderscores(ft));
-        xlabel('Degrees (C)');
-        ylabel('N');
-        legendmarkeradjust(30)
-
-    end
-
-
+    title(escapeUnderscores(ft));
+    xlabel('Degrees (C)');
+    ylabel('N');
+    legendmarkeradjust(30)
     
-    % plot secondary matrix format
+end
+
+
+%check raw data filtered in yogas
+ftnames=fieldnames(data.(exp).temperature)
+for ftIdx=1:length(ftnames)
+    ft=ftnames{ftIdx};
+    figure,
+    plot(allYogas.temperature.(ft),allYogas.rawDataFiltered.(ft),'.')
+    legend('ch1','ch2','ch3','ch4','ch5','ch6','Location','west');
+    
+    title(escapeUnderscores(ft));
+    xlabel('Degrees (C)');
+    ylabel('N');
+    legendmarkeradjust(30)
+    
+end
+
+
+
+% plot secondary matrix format
 for ftIdx =1:length(sensorsToAnalize)
     ft = sensorsToAnalize{ftIdx};
     
