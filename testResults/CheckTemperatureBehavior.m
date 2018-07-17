@@ -29,12 +29,12 @@ names={
   'stanby4';
   'yoga5';
   'stanby5';
-  'yoga6'
+  %'yoga6'
 };
 
 
-yogas=[2;3;4;8;10;12];
-stanby=[1,5,6,7,9,11]
+yogas=[2;3;4;8;10];%;12];
+stanby=[1,5,6,7,9,11];
 
 %modify something in all datasets
 % for in=1:length(experimentNames)
@@ -69,4 +69,70 @@ allYogas=data.(exp);
 for yg=2:length(yogas)
     exp=strcat('e',num2str(yogas(yg)));
    allYogas= addDatasets(allYogas,data.(exp));
+end
+
+% check normal ft data
+ ftnames=fieldnames(data.(exp).temperature)
+    for ftIdx=1:length(ftnames)
+        ft=ftnames{ftIdx};
+        figure,
+plot(allStanby.temperature.(ft),allStanby.ftData.(ft),'.')
+ legend('F_{x}','F_{y}','F_{z}','\tau_{x}','\tau_{y}','\tau_{z}','Location','west');
+        
+        title(escapeUnderscores(ft));
+        xlabel('Degrees (C)');
+        ylabel('N');
+        legendmarkeradjust(30)
+
+    end
+    
+    
+    %check raw data filtered
+    ftnames=fieldnames(data.(exp).temperature)
+    for ftIdx=1:length(ftnames)
+        ft=ftnames{ftIdx};
+        figure,
+plot(allStanby.temperature.(ft),allStanby.rawDataFiltered.(ft),'.')
+ legend('ch1','ch2','ch3','ch4','ch5','ch6','Location','west');
+        
+        title(escapeUnderscores(ft));
+        xlabel('Degrees (C)');
+        ylabel('N');
+        legendmarkeradjust(30)
+
+    end
+
+    
+        %check raw data filtered in yogas
+    ftnames=fieldnames(data.(exp).temperature)
+    for ftIdx=1:length(ftnames)
+        ft=ftnames{ftIdx};
+        figure,
+plot(allYogas.temperature.(ft),allYogas.rawDataFiltered.(ft),'.')
+ legend('ch1','ch2','ch3','ch4','ch5','ch6','Location','west');
+        
+        title(escapeUnderscores(ft));
+        xlabel('Degrees (C)');
+        ylabel('N');
+        legendmarkeradjust(30)
+
+    end
+
+
+    
+    % plot secondary matrix format
+for ftIdx =1:length(sensorsToAnalize)
+    ft = sensorsToAnalize{ftIdx};
+    
+    if (calibOptions.secMatrixFormat)
+        secMat.(ft)= calibMatrices.(ft)/dataset.cMat.(ft);
+        xmlStr=cMat2xml(secMat.(ft),ft)% print in required format to use by WholeBodyDynamics
+    end
+    % Evaluation of results
+    if (calibOptions.resultEvaluation)
+        disp(ft)
+        %Workbench_no_offset_mse=mean((filteredNoOffset.(ft)-dataset.estimatedFtData.(ft)).^2)
+        New_calibration_no_offset_mse=mean((reCalibData.(ft)-dataset.estimatedFtData.(ft)).^2)
+        %Workbench_mse=mean((dataset.ftData.(ft)-dataset.estimatedFtData.(ft)).^2)
+    end
 end
