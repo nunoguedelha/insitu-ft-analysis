@@ -1,4 +1,4 @@
-function [calibM,full_scale,offset]=estimateCalibMatrixWithRegAndOff(rawData,expectedWrench,C_w,lambda,O_w)
+function [calibM,full_scale,offset]=estimateCalibMatrixWithRegAndOff(rawData,expectedWrench,C_w,lambda,varargin)
 % This functions augments the calibration matrix to consider also the
 % offset. So that the offset is estimated during the process.
 % inputs:
@@ -15,6 +15,18 @@ function [calibM,full_scale,offset]=estimateCalibMatrixWithRegAndOff(rawData,exp
 %  offset: the resulting offset
 
 %%
+if (length(varargin)==1 && isvector(varargin{1}))
+    if (sum(varargin{1})==0)
+        O_w=[0,0,0,0,0,0]';
+        noOffset=true;
+    else
+        O_w=varargin{1};
+        noOffset=false;
+    end
+else
+    O_w=[0,0,0,0,0,0]';
+    noOffset=true;
+end
 [n,wrenchSize] = size(expectedWrench);
 C_wTrans=C_w';
 R = rawData;
@@ -23,8 +35,12 @@ overlineR = [R ones(n,1)];
 Wtrans = W';
 b = Wtrans(:);
 kA = kron(overlineR,eye(6,6));
+if noOffset
 toPenalize=zeros(42);
 toPenalize(1:36,1:36)=eye(36); % this evades to try to minimize the offset
+else
+  toPenalize=eye(42);  
+end
 A=kA'*kA+lambda*toPenalize;
 b=kA'*b+lambda*[C_wTrans(:);O_w];
 x = pinv(A)*b;

@@ -25,6 +25,7 @@ function [dataset,estimator,input,extraSample]=readExperiment(experimentName,scr
 %       scriptOptions.raw=false;
 %       scriptOptions.estimateWrenches=false;
 %       scriptOptions.useInertial=false;
+%       scriptOptions.multiSens=false;
 % % Script of the mat file used for save the intermediate results
 %       scriptOptions.matFileName='iCubDataset';
 
@@ -123,7 +124,7 @@ else
         ftData.(input.ftNames{1})=sensors.ft.measures;
         [uniqueValues,uniqueIndex]=unique(sensors.temperature.measures(:,1));
         if ( length(uniqueValues)>1)
-            temperature.(input.ftNames{1})=interp1(sensors.temperature.time(uniqueIndex), uniqueValues  , time)';
+            temperature.(input.ftNames{1})=interp1(sensors.temperature.time(uniqueIndex), uniqueValues  , time);
         else
             temperature.(input.ftNames{1})(1:length(time),1)=uniqueValues*ones(size(time));
         end
@@ -134,10 +135,10 @@ else
             %resample FT data
             ftData.(input.ftNames{i})=resampleFt(time,sensors_temp.ft.time,sensors_temp.ft.measures);
             fprintf('readExperiment: Resampling the FT data for the part %s\n',input.ftNames{i});
-            % temperature.(input.ftNames{i})=interp1(sensors_temp.temperature.time, sensors_temp.temperature.measures(:,1)  , time)';
+            % temperature.(input.ftNames{i})=interp1(sensors_temp.temperature.time, sensors_temp.temperature.measures(:,1)  , time);
             [uniqueValues,uniqueIndex]=unique(sensors_temp.temperature.measures(:,1));
             if ( length(uniqueValues)>1)
-                temperature.(input.ftNames{i})=interp1(sensors_temp.temperature.time(uniqueIndex), uniqueValues  , time)';
+                temperature.(input.ftNames{i})=interp1(sensors_temp.temperature.time(uniqueIndex), uniqueValues  , time);
             else
                 temperature.(input.ftNames{i})(1:length(time),1)=uniqueValues*ones(size(time));
             end
@@ -351,27 +352,41 @@ else
     end
 end
 
+
 %% Load extra samples if required
+extraSampleExist=false;
 if (any(strcmp('extraSampleRight', fieldnames(input))))
     [extraSample.right,~]=readExperiment(input.extraSampleRight,scriptOptions);
+    disp('readExperiment: extraSampleRight available');
+    extraSampleExist=true;
 else
     extraSample.right=nan;
 end
 
 if (any(strcmp('extraSampleLeft', fieldnames(input))))
     [extraSample.left,~]=readExperiment(input.extraSampleLeft,scriptOptions);
+disp('readExperiment: extraSampleLeft available');
+extraSampleExist=true;
 else
     extraSample.left=nan;
 end
 
 if (any(strcmp('extraSampleTz', fieldnames(input))))
     [extraSample.Tz,~]=readExperiment(input.extraSampleTz,scriptOptions);
+    disp('readExperiment: extraSampleTz available');
+    extraSampleExist=true;
 else
     extraSample.Tz=nan;
 end
 
 if (any(strcmp('extraSampleGeneral', fieldnames(input))))
     [extraSample.general,~]=readExperiment(input.extraSampleGeneral,scriptOptions);
+    disp('readExperiment: extraSampleGeneral available');
+    extraSampleExist=true;
 else
     extraSample.general=nan;
+end
+
+if ~extraSampleExist
+   extraSample=nan; 
 end

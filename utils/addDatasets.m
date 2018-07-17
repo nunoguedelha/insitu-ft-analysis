@@ -7,8 +7,8 @@ if (isstruct(set1))
         else
             if  (isnumeric(set1.(dataFieldNames{i})))
                 if (ismatrix(set1.(dataFieldNames{i})))
-                    if (size(set1.(dataFieldNames{i}),1)~=6 && size(set1.(dataFieldNames{i}),2)~=6)
-                    set1.(dataFieldNames{i})=[set1.(dataFieldNames{i});set2.(dataFieldNames{i})];
+                    if ~(size(set1.(dataFieldNames{i}),1)==6 && size(set1.(dataFieldNames{i}),2)==6)
+                        set1.(dataFieldNames{i})=[set1.(dataFieldNames{i});set2.(dataFieldNames{i})];
                     end
                 else
                     if (isvector(set1.(dataFieldNames{i})))
@@ -21,9 +21,9 @@ if (isstruct(set1))
 else
     if (isnumeric(set1))
         if (ismatrix(set1))
-             if (size(set1.(dataFieldNames{i}),1)~=6 && size(set1.(dataFieldNames{i}),2)~=6)
-            set1=set1(mask,:);
-             end
+            if ~(size(set1.(dataFieldNames{i}),1)==6 && size(set1.(dataFieldNames{i}),2)==6)
+                set1=set1(mask,:);
+            end
         else
             if (isvector(set1))
                 set1=set1(mask);
