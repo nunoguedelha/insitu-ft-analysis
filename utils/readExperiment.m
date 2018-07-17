@@ -355,24 +355,28 @@ end
 %% Load extra samples if required
 if (any(strcmp('extraSampleRight', fieldnames(input))))
     [extraSample.right,~]=readExperiment(input.extraSampleRight,scriptOptions);
+    disp('readExperiment: extraSampleRight available');
 else
     extraSample.right=nan;
 end
 
 if (any(strcmp('extraSampleLeft', fieldnames(input))))
     [extraSample.left,~]=readExperiment(input.extraSampleLeft,scriptOptions);
+disp('readExperiment: extraSampleLeft available');
 else
     extraSample.left=nan;
 end
 
 if (any(strcmp('extraSampleTz', fieldnames(input))))
     [extraSample.Tz,~]=readExperiment(input.extraSampleTz,scriptOptions);
+    disp('readExperiment: extraSampleTz available');
 else
     extraSample.Tz=nan;
 end
 
 if (any(strcmp('extraSampleGeneral', fieldnames(input))))
     [extraSample.general,~]=readExperiment(input.extraSampleGeneral,scriptOptions);
+    disp('readExperiment: extraSampleGeneral available');
 else
     extraSample.general=nan;
 end
