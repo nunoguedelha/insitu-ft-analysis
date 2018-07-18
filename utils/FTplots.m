@@ -95,10 +95,10 @@ if ~isempty(reference)
     rfields=fieldnames(reference);
 end
 
-if (isempty(referenceTime) && ~isempty(reference) && (size(time,1) == size(reference.(rfields{1}),1)))
+if (isempty(referenceTime) && ~isempty(reference) && (length(time) == size(reference.(rfields{1}),1)))
     referenceTime=time    ;
 else
-    if(~isempty(reference) && (size(referenceTime,1) ~= size(reference.(rfields{1}),1)))
+    if(~isempty(reference) && (length(referenceTime) ~= size(reference.(rfields{1}),1)))
     error('FTplots: mismatch between size of the time vector for the reference and the reference size');
     end
 end
@@ -198,7 +198,7 @@ if (~isempty(reference) && ~byChannel)
         end
     end
     if (length(time)== length(referenceTime) && showDifference)
-    if (sum(referenceTime==time)==size(time,1))
+    if (sum(referenceTime==time)==length(time))
         for  i=1:size(fields,1)
             figure('WindowStyle','docked'),
             plot(xAxis,abs(data.(fields{i})(:,1))-abs(reference.(rfields{i})(:,1)),xPlotOptions);hold on;
