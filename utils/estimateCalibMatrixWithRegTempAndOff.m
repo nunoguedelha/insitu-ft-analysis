@@ -1,4 +1,4 @@
-function [calibM,full_scale,offset]=estimateCalibMatrixWithRegAndOff(rawData,expectedWrench,C_w,lambda,varargin)
+function [calibM,full_scale,offset,tempCoeff]=estimateCalibMatrixWithRegTempAndOff(rawData,temperature,expectedWrench,C_w,lambda,varargin)
 % This functions augments the calibration matrix to consider also the
 % offset. So that the offset is estimated during the process.
 % inputs:
@@ -27,26 +27,29 @@ else
     O_w=[0,0,0,0,0,0]';
     noOffset=true;
 end
+temp_0=[0,0,0,0,0,0]';
 [n,wrenchSize] = size(expectedWrench);
 C_wTrans=C_w';
 R = rawData;
 W = expectedWrench;
-overlineR = [R ones(n,1)];
+overlineR = [R temperature ones(n,1)];
 Wtrans = W';
-kb = Wtrans(:);
-kA = kron(overlineR,eye(6));
+b = Wtrans(:);
+kA = kron(overlineR,eye(6,6));
 if noOffset
-toPenalize=zeros(42);
-toPenalize(1:36,1:36)=eye(36); % this evades to try to minimize the offset
+    toPenalize=zeros(48);
+    toPenalize(1:36,1:36)=eye(36); % this evades to try to minimize the offset and temperature
 else
-  toPenalize=eye(42);  
+    toPenalize=eye(48);
+    toPenalize(37:42,37:42)=zeros(6,6); % this evades to try to minimize the temperature
 end
 A=kA'*kA+lambda*toPenalize;
-b=kA'*kb+lambda*[C_wTrans(:);O_w];
+b=kA'*b+lambda*[C_wTrans(:);temp_0;O_w];
 x = pinv(A)*b;
 
 calibM = reshape(x(1:36), 6, 6);
-offset=x(37:42);
+tempCoeff=x(37:42);
+offset=x(43:48);
 %Change offset sign to match the other estimation functions
 offset=-offset;
 % calculate full scale range

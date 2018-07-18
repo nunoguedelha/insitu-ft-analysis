@@ -32,8 +32,8 @@ experimentName='/green-iCub-Insitu-Datasets/2018_07_10_Grid';
 % the names are associated to the location of the sensor in the
 % in the iCub options are {'left_arm','right_arm','left_leg','right_leg','right_foot','left_foot'};
 
-sensorsToAnalize = {'left_leg','left_foot','right_leg','right_foot'};
-%sensorsToAnalize = {'right_leg','left_leg'};
+%sensorsToAnalize = {'left_leg','left_foot','right_leg','right_foot'};
+sensorsToAnalize = {'right_leg','left_leg'};
 
 %% Start
 %Read data
@@ -41,7 +41,7 @@ sensorsToAnalize = {'left_leg','left_foot','right_leg','right_foot'};
 [dataset,~,input,extraSample]=readExperiment(experimentName,scriptOptions);
 
 % stack extrasamples
-[~,~,augmentedDataset,~]=estimateMatricesWthRegExtraSamples2(dataset,sensorsToAnalize,dataset.cMat,0,extraSample);
+[~,~,augmentedDataset,~]=estimateMatricesWthRegExtraSamples(dataset,sensorsToAnalize,dataset.cMat,0,extraSample);
 % create csv folder
 if ~exist(strcat('data/',experimentName,'/csvFiles'),'dir')
     mkdir(strcat('data/',experimentName,'/csvFiles'));
