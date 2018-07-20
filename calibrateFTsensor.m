@@ -44,7 +44,7 @@ addpath utils
 
 %% general reading configuration options
 scriptOptions = {};
-scriptOptions.forceCalculation=false;%false;
+scriptOptions.forceCalculation=true;%false;
 scriptOptions.printPlots=true;%true
 scriptOptions.raw=true;
 scriptOptions.saveData=true;
@@ -53,6 +53,7 @@ scriptOptions.filterData=true;
 scriptOptions.estimateWrenches=true;
 scriptOptions.useInertial=false;
 scriptOptions.visualizeExp=false;
+scriptOptions.multiSens=true;
 
 % Script of the mat file used for save the intermediate results
 scriptOptions.matFileName='ftDataset';
@@ -60,7 +61,7 @@ scriptOptions.matFileName='ftDataset';
 %% name and paths of the experiment files
 % change name to desired experiment folder
 %experimentName='icub-insitu-ft-analysis-big-datasets/iCubGenova04/exp_1/poleLeftRight';
-experimentName='/green-iCub-Insitu-Datasets/2018_04_09_Grid_2';
+experimentName='/green-iCub-Insitu-Datasets/2018_07_10_Grid';
 
 %% We carry the calibration for just a subset of the sensors
 % the names are associated to the location of the sensor in the
