@@ -9,16 +9,18 @@ addpath utils
 addpath external/quadfit
 
 %experimentName='dataSamples/First_Time_Sensor';%
-experimentName='green-iCub-Insitu-Datasets/2018_04_09_left_leg';
+experimentName='green-iCub-Insitu-Datasets/2018_07_10_TZ';
 
 
 %Desired inspection sections
 checkSaturation=false;
 sphereReference=false;
 Force3Dspace=false;
-ForceVsTime=true;
-PromptForIntervals=true;
+ForceVsTime=false;
+visualizeData=true;
+PromptForIntervals=false;
 checKJointValues= false;
+
 %Experiment conditions to know to what compare
 %options:
 % right_leg_yoga
@@ -52,7 +54,7 @@ refNames=fieldnames(referenceExp);
 
 %% Read data
 scriptOptions = {};
-scriptOptions.forceCalculation=true;%false;
+scriptOptions.forceCalculation=false;%false;
 if(checkSaturation)
     scriptOptions.raw=true;
 end
@@ -64,10 +66,15 @@ if(strcmp(type,'random'))
 else
     scriptOptions.estimateWrenches=false;
 end
+scriptOptions.multiSens=true;
 scriptOptions.useInertial=false;
-% Script of the mat file used for save the intermediate results
-scriptOptions.matFileName='iCubDataset';
+scriptOptions.matFileName='iCubDataset'; % Script of the mat file used for save the intermediate results
+
+% Read experiment
 [dataset,estimator,input,extraSample]=readExperiment (experimentName,scriptOptions);
+if any(input.type)
+   type=input.type; 
+end
 names=fieldnames(dataset.ftData);
 sensorsToAnalize={'right_leg','left_leg'};
 %%
@@ -142,4 +149,10 @@ if(ForceVsTime)
        dataset.jointNames.jointNames(nonEmptyIndexes)
         
     end
+end
+
+if (visualizeData)
+    global storedInis storedEnds storedTimeInis storedTimeEnds
+   visualizeExperiment(dataset,input,sensorsToAnalize);
+    
 end
