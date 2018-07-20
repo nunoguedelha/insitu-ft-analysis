@@ -67,7 +67,7 @@ else
         end
     end
 end
-
+global storedInis storedEnds storedTimeInis storedTimeEnds intervalIni 
 %% start 
 if testDir
     currentDir=pwd;
@@ -174,13 +174,40 @@ odom.updateKinematics(jointPos);
 odom.init(fixedFrame,fixedFrame);
 %% Plot and visualize at each time sample
 if(~video)
-    for indx=1:length(sensorsToAnalize)
-        ft =sensorsToAnalize{indx};
-        b = uicontrol('Parent',H.handle,'Style','slider','Position',[81,0,419,23],...
+storedInis=[];
+storedEnds=[];
+storedTimeInis=0;
+storedTimeEnds=1500;
+
+ intervalIni=true;
+        b = uicontrol('Parent',H.handle,'Style','slider','Units','normalized','Position',[0.15,0,0.75,0.05],...
             'value',1, 'min',1, 'max',length(dataset.time),'SliderStep', [1/length(dataset.time) 1/length(dataset.time)],...
             'Callback', {@callBackSlider,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model});
         
-    end
+
+        bg = uibuttongroup(H.handle,'Visible','off',...
+                  'Position',[0.9 0 0.1 .05],...
+                  'SelectionChangedFcn',@bselection);
+              
+% Create three radio buttons in the button group.
+r1 = uicontrol(bg,'Style',...
+                  'radiobutton',...
+                  'String','Ini',...
+                  'Units','normalized',...
+                  'Position',[0 0.5 1 0.5],...  
+                  'HandleVisibility','off');
+              
+r2 = uicontrol(bg,'Style','radiobutton',...
+                  'String','End',...
+                  'Units','normalized',...
+                  'Position',[0 0 1 0.5],...                  
+                  'HandleVisibility','off');
+              
+% Make the uibuttongroup visible after creating child objects. 
+bg.Visible = 'on';
+
+    
+        
 else
     init_time = 1;
     baseT=odom.getWorldLinkTransform(odom.model.getDefaultBaseLink());
@@ -254,9 +281,41 @@ end
 
 
 function callBackSlider(hObject,evt,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model)
-     i = hObject.Value;  
-       txt = uicontrol('Parent',H.handle,'Style','text',...
-        'Position',[0,20,100,22],...
-        'String',strcat('S =',num2str(round(i))));
+i = hObject.Value;
+txt = uicontrol('Parent',H.handle,'Style','text',...
+    'Position',[0,5,75,32],...
+    'String',"S ="+num2str(round(i))+newline+sprintf('t= %.2f',(dataset.time(round(i))-dataset.time(1))));
+
 [H]=plotForceAndVizFromSample(i,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model)
-end   
+btn = uicontrol('Style', 'pushbutton', 'String', 'Save',...
+    'Position', [10 40 40 20],...
+    'Callback', {@callBackSaveButton,dataset,i});
+end
+
+function bselection(source,event)
+global   intervalIni ;
+display(['Previous: ' event.OldValue.String]);
+display(['Current: ' event.NewValue.String]);
+display('------------------');
+if strcmp('Ini',event.NewValue.String)
+ intervalIni=true;
+
+else
+    intervalIni=false;
+   
+end
+end
+
+function callBackSaveButton(hObject,evt,dataset,i)
+global   intervalIni intervalEnd;
+global storedInis storedEnds storedTimeInis storedTimeEnds
+sample=round(i);
+timeSample=dataset.time(round(i))-dataset.time(1);
+if intervalIni
+    storedInis=[storedInis sample];
+    storedTimeInis=[storedTimeInis timeSample];
+else
+    storedEnds=[storedEnds sample];
+    storedTimeEnds=[timeSample storedTimeEnds];
+end
+end

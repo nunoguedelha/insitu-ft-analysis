@@ -1,5 +1,15 @@
-function [H]=plotForceAndVizFromSample(i,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model)
-i = round(i);  
+function [H]=plotForceAndVizFromSample(i,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,varargin)
+useTorque=false;
+for v=1:length(varargin)
+    if ischar(varargin{v} )
+        if (stcmp('torque',varargin{v}))
+            useTorque=true;
+        end
+    end
+    
+end
+
+i = round(i);
 numberOfJoints=size(jointPos.toMatlab());
 %joints = dataset.qj(i,1:23)'; %TODO:This depends in the model used that
 %outputs the considerd joints. Is the robot model not the one in external
@@ -19,19 +29,22 @@ baseT.setPosition(pos);
 
 viz3.modelViz(0).setPositions(baseT,jointPos);
 viz3.draw();
-
-
+if useTorque
+    dataToPlot=4:6;
+else
+    dataToPlot=1:3;
+end
 for indx=1:length(sensorsToAnalize)
     ft =sensorsToAnalize{indx};
     subplot( H.(ft).sub)
     [az,el]=view;
     hold off
-    h= plot3_matrix(dataset.(whichFtData).(ft)(1:i,1:3),'r');%
+    h= plot3_matrix(dataset.(whichFtData).(ft)(1:i,dataToPlot),'r');%
     hold on;
     delete(H.(ft).old);
     H.(ft).old=h;
     if estimatedAvailable
-        h2= plot3_matrix(dataset.estimatedFtData.(ft)(1:i,1:3),'b');
+        h2= plot3_matrix(dataset.estimatedFtData.(ft)(1:i,dataToPlot),'b');
         delete(H.(ft).old2);
         H.(ft).old2=h2;
         legend('measuredData','estimatedData','Location','west');
