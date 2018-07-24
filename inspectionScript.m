@@ -58,13 +58,13 @@ scriptOptions.forceCalculation=false;%false;
 if(checkSaturation)
     scriptOptions.raw=true;
 end
-scriptOptions.saveData=false;
+scriptOptions.saveData=true;
 scriptOptions.testDir=false;% to calculate the raw data, for recalibration always true
 scriptOptions.filterData=true;
 if(strcmp(type,'random'))
-    scriptOptions.estimateWrenches=true;
-else
     scriptOptions.estimateWrenches=false;
+else
+    scriptOptions.estimateWrenches=true;
 end
 scriptOptions.multiSens=true;
 scriptOptions.useInertial=false;
@@ -154,5 +154,7 @@ end
 if (visualizeData)
     global storedInis storedEnds storedTimeInis storedTimeEnds
    visualizeExperiment(dataset,input,sensorsToAnalize);
+   
+   visualizeExperiment(dataset,input,sensorsToAnalize,'torque');
     
 end
