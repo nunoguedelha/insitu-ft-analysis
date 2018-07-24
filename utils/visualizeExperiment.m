@@ -3,15 +3,20 @@ function []=visualizeExperiment(dataset,input,sensorsToAnalize,varargin)
 %% This function has the aim of been able to see the icub posture while seen the devolpment of the ft forces in the wrench space
 %Input
 % dataset: has the joint and forces information
-% robotName: is used to load the robot model to know which joints to add the
+% input: contains other required variables such as robotName and fixedFrame
+%robotName: is used to load the robot model to know which joints to add the
 % visualization part, it is asumed its the same type of robot than the one found in
 % model.urdf
-%sensorsToAnalize: is to plot only the relevant sensors
 %fixedFrame: is to give a reference for the visualizer which frame is fixed
+%sensorsToAnalize: is to plot only the relevant sensors
+%varargin: it enables certain behaviours depending on what it receives
+% video: creates a video of the forces and the iCub moving based on the
+% given dataset
+% testDir: tells the program if you are in the main folder or a subfolder
+% torque: selects torques to be ploted instead of forces
 %TODO: extend to the use of intervals for selection of the fixed frame
 %TODO: a way to add also the reference from world to fixed frame
-%Outuput
-%H: struct containing the plots handlers with their axis
+% For using fully the functionality of the button save we should declare
 %Remark: install also the irrlicht library (sudo apt install
 %libirrlicht-dev ) required , and enable the `IDYNTREE_USES_MATLAB` and `IDYNTREE_USES_IRRLICHT`
 %testDir=false; % true if in test directory
@@ -119,11 +124,9 @@ for i=0:dofs-4 %-4 ensures avoiding the 3 last neck joints
     consideredJoints.push_back( (names{i+1}));
 end
 %% set iCubViz variables
-
 mdlLdr = iDynTree.ModelLoader();
 mdlLdr.loadReducedModelFromFile(strcat('external/iCubViz/','model.urdf'),consideredJoints);
 model = mdlLdr.model();
-%
 viz3 = iDynTree.Visualizer();
 viz3.init();
 viz3.addModel(model,'icub');
@@ -168,8 +171,6 @@ for indx=1:length(sensorsToAnalize)
             maxF=max(dataset.(whichFtData).(ft));
         end
     end
-    
-    
     %tempMax=max(abs(minF-maxF));
     %H.(ft).minMaxForces=[minF(1),minF(1)+tempMax,minF(2),minF(2)+tempMax,minF(3),minF(3)+tempMax];
     H.(ft).minMaxForces=[minF(1),maxF(1),minF(2),maxF(2),minF(3),maxF(3)];
@@ -178,9 +179,7 @@ for indx=1:length(sensorsToAnalize)
     %axis equal;
 end
 %% Start variables for viz
-
 jointPos = iDynTree.JointPosDoubleArray(model);
-
 % Assuming that the l_sole frame is fixed and it is the world, compute the
 % world_H_base that correspond to the specified joints
 odom = iDynTree.SimpleLeggedOdometry();
@@ -201,43 +200,47 @@ if(~video)
         'Position',[0,5,75,32],...            ..
         'String',"S ="+num2str(0)+newline+sprintf('t= %.2f',(0)));
     
+    uiHandles.edtxt = uicontrol('Parent',H.handle,'Style','edit',...
+        'Position',[5,59,50,32],...
+        'String',num2str(0));
     
+    uiHandles.sliderHandle = uicontrol('Parent',H.handle,'Style','slider',...
+        'Units','normalized','Position',[0.15,0,0.75,0.05],...
+        'value',1, 'min',1, 'max',length(dataset.time),...
+        'SliderStep', [1/length(dataset.time) 1/length(dataset.time)]);
+
     if useTorque
-        uiHandles.sliderHandle = uicontrol('Parent',H.handle,'Style','slider','Units','normalized','Position',[0.15,0,0.75,0.05],...
-            'value',1, 'min',1, 'max',length(dataset.time),'SliderStep', [1/length(dataset.time) 1/length(dataset.time)],...
-            'Callback', {@callBackSlider,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,uiHandles,'torque'});
+        set(uiHandles.sliderHandle, 'Callback', {@callBackSlider,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,uiHandles,'torque'});
+        set(uiHandles.edtxt, 'CallBack',{@editText,uiHandles,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,'torque'});
     else
-        uiHandles.sliderHandle = uicontrol('Parent',H.handle,'Style','slider','Units','normalized','Position',[0.15,0,0.75,0.05],...
-            'value',1, 'min',1, 'max',length(dataset.time),'SliderStep', [1/length(dataset.time) 1/length(dataset.time)],...
-            'Callback', {@callBackSlider,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,uiHandles});
+        set(uiHandles.sliderHandle, 'Callback', {@callBackSlider,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,uiHandles});
+        set(uiHandles.edtxt, 'CallBack',{@editText,uiHandles,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model});
     end
-    
-    btn = uicontrol('Style', 'pushbutton', 'String', 'Save',...
+    % create save button
+    saveButton = uicontrol('Style', 'pushbutton', 'String', 'Save',...
         'Position', [10 40 40 20],...
         'Callback', {@callBackSaveButton,dataset,uiHandles.sliderHandle});
-    
-    bg = uibuttongroup(H.handle,'Visible','off',...
+    % create button group
+    radioButtonsGroup = uibuttongroup(H.handle,'Visible','off',...
         'Position',[0.9 0 0.1 .05],...
         'SelectionChangedFcn',@bselection);
     
-    % Create three radio buttons in the button group.
-    r1 = uicontrol(bg,'Style',...
+    % Create 2 radio buttons in the button group.
+    radioButton1 = uicontrol(radioButtonsGroup,'Style',...
         'radiobutton',...
         'String','Ini',...
         'Units','normalized',...
         'Position',[0 0.5 1 0.5],...
         'HandleVisibility','off');
     
-    r2 = uicontrol(bg,'Style','radiobutton',...
+    radioButton2 = uicontrol(radioButtonsGroup,'Style','radiobutton',...
         'String','End',...
         'Units','normalized',...
         'Position',[0 0 1 0.5],...
         'HandleVisibility','off');
     
     % Make the uibuttongroup visible after creating child objects.
-    bg.Visible = 'on';
-    
-    
+    radioButtonsGroup.Visible = 'on';
     
 else
     init_time = 1;
@@ -249,14 +252,10 @@ else
     for i=init_time:n:length(dataset.qj(:,1))
         tic
         
-        
-        
         joints = dataset.qj(i,1:dofs-3)';
         jointPos.fromMatlab(joints);
-        
         %      odom.updateKinematics(jointPos);
         %     odom.init(fixedFrame,fixedFrame);
-        
         %viz3.modelViz(0).setPositions(odom.getWorldLinkTransform(model.getDefaultBaseLink()),jointPos);
         viz3.modelViz(0).setPositions(baseT,jointPos);
         viz3.draw();
@@ -300,7 +299,6 @@ else
             F(i) = getframe(gcf);
         end
         %pause(max(0,0.01-t))
-        
     end
     
     %make the video of the plot.
@@ -316,24 +314,12 @@ if testDir
     cd ( currentDir)
 end
 
-%end
-
-
-
-
+%callback functions
     function callBackSlider(hObject,evt,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,uiHandles,varargin)
         sample = hObject.Value;
-        
         set(uiHandles.txt,'String',"S ="+num2str(round(sample))+newline+sprintf('t= %.2f',(dataset.time(round(sample))-dataset.time(1))));
-        uiHandles.sliderHandle=hObject;
-        uiHandles.edtxt = uicontrol('Parent',H.handle,'Style','edit',...
-        'Position',[5,59,50,32],...
-        'CallBack',{@editText,uiHandles,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,'torque'},...
-        'String',num2str(round(sample)));
-        %set(uiHandles.edtxt,'String',num2str(round(i)));
-        
+        set(uiHandles.edtxt,'String',num2str(round(sample)));
         [H]=plotForceAndVizFromSample(sample,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,varargin)
-        %guidata(Hobj,uiHandles);
     end
 
     function bselection(source,event)
@@ -343,19 +329,15 @@ end
         display('------------------');
         if strcmp('Ini',event.NewValue.String)
             intervalIni=true;
-            
         else
             intervalIni=false;
-            
         end
     end
 
     function callBackSaveButton(hObject,evt,dataset,sliderHandle)
-        %  global   intervalIni intervalEnd;
-        % global storedInis storedEnds storedTimeInis storedTimeEnds
-        i=round(sliderHandle.Value);
-        sample=round(i);
-        timeSample=dataset.time(round(i))-dataset.time(1);
+        sliderValue=round(sliderHandle.Value);
+        sample=round(sliderValue);
+        timeSample=dataset.time(round(sliderValue))-dataset.time(1);
         if intervalIni
             storedInis=[storedInis sample];
             storedTimeInis=[storedTimeInis timeSample];
@@ -369,10 +351,14 @@ end
         a = get(Hobj,'string');
         disp(['The string in the editbox is: ',a])
         sample=str2num(a);
+        if sample>uiHandles.sliderHandle.Max
+            sample=uiHandles.sliderHandle.Max;
+        end
+        if sample<uiHandles.sliderHandle.Min
+            sample=uiHandles.sliderHandle.Min;
+        end
         set(uiHandles.sliderHandle,'Value',sample);
-        %set(sliderHandle,'Value',sample);
         set(uiHandles.txt,'String',"S ="+num2str(round(sample))+newline+sprintf('t= %.2f',(dataset.time(round(sample))-dataset.time(1))));
         [H]=plotForceAndVizFromSample(sample,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,varargin)
-        %guidata(Hobj,uiHandles);
     end
 end
