@@ -21,6 +21,7 @@ fixedFrame='root_link';
 n=100;
 testDir=false;
 skipNextIteration=false;
+useTorque=false;
 %% deal with extra variables
 if (length(varargin)==1)
     if(ischar(  varargin{1}))
@@ -28,11 +29,13 @@ if (length(varargin)==1)
             case {'video','VIDEO','Video'}
                 video=true;
             case {'testDir','TestDir','testdir'}
-                testDir=true;            
+                testDir=true;
+            case {'torque','TORQUE','Torque'}
+                useTorque=true;
             otherwise
                 warning('Unexpected option going by default options.')
         end
-    end  
+    end
 else
     if (length(varargin)>1)
         for count=1:length(varargin)
@@ -44,6 +47,8 @@ else
                             video=true;
                         case {'testDir','TestDir','testdir'}
                             testDir=true;
+                        case {'torque','TORQUE','Torque'}
+                            useTorque=true;
                         case {'fixedFrame','contactFrame','FixedFrame','ContactFrame'}
                             if(length(varargin)>count)
                                 fixedFrame=varargin{count+1};
@@ -67,8 +72,8 @@ else
         end
     end
 end
-global storedInis storedEnds storedTimeInis storedTimeEnds intervalIni 
-%% start 
+global storedInis storedEnds storedTimeInis storedTimeEnds intervalIni
+%% start
 if testDir
     currentDir=pwd;
     cd ('../')
@@ -141,16 +146,27 @@ for indx=1:length(sensorsToAnalize)
     
     %get axis values
     if estimatedAvailable
-        minF=[min(dataset.(whichFtData).(ft));
-            min(dataset.estimatedFtData.(ft))];
-        maxF=[max(dataset.(whichFtData).(ft));
-            max(dataset.estimatedFtData.(ft))];
-        
+        if useTorque
+            minF=[min(dataset.(whichFtData).(ft)(:,4:6));
+                min(dataset.estimatedFtData.(ft)(:,4:6))];
+            maxF=[max(dataset.(whichFtData).(ft)(:,4:6));
+                max(dataset.estimatedFtData.(ft)(:,4:6))];
+        else
+            minF=[min(dataset.(whichFtData).(ft));
+                min(dataset.estimatedFtData.(ft))];
+            maxF=[max(dataset.(whichFtData).(ft));
+                max(dataset.estimatedFtData.(ft))];
+        end
         minF=min(minF);
         maxF=max(maxF);
     else
-        minF=min(dataset.(whichFtData).(ft));
-        maxF=max(dataset.(whichFtData).(ft));
+        if useTorque
+            minF=min(dataset.(whichFtData).(ft)(:,4:6));
+            maxF=max(dataset.(whichFtData).(ft)(:,4:6));
+        else
+            minF=min(dataset.(whichFtData).(ft));
+            maxF=max(dataset.(whichFtData).(ft));
+        end
     end
     
     
@@ -174,40 +190,45 @@ odom.updateKinematics(jointPos);
 odom.init(fixedFrame,fixedFrame);
 %% Plot and visualize at each time sample
 if(~video)
-storedInis=[];
-storedEnds=[];
-storedTimeInis=0;
-storedTimeEnds=1500;
-
- intervalIni=true;
+    storedInis=[];
+    storedEnds=[];
+    storedTimeInis=0;
+    storedTimeEnds=1500;
+    
+    intervalIni=true;
+    if useTorque
+        b = uicontrol('Parent',H.handle,'Style','slider','Units','normalized','Position',[0.15,0,0.75,0.05],...
+            'value',1, 'min',1, 'max',length(dataset.time),'SliderStep', [1/length(dataset.time) 1/length(dataset.time)],...
+            'Callback', {@callBackSlider,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,'torque'});
+    else
         b = uicontrol('Parent',H.handle,'Style','slider','Units','normalized','Position',[0.15,0,0.75,0.05],...
             'value',1, 'min',1, 'max',length(dataset.time),'SliderStep', [1/length(dataset.time) 1/length(dataset.time)],...
             'Callback', {@callBackSlider,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model});
-        
-
-        bg = uibuttongroup(H.handle,'Visible','off',...
-                  'Position',[0.9 0 0.1 .05],...
-                  'SelectionChangedFcn',@bselection);
-              
-% Create three radio buttons in the button group.
-r1 = uicontrol(bg,'Style',...
-                  'radiobutton',...
-                  'String','Ini',...
-                  'Units','normalized',...
-                  'Position',[0 0.5 1 0.5],...  
-                  'HandleVisibility','off');
-              
-r2 = uicontrol(bg,'Style','radiobutton',...
-                  'String','End',...
-                  'Units','normalized',...
-                  'Position',[0 0 1 0.5],...                  
-                  'HandleVisibility','off');
-              
-% Make the uibuttongroup visible after creating child objects. 
-bg.Visible = 'on';
-
+    end
     
-        
+    bg = uibuttongroup(H.handle,'Visible','off',...
+        'Position',[0.9 0 0.1 .05],...
+        'SelectionChangedFcn',@bselection);
+    
+    % Create three radio buttons in the button group.
+    r1 = uicontrol(bg,'Style',...
+        'radiobutton',...
+        'String','Ini',...
+        'Units','normalized',...
+        'Position',[0 0.5 1 0.5],...
+        'HandleVisibility','off');
+    
+    r2 = uicontrol(bg,'Style','radiobutton',...
+        'String','End',...
+        'Units','normalized',...
+        'Position',[0 0 1 0.5],...
+        'HandleVisibility','off');
+    
+    % Make the uibuttongroup visible after creating child objects.
+    bg.Visible = 'on';
+    
+    
+    
 else
     init_time = 1;
     baseT=odom.getWorldLinkTransform(odom.model.getDefaultBaseLink());
@@ -230,16 +251,20 @@ else
         viz3.modelViz(0).setPositions(baseT,jointPos);
         viz3.draw();
         t = toc;
-        
+        if useTorque
+            dataToPlot=4:6;
+        else
+            dataToPlot=1:3;
+        end
         for indx=1:length(sensorsToAnalize)
             ft =sensorsToAnalize{indx};
             subplot( H.(ft).sub)
-            h= plot3_matrix(dataset.(whichFtData).(ft)(1:i,1:3),'r');%
+            h= plot3_matrix(dataset.(whichFtData).(ft)(1:i,dataToPlot),'r');%
             hold on;
             delete(H.(ft).old);
             H.(ft).old=h;
             if estimatedAvailable
-                h2= plot3_matrix(dataset.estimatedFtData.(ft)(1:i,1:3),'b');
+                h2= plot3_matrix(dataset.estimatedFtData.(ft)(1:i,dataToPlot),'b');
                 delete(H.(ft).old2);
                 H.(ft).old2=h2;
                 legend('measuredData','estimatedData','Location','west');
@@ -247,9 +272,15 @@ else
                 legend('measuredData','Location','west');
             end
             title(strcat({'Wrench space '},escapeUnderscores(ft)));
-            xlabel('F_{x}');
-            ylabel('F_{y}');
-            zlabel('F_{z}');
+            if useTorque
+                xlabel('\tau_{x}');
+                ylabel('\tau_{y}');
+                zlabel('\tau_{z}');
+            else
+                xlabel('F_{x}');
+                ylabel('F_{y}');
+                zlabel('F_{z}');
+            end
             axis(H.(ft).minMaxForces);
             %axis equal;
             grid on;
@@ -272,50 +303,68 @@ else
 end
 
 if testDir
- cd ( currentDir)
+    cd ( currentDir)
 end
 
-end
+%end
 
 
 
 
-function callBackSlider(hObject,evt,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model)
-i = hObject.Value;
-txt = uicontrol('Parent',H.handle,'Style','text',...
-    'Position',[0,5,75,32],...
-    'String',"S ="+num2str(round(i))+newline+sprintf('t= %.2f',(dataset.time(round(i))-dataset.time(1))));
+    function callBackSlider(hObject,evt,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,varargin)
+        i = hObject.Value;
+        txt = uicontrol('Parent',H.handle,'Style','text',...
+            'Position',[0,5,75,32],...            ..
+            'String',"S ="+num2str(round(i))+newline+sprintf('t= %.2f',(dataset.time(round(i))-dataset.time(1))));
+        
+        passOnvarargin=varargin;
+         edtxt = uicontrol('Parent',H.handle,'Style','edit',...
+            'Position',[5,59,50,32],...
+            'CallBack',{@editText,txt,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,varargin{:}},...
+            'String',num2str(round(i)));
+        
+        
+        [H]=plotForceAndVizFromSample(i,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,varargin)
+        btn = uicontrol('Style', 'pushbutton', 'String', 'Save',...
+            'Position', [10 40 40 20],...
+            'Callback', {@callBackSaveButton,dataset,i});
+    end
 
-[H]=plotForceAndVizFromSample(i,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model)
-btn = uicontrol('Style', 'pushbutton', 'String', 'Save',...
-    'Position', [10 40 40 20],...
-    'Callback', {@callBackSaveButton,dataset,i});
-end
+    function bselection(source,event)
+        % global   intervalIni ;
+        display(['Previous: ' event.OldValue.String]);
+        display(['Current: ' event.NewValue.String]);
+        display('------------------');
+        if strcmp('Ini',event.NewValue.String)
+            intervalIni=true;
+            
+        else
+            intervalIni=false;
+            
+        end
+    end
 
-function bselection(source,event)
-global   intervalIni ;
-display(['Previous: ' event.OldValue.String]);
-display(['Current: ' event.NewValue.String]);
-display('------------------');
-if strcmp('Ini',event.NewValue.String)
- intervalIni=true;
+    function callBackSaveButton(hObject,evt,dataset,i)
+        %  global   intervalIni intervalEnd;
+        % global storedInis storedEnds storedTimeInis storedTimeEnds
+        sample=round(i);
+        timeSample=dataset.time(round(i))-dataset.time(1);
+        if intervalIni
+            storedInis=[storedInis sample];
+            storedTimeInis=[storedTimeInis timeSample];
+        else
+            storedEnds=[storedEnds sample];
+            storedTimeEnds=[timeSample storedTimeEnds];
+        end
+    end
 
-else
-    intervalIni=false;
-   
-end
-end
-
-function callBackSaveButton(hObject,evt,dataset,i)
-global   intervalIni intervalEnd;
-global storedInis storedEnds storedTimeInis storedTimeEnds
-sample=round(i);
-timeSample=dataset.time(round(i))-dataset.time(1);
-if intervalIni
-    storedInis=[storedInis sample];
-    storedTimeInis=[storedTimeInis timeSample];
-else
-    storedEnds=[storedEnds sample];
-    storedTimeEnds=[timeSample storedTimeEnds];
-end
+    function editText(Hobj,evt,txt,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,varargin)
+        a = get(Hobj,'string');
+        disp(['The string in the editbox is: ',a])
+        sample=str2num(a);
+        set( b,'Value',sample);
+        set(txt,'String',"S ="+num2str(round(sample))+newline+sprintf('t= %.2f',(dataset.time(round(sample))-dataset.time(1))));
+           [H]=plotForceAndVizFromSample(sample,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,varargin)
+     
+    end
 end
