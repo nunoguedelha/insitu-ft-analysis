@@ -1,12 +1,10 @@
 function [H]=plotForceAndVizFromSample(i,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,varargin)
 useTorque=false;
-for v=1:length(varargin)
-    if ischar(varargin{v} )
-        if (stcmp('torque',varargin{v}))
+for v=1:length(varargin)    
+        if (ismember({'torque'},varargin{v}))
             useTorque=true;
         end
-    end
-    
+   
 end
 
 i = round(i);
@@ -52,9 +50,15 @@ for indx=1:length(sensorsToAnalize)
         legend('measuredData','Location','west');
     end
     title(strcat({'Wrench space '},escapeUnderscores(ft)));
-    xlabel('F_{x}');
-    ylabel('F_{y}');
-    zlabel('F_{z}');
+    if useTorque
+        xlabel('\tau_{x}');
+        ylabel('\tau_{y}');
+        zlabel('\tau_{z}');
+    else
+        xlabel('F_{x}');
+        ylabel('F_{y}');
+        zlabel('F_{z}');
+    end
     axis(H.(ft).minMaxForces);
     grid on;
     view(az,el);
