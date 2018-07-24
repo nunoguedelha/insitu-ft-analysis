@@ -196,15 +196,25 @@ if(~video)
     storedTimeEnds=1500;
     
     intervalIni=true;
+    
+    uiHandles.txt = uicontrol('Parent',H.handle,'Style','text',...
+        'Position',[0,5,75,32],...            ..
+        'String',"S ="+num2str(0)+newline+sprintf('t= %.2f',(0)));
+    
+    
     if useTorque
-        b = uicontrol('Parent',H.handle,'Style','slider','Units','normalized','Position',[0.15,0,0.75,0.05],...
+        uiHandles.sliderHandle = uicontrol('Parent',H.handle,'Style','slider','Units','normalized','Position',[0.15,0,0.75,0.05],...
             'value',1, 'min',1, 'max',length(dataset.time),'SliderStep', [1/length(dataset.time) 1/length(dataset.time)],...
-            'Callback', {@callBackSlider,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,'torque'});
+            'Callback', {@callBackSlider,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,uiHandles,'torque'});
     else
-        b = uicontrol('Parent',H.handle,'Style','slider','Units','normalized','Position',[0.15,0,0.75,0.05],...
+        uiHandles.sliderHandle = uicontrol('Parent',H.handle,'Style','slider','Units','normalized','Position',[0.15,0,0.75,0.05],...
             'value',1, 'min',1, 'max',length(dataset.time),'SliderStep', [1/length(dataset.time) 1/length(dataset.time)],...
-            'Callback', {@callBackSlider,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model});
+            'Callback', {@callBackSlider,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,uiHandles});
     end
+    
+    btn = uicontrol('Style', 'pushbutton', 'String', 'Save',...
+        'Position', [10 40 40 20],...
+        'Callback', {@callBackSaveButton,dataset,uiHandles.sliderHandle});
     
     bg = uibuttongroup(H.handle,'Visible','off',...
         'Position',[0.9 0 0.1 .05],...
@@ -311,23 +321,19 @@ end
 
 
 
-    function callBackSlider(hObject,evt,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,varargin)
-        i = hObject.Value;
-        txt = uicontrol('Parent',H.handle,'Style','text',...
-            'Position',[0,5,75,32],...            ..
-            'String',"S ="+num2str(round(i))+newline+sprintf('t= %.2f',(dataset.time(round(i))-dataset.time(1))));
+    function callBackSlider(hObject,evt,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,uiHandles,varargin)
+        sample = hObject.Value;
         
-        passOnvarargin=varargin;
-         edtxt = uicontrol('Parent',H.handle,'Style','edit',...
-            'Position',[5,59,50,32],...
-            'CallBack',{@editText,txt,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,varargin{:}},...
-            'String',num2str(round(i)));
+        set(uiHandles.txt,'String',"S ="+num2str(round(sample))+newline+sprintf('t= %.2f',(dataset.time(round(sample))-dataset.time(1))));
+        uiHandles.sliderHandle=hObject;
+        uiHandles.edtxt = uicontrol('Parent',H.handle,'Style','edit',...
+        'Position',[5,59,50,32],...
+        'CallBack',{@editText,uiHandles,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,'torque'},...
+        'String',num2str(round(sample)));
+        %set(uiHandles.edtxt,'String',num2str(round(i)));
         
-        
-        [H]=plotForceAndVizFromSample(i,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,varargin)
-        btn = uicontrol('Style', 'pushbutton', 'String', 'Save',...
-            'Position', [10 40 40 20],...
-            'Callback', {@callBackSaveButton,dataset,i});
+        [H]=plotForceAndVizFromSample(sample,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,varargin)
+        %guidata(Hobj,uiHandles);
     end
 
     function bselection(source,event)
@@ -344,9 +350,10 @@ end
         end
     end
 
-    function callBackSaveButton(hObject,evt,dataset,i)
+    function callBackSaveButton(hObject,evt,dataset,sliderHandle)
         %  global   intervalIni intervalEnd;
         % global storedInis storedEnds storedTimeInis storedTimeEnds
+        i=round(sliderHandle.Value);
         sample=round(i);
         timeSample=dataset.time(round(i))-dataset.time(1);
         if intervalIni
@@ -358,13 +365,14 @@ end
         end
     end
 
-    function editText(Hobj,evt,txt,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,varargin)
+    function editText(Hobj,evt,uiHandles,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,varargin)
         a = get(Hobj,'string');
         disp(['The string in the editbox is: ',a])
         sample=str2num(a);
-        set( b,'Value',sample);
-        set(txt,'String',"S ="+num2str(round(sample))+newline+sprintf('t= %.2f',(dataset.time(round(sample))-dataset.time(1))));
-           [H]=plotForceAndVizFromSample(sample,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,varargin)
-     
+        set(uiHandles.sliderHandle,'Value',sample);
+        %set(sliderHandle,'Value',sample);
+        set(uiHandles.txt,'String',"S ="+num2str(round(sample))+newline+sprintf('t= %.2f',(dataset.time(round(sample))-dataset.time(1))));
+        [H]=plotForceAndVizFromSample(sample,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,varargin)
+        %guidata(Hobj,uiHandles);
     end
 end
