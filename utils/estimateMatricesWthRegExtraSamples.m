@@ -14,17 +14,18 @@ function [calibMatrices,fullscale,augmentedDataset,varargout]=estimateMatricesWt
 extraSampleNames=fieldnames(extraSample);
 augmentedDataset=dataset;
 useFiltered=false;
-
+useTemperature=false;
 %% deal with varargin
 offset=[];
 preCalibMat=[];
 offsetAvailable=false;
 calibrationDimension=size(dataset.rawData.(sensorsToAnalize{1}),2);
 for v=1:length(varargin)
+    
 if (isstruct(varargin{v}))
    vnames= fieldnames(varargin{v});
    if (~strcmp((vnames{1}),(sensorsToAnalize{1})) && length(vnames)>=length(sensorsToAnalize))
-       error('estimateMatricesWthRegExtraSamples2:Not matching field names between structures');
+       error('estimateMatricesWthRegExtraSamples:Not matching field names between structures');
    end
    tempV=varargin{v};
     if (isvector(tempV.(vnames{1})))
@@ -32,7 +33,7 @@ if (isstruct(varargin{v}))
             offset=tempV;
             offsetAvailable=true;
         else
-            warning('estimateMatricesWthRegExtraSamples2: this vector is not an offset of the right dimensions, ignoring vector');
+            warning('estimateMatricesWthRegExtraSamples: this vector is not an offset of the right dimensions, ignoring vector');
         end
      
         else
@@ -40,17 +41,21 @@ if (isstruct(varargin{v}))
             if (size(tempV.(vnames{1}),1)==calibrationDimension && size(tempV.(vnames{1}),2)==calibrationDimension) % check if this is true when including temperature
                 preCalibMat=tempV;
             else
-                warning('estimateMatricesWthRegExtraSamples2: matrix inerted is ot 6 by 6 so not a calibration matrix');
+                warning('estimateMatricesWthRegExtraSamples: matrix inerted is not 6 by 6 so not a calibration matrix');
             end
         end
     end
 else
-    warning('estimateMatricesWthRegExtraSamples2: no struct in varargin, variable will not be used');
+    warning('estimateMatricesWthRegExtraSamples: no struct in varargin, variable will not be used');
 end
 end
+if ismember('temperatureEstimationOn',varargin)
+useTemperature=true;
+end
+
 if isempty(preCalibMat)
    preCalibMat= cMat;
-   info('estimateMatricesWthRegExtraSamples2: no other calibration matrix available so if required workbench matrix will be used');
+   info('estimateMatricesWthRegExtraSamples: no other calibration matrix available so if required workbench matrix will be used');
 end
 
 

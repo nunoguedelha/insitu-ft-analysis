@@ -5,16 +5,17 @@
 %using insitu
 % NOTE: only use when position of center of mass is constant
 %TODO: procedure for choosing when to use insitu or not required
-if(calibOptions.usingInsitu) 
- [calibMatrices,offset,fullscale]= estimateMatricesWthReg(dataset.rawDataFiltered,dataset.estimatedFtData,sensorsToAnalize, dataset.cMat,lambda);
- if isstruct(extraSample)
-      [calibMatrices,fullscale,augmentedDataset]= estimateMatricesWthRegExtraSamples(dataset,sensorsToAnalize, dataset.cMat,lambda...
-              ,extraSample,offset,calibMatrices);
-          dataset=augmentedDataset;
- end
-    
+%% Calibration
+% calibrate using offset calculated insitu
+if(calibOptions.usingInsitu)
+    [calibMatrices,offset,fullscale]= estimateMatricesWthReg(dataset.rawDataFiltered,dataset.estimatedFtData,sensorsToAnalize, dataset.cMat,lambda);
+    if isstruct(extraSample)
+        [calibMatrices,fullscale,augmentedDataset]= estimateMatricesWthRegExtraSamples(dataset,sensorsToAnalize, dataset.cMat,lambda...
+            ,extraSample,offset,calibMatrices);
+        dataset=augmentedDataset;
+    end    
 else
-    %not using insitu
+    %not using insitu offset
     offsetOnMainDataset=false;
     if offsetOnMainDataset
         [calibMatrices,offsetC,fullscale]=...
@@ -51,26 +52,22 @@ else
                 lambda,...
                 sensorsToAnalize);% weighting coefficient
             
-        end
-        
+        end        
         offset=getRawData(offsetC,calibMatrices);
         reCabData.offset=offset; % REMARK:This offset is dependent on the calibration matrix, since the calibration matrix changes when using extra sample the offset needs re-estimation or being substracted from the raw.
-        
     end
-        
 end
 reCabData.calibMatrices=calibMatrices;
 
 reCabData.fullscale=fullscale;
 
-%% write calibration matrices file
-
+%% Write calibration matrices file
 if(calibOptions.saveMat)
     names=fieldnames(dataset.ftData);
     if ~exist(strcat('data/',experimentName,'/calibrationMatrices'),'dir')
         mkdir(strcat('data/',experimentName,'/calibrationMatrices'));
     end
-     for ftIdx =1:length(sensorsToAnalize)
+    for ftIdx =1:length(sensorsToAnalize)
         ft = sensorsToAnalize{ftIdx};
         i=find(strcmp(ft, names));
         if (round(dataset.cMat.(ft))==eye(6))
@@ -79,77 +76,73 @@ if(calibOptions.saveMat)
             scriptOptions.firstTime=false;
         end
         if (scriptOptions.firstTime)
-            if (any(strcmp('calibOutputNames', fieldnames(input))))                
-                 filename=strcat('data/',experimentName,'/calibrationMatrices/', input.calibOutputNames{i},lambdaName);
+            if (any(strcmp('calibOutputNames', fieldnames(input))))
+                filename=strcat('data/',experimentName,'/calibrationMatrices/', input.calibOutputNames{i},lambdaName);
             else
-            prompt={'First time sensor:                 insert serial number or      desired sensor name'};
-            name = 'Sensor name';
-            defaultans = {'SN00001'};
-            answer = inputdlg(prompt,name,[1 30],defaultans);
-            if (~isempty(answer))
-            filename=strcat('data/',experimentName,'/calibrationMatrices/',answer{1},lambdaName);
-            else
-                disp('Sensor name canceled, not saving calibration matrix');
-                filename=strcat('data/',experimentName,'/calibrationMatrices/',defaultans{1},lambdaName);
-                break;
-            end
+                prompt={'First time sensor:                 insert serial number or      desired sensor name'};
+                name = 'Sensor name';
+                defaultans = {'SN00001'};
+                answer = inputdlg(prompt,name,[1 30],defaultans);
+                if (~isempty(answer))
+                    filename=strcat('data/',experimentName,'/calibrationMatrices/',answer{1},lambdaName);
+                else
+                    disp('Sensor name canceled, not saving calibration matrix');
+                    filename=strcat('data/',experimentName,'/calibrationMatrices/',defaultans{1},lambdaName);
+                    break;
+                end
             end
         else
             filename=strcat('data/',experimentName,'/calibrationMatrices/',dataset.calibMatFileNames{i},lambdaName);
         end
-         firmwareMat=calibMatrices.(ft);
-            full_scale=fullscale.(ft);
+        firmwareMat=calibMatrices.(ft);
+        full_scale=fullscale.(ft);
         writeCalibMat(firmwareMat, full_scale, filename)
     end
 end
-%% generate wrenches with new calibration matrix
-    for ftIdx =1:length(sensorsToAnalize)
-        ft = sensorsToAnalize{ftIdx};
-        for j=1:size(dataset.rawData.(ft),1)
-            reCalibData.(ft)(j,:)=calibMatrices.(ft)*(dataset.rawData.(ft)(j,:)'-offset.(ft)'); 
-        end
-        offsetInWrenchSpace.(ft)=calibMatrices.(ft)*offset.(ft)';
+%% Generate wrenches with new calibration matrix
+for ftIdx =1:length(sensorsToAnalize)
+    ft = sensorsToAnalize{ftIdx};
+    for j=1:size(dataset.rawData.(ft),1)
+        reCalibData.(ft)(j,:)=calibMatrices.(ft)*(dataset.rawData.(ft)(j,:)'-offset.(ft)');
     end
-    reCabData.offsetInWrenchSpace=offsetInWrenchSpace;
-
+    offsetInWrenchSpace.(ft)=calibMatrices.(ft)*offset.(ft)';
+end
+reCabData.offsetInWrenchSpace=offsetInWrenchSpace;
 reCabData.reCalibData=reCalibData;
 reCabData.calibMatFileNames=dataset.calibMatFileNames;
 % Save the workspace again to include calib Matrices, scale and offset
-    %     %save recalibrated matrices, offsets, new wrenches, sensor serial
-    %     numbers
-    if(scriptOptions.saveData)
-        if (calibOptions.usingInsitu)
-             save(strcat('data/',experimentName,'/reCabDataInsitu.mat'),'reCabData')
-        else
-    save(strcat('data/',experimentName,'/reCabData.mat'),'reCabData')
-        end
+%     %save recalibrated matrices, offsets, new wrenches, sensor serial
+%     numbers
+if(scriptOptions.saveData)
+    if (calibOptions.usingInsitu)
+        save(strcat('data/',experimentName,'/reCabDataInsitu.mat'),'reCabData')
+    else
+        save(strcat('data/',experimentName,'/reCabData.mat'),'reCabData')
     end
+end
 %% Plotting section
-if(calibOptions.plot)    
+if(calibOptions.plot)
     
     %% plot 3D graph
     if (calibOptions.onlyWSpace)
         for ftIdx =1:length(sensorsToAnalize)
             ft = sensorsToAnalize{ftIdx};
-             if (round(dataset.cMat.(ft))==eye(6))
+            if (round(dataset.cMat.(ft))==eye(6))
                 scriptOptions.firstTime=true;
             else
                 scriptOptions.firstTime=false;
             end
-         
-                filteredOffset.(ft)=(dataset.cMat.(ft)*offset.(ft)')';  
-               filteredNoOffset.(ft)=dataset.filteredFtData.(ft) -repmat(filteredOffset.(ft),size(dataset.filteredFtData.(ft),1),1);
             
+            filteredOffset.(ft)=(dataset.cMat.(ft)*offset.(ft)')';
+            filteredNoOffset.(ft)=dataset.filteredFtData.(ft) -repmat(filteredOffset.(ft),size(dataset.filteredFtData.(ft),1),1);            
             
-            if(~scriptOptions.firstTime)              
+            if(~scriptOptions.firstTime)
                 namesdatasets={'measuredDataNoOffset','estimatedData','reCalibratedData'};
                 force3DPlots(namesdatasets,(ft),filteredNoOffset.(ft),dataset.estimatedFtData.(ft),reCalibData.(ft));
             else
-                namesdatasets={'estimatedData','reCalibratedData'};
-               
+                namesdatasets={'estimatedData','reCalibratedData'};                
                 force3DPlots(namesdatasets,(ft),dataset.estimatedFtData.(ft),reCalibData.(ft));
-            end
-            
+            end            
         end
     else
         %% FTPLOTs
@@ -162,10 +155,10 @@ if(calibOptions.plot)
     end
 end
 
-% plot secondary matrix format
+%% Evaluation and secondary matrix generation
 for ftIdx =1:length(sensorsToAnalize)
     ft = sensorsToAnalize{ftIdx};
-    
+    % plot secondary matrix format
     if (calibOptions.secMatrixFormat)
         secMat.(ft)= calibMatrices.(ft)/dataset.cMat.(ft);
         xmlStr=cMat2xml(secMat.(ft),ft)% print in required format to use by WholeBodyDynamics
