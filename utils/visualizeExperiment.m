@@ -192,7 +192,7 @@ if(~video)
     storedInis=[];
     storedEnds=[];
     storedTimeInis=0;
-    storedTimeEnds=1500;
+    storedTimeEnds=(dataset.time(end)-dataset.time(1));
     
     intervalIni=true;
     
@@ -341,9 +341,11 @@ end
         if intervalIni
             storedInis=[storedInis sample];
             storedTimeInis=[storedTimeInis timeSample];
+            storedTimeInis=sort(storedTimeInis);
         else
             storedEnds=[storedEnds sample];
             storedTimeEnds=[timeSample storedTimeEnds];
+            storedTimeEnds=sort(storedTimeEnds);
         end
     end
 
