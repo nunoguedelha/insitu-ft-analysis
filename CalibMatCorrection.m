@@ -7,9 +7,14 @@
 %TODO: procedure for choosing when to use insitu or not required
 %% Calibration
 % calibrate using offset calculated insitu
+if isstruct(extraSample)
+    extraSamplesAvailable=true;
+else
+    extraSamplesAvailable=false;
+end
 if(calibOptions.usingInsitu)
     [calibMatrices,offset,fullscale]= estimateMatricesWthReg(dataset.rawDataFiltered,dataset.estimatedFtData,sensorsToAnalize, dataset.cMat,lambda);
-    if isstruct(extraSample)
+    if extraSamplesAvailable
         [calibMatrices,fullscale,augmentedDataset]= estimateMatricesWthRegExtraSamples(dataset,sensorsToAnalize, dataset.cMat,lambda...
             ,extraSample,offset,calibMatrices);
         dataset=augmentedDataset;
@@ -23,11 +28,11 @@ else
             dataset.rawDataFiltered,... %raw data input
             dataset.estimatedFtData,...% estimated wrenches as reference
             dataset.cMat,...% previous calibration matrix for regularization
-            lambda,...
-            sensorsToAnalize);% weighting coefficient
+            lambda,...% weighting coefficient
+            sensorsToAnalize);
         offset=getRawData(offsetC,calibMatrices);
         reCabData.offset=offset; % REMARK:This offset is dependent on the calibration matrix, since the calibration matrix changes when using extra sample the offset needs re-estimation or being substracted from the raw.
-        if isstruct(extraSample)
+        if extraSamplesAvailable
             % stack all extra samples together for calculation
             [calibMatrices,fullscale,augmentedDataset]= ...
                 estimateMatricesWthRegExtraSamples(...
@@ -37,7 +42,7 @@ else
         end
     else
         %% Under develpment
-        if isstruct(extraSample)
+        if extraSamplesAvailable
             [calibMatrices,fullscale,augmentedDataset,offsetC]= ...
                 estimateMatricesWthRegExtraSamples(...
                 dataset,sensorsToAnalize, dataset.cMat,lambda...
