@@ -44,7 +44,7 @@ addpath utils
 
 %% general reading configuration options
 scriptOptions = {};
-scriptOptions.forceCalculation=true;%false;
+scriptOptions.forceCalculation=false;%false;
 scriptOptions.printPlots=true;%true
 scriptOptions.raw=true;
 scriptOptions.saveData=true;
@@ -77,11 +77,12 @@ lambdaName='';
 
 %calibration script options
 calibOptions.saveMat=true;
-calibOptions.usingInsitu=false;
+calibOptions.usingInsitu=true;
 calibOptions.plot=true;
 calibOptions.onlyWSpace=true;
 calibOptions.secMatrixFormat=false;
-calibOptions.resultEvaluation=false;
+calibOptions.resultEvaluation=true;
+calibOptions.useTemperature=true;
 %% Start
 %Read data
 %[dataset,extraSample]=read_estimate_experimentData(experimentName,scriptOptions);
