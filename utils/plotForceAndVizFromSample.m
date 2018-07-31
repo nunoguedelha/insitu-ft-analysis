@@ -37,12 +37,12 @@ for indx=1:length(sensorsToAnalize)
     subplot( H.(ft).sub)
     [az,el]=view;
     hold off
-    h= plot3_matrix(dataset.(whichFtData).(ft)(1:i,dataToPlot),'r');%
+    h= plot3_matrix(dataset.(whichFtData).(ft)(1:i,dataToPlot),'r.');%
     hold on;
     delete(H.(ft).old);
     H.(ft).old=h;
     if estimatedAvailable
-        h2= plot3_matrix(dataset.estimatedFtData.(ft)(1:i,dataToPlot),'b');
+        h2= plot3_matrix(dataset.estimatedFtData.(ft)(1:i,dataToPlot),'b.');
         delete(H.(ft).old2);
         H.(ft).old2=h2;
         legend('measuredData','estimatedData','Location','west');
