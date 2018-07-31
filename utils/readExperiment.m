@@ -237,13 +237,6 @@ else
     dataset.ddqj = ddqj_all';
     dataset.tau=tau_all';
     %% This section modifies or estimates data
-    %% Estimate wrenches
-    if(scriptOptions.estimateWrenches)
-        [estimatedDataset,intervalMask,contactFrame]=estimateDynamicsUsingIntervals(dataset,estimator,input,scriptOptions.useInertial);
-        dataset=applyMask(dataset,intervalMask);
-        dataset.estimatedFtData=estimatedDataset.estimatedFtData;
-        dataset.contactFrame=contactFrame;
-    end
     %% Filter ft data
     if(scriptOptions.filterData)
         disp( 'readExperiment: Filtering FT data');
@@ -251,7 +244,13 @@ else
         dataset=applyMask(dataset,mask);
         dataset.filteredFtData=applyMask(filteredFtData,mask);
     end
-    
+    %% Estimate wrenches
+    if(scriptOptions.estimateWrenches)
+        [estimatedDataset,intervalMask,contactFrame]=estimateDynamicsUsingIntervals(dataset,estimator,input,scriptOptions.useInertial);
+        dataset=applyMask(dataset,intervalMask);
+        dataset.estimatedFtData=estimatedDataset.estimatedFtData;
+        dataset.contactFrame=contactFrame;
+    end    
     %% Calculate raw data using known calibration matrix
     if(scriptOptions.raw)
         disp( 'readExperiment: Calculating raw FT values');
