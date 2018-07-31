@@ -13,51 +13,61 @@ function [calibMatrices,fullscale,augmentedDataset,varargout]=estimateMatricesWt
 % initialize some values
 extraSampleNames=fieldnames(extraSample);
 augmentedDataset=dataset;
-useFiltered=false;
+useFiltered=true;
 useTemperature=false;
 %% deal with varargin
 offset=[];
 preCalibMat=[];
 offsetAvailable=false;
 calibrationDimension=size(dataset.rawData.(sensorsToAnalize{1}),2);
-for v=1:length(varargin)
-    
-if (isstruct(varargin{v}))
-   vnames= fieldnames(varargin{v});
-   if (~strcmp((vnames{1}),(sensorsToAnalize{1})) && length(vnames)>=length(sensorsToAnalize))
-       error('estimateMatricesWthRegExtraSamples:Not matching field names between structures');
-   end
-   tempV=varargin{v};
-    if (isvector(tempV.(vnames{1})))
-        if (sum(size(tempV.(vnames{1}))) ==(calibrationDimension+1) && (size(tempV.(vnames{1}),1)==calibrationDimension || size(tempV.(vnames{1}),2)==calibrationDimension) )
-            offset=tempV;
-            offsetAvailable=true;
-        else
-            warning('estimateMatricesWthRegExtraSamples: this vector is not an offset of the right dimensions, ignoring vector');
+for v=1:length(varargin)    
+    if (isstruct(varargin{v}))
+        vnames= fieldnames(varargin{v});
+        if (~strcmp((vnames{1}),(sensorsToAnalize{1})) && length(vnames)>=length(sensorsToAnalize))
+            error('estimateMatricesWthRegExtraSamples:Not matching field names between structures');
         end
-     
-        else
-        if (ismatrix(tempV.(vnames{1})))
-            if (size(tempV.(vnames{1}),1)==calibrationDimension && size(tempV.(vnames{1}),2)==calibrationDimension) % check if this is true when including temperature
-                preCalibMat=tempV;
+        tempV=varargin{v};
+        if (isvector(tempV.(vnames{1})))
+            if (sum(size(tempV.(vnames{1}))) ==(calibrationDimension+1) && (size(tempV.(vnames{1}),1)==calibrationDimension || size(tempV.(vnames{1}),2)==calibrationDimension) )
+                offset=tempV;
+                offsetAvailable=true;
             else
-                warning('estimateMatricesWthRegExtraSamples: matrix inerted is not 6 by 6 so not a calibration matrix');
+                warning('estimateMatricesWthRegExtraSamples: this vector is not an offset of the right dimensions, ignoring vector');
+            end
+            
+        else
+            if (ismatrix(tempV.(vnames{1})))
+                if (size(tempV.(vnames{1}),1)==calibrationDimension && size(tempV.(vnames{1}),2)==calibrationDimension) % check if this is true when including temperature
+                    preCalibMat=tempV;
+                else
+                    warning('estimateMatricesWthRegExtraSamples: matrix inerted is not 6 by 6 so not a calibration matrix');
+                end
             end
         end
+    else
+        if ischar(varargin{v})
+            if strcmp('temperatureEstimationOn',varargin{v})
+                useTemperature=true;
+            end            
+        else
+            warning('estimateMatricesWthRegExtraSamples: no struct or string in varargin, variable will not be used');
+        end
     end
-else
-    warning('estimateMatricesWthRegExtraSamples: no struct in varargin, variable will not be used');
 end
-end
-if ismember('temperatureEstimationOn',varargin)
-useTemperature=true;
-end
+
 
 if isempty(preCalibMat)
-   preCalibMat= cMat;
-   info('estimateMatricesWthRegExtraSamples: no other calibration matrix available so if required workbench matrix will be used');
+    preCalibMat= cMat;
+    info('estimateMatricesWthRegExtraSamples: no other calibration matrix available so if required workbench matrix will be used');
 end
 
+if useTemperature
+    dataFields=fieldnames(dataset);
+    if ~ismember('temperature',dataFields)
+    useTemperature=false;
+    warning('estimateMatricesWthRegExtraSamples: expected temperature info but not available, calibration will be perform without temperature');
+    end
+end
 
 %% start estimating
 for ftIdx =1:length(sensorsToAnalize)
@@ -67,6 +77,9 @@ for ftIdx =1:length(sensorsToAnalize)
     stackedEstimated=dataset.estimatedFtData.(ft);
     stackedRawFiltered=dataset.rawDataFiltered.(ft);
     calibrationRequired=false;
+    if useTemperature
+        stackedTemperature=dataset.temperature.(ft);
+    end
     
     % go through all possible extra samples
     for eSampleIDNum =1:length(extraSampleNames)
@@ -82,6 +95,15 @@ for ftIdx =1:length(sensorsToAnalize)
                         rawDataFiltered2=extraSample.right.rawDataFiltered;
                         estimatedFtData2=extraSample.right.estimatedFtData;
                         calibrationRequired=true;
+                        if useTemperature
+                            dataFields=fieldnames(extraSample.(eSampleID));
+                            if ~ismember('temperature',dataFields)
+                                useTemperature=false;
+                                warning('estimateMatricesWthRegExtraSamples: expected temperature info but not available, calibration will be perform without temperature');
+                            else
+                                temperature2=extraSample.(eSampleID).temperature;
+                            end
+                        end
                     end
                 end
                 
@@ -91,6 +113,15 @@ for ftIdx =1:length(sensorsToAnalize)
                         rawDataFiltered2=extraSample.left.rawDataFiltered;
                         estimatedFtData2=extraSample.left.estimatedFtData;
                         calibrationRequired=true;
+                        if useTemperature
+                            dataFields=fieldnames(extraSample.(eSampleID));
+                            if ~ismember('temperature',dataFields)
+                                useTemperature=false;
+                                warning('estimateMatricesWthRegExtraSamples: expected temperature info but not available, calibration will be perform without temperature');
+                            else
+                                temperature2=extraSample.(eSampleID).temperature;
+                            end
+                        end
                     end
                 end
             else % if is not the right or left extra sample is should be Tz or general. Tz only to be considered in the legs
@@ -99,6 +130,15 @@ for ftIdx =1:length(sensorsToAnalize)
                     rawDataFiltered2=extraSample.(eSampleID).rawDataFiltered;
                     estimatedFtData2=extraSample.(eSampleID).estimatedFtData;
                     calibrationRequired=true;
+                    if useTemperature
+                        dataFields=fieldnames(extraSample.(eSampleID));
+                        if ~ismember('temperature',dataFields)
+                            useTemperature=false;
+                            warning('estimateMatricesWthRegExtraSamples: expected temperature info but not available, calibration will be perform without temperature');
+                        else
+                            temperature2=extraSample.(eSampleID).temperature;
+                        end
+                    end
                 end
             end
             
@@ -108,13 +148,25 @@ for ftIdx =1:length(sensorsToAnalize)
                 rawDataFiltered2=extraSample.(eSampleID).rawDataFiltered;
                 estimatedFtData2=extraSample.(eSampleID).estimatedFtData;
                 calibrationRequired=true;
+                if useTemperature
+                    dataFields=fieldnames(extraSample.(eSampleID));
+                    if ~ismember('temperature',dataFields)
+                        useTemperature=false;
+                        warning('estimateMatricesWthRegExtraSamples: expected temperature info but not available, calibration will be perform without temperature');
+                    else
+                        temperature2=extraSample.(eSampleID).temperature;
+                    end
+                end
             end
         end
         %% stack them
         if(isstruct(rawData2))
-        stackedRaw=[stackedRaw;rawData2.(ft)];
-        stackedEstimated=[stackedEstimated;estimatedFtData2.(ft)];
-        stackedRawFiltered=[stackedRawFiltered;rawDataFiltered2.(ft)];
+            stackedRaw=[stackedRaw;rawData2.(ft)];
+            stackedEstimated=[stackedEstimated;estimatedFtData2.(ft)];
+            stackedRawFiltered=[stackedRawFiltered;rawDataFiltered2.(ft)];
+            if useTemperature
+               stackedTemperature=[ stackedTemperature;temperature2.(ft)];
+            end
         end
         
         % augment dataset only once for each extra sample, regardless if
@@ -126,25 +178,29 @@ for ftIdx =1:length(sensorsToAnalize)
     end
     
     if calibrationRequired
+        if useFiltered
+            rawToUse = stackedRawFiltered;
+        else
+            rawToUse = stackedRaw;
+        end
         if offsetAvailable
             %% check correct dimensions of the offset
             [rows,columns]=size(offset.(ft));
             if rows==6 && columns==1
                 offset.(ft)=offset.(ft)';
-            end
-            
-            if useFiltered
-                rawNoOffset=stackedRawFiltered-repmat(offset.(ft),size(stackedRaw,1),1);
+            end            
+            rawNoOffset = rawToUse-repmat(offset.(ft),size(rawToUse,1),1);            
+            if ~useTemperature
+                [calibMatrices.(ft),fullscale.(ft)]=estimateCalibMatrixWithReg(rawNoOffset,stackedEstimated,cMat.(ft),lambda);
             else
-                rawNoOffset = stackedRaw-repmat(offset.(ft),size(stackedRaw,1),1);
+                [calibMatrices.(ft),fullscale.(ft),tempCoeff.(ft)]=estimateCalibMatrixWithRegAndTemp(rawNoOffset,stackedEstimated,cMat.(ft),lambda,stackedTemperature);
             end
-            [calibMatrices.(ft),fullscale.(ft)]=estimateCalibMatrixWithReg(rawNoOffset,stackedEstimated,cMat.(ft),lambda);
         else
             %% no offset provided so we attempt the one shot.
-            if useFiltered
-                [calibMatrices.(ft),fullscale.(ft),offset]=estimateCalibMatrixWithRegAndOff(stackedRawFiltered,stackedEstimated,cMat.(ft),lambda);
+            if ~useTemperature
+                [calibMatrices.(ft),fullscale.(ft),offset.(ft)]=estimateCalibMatrixWithRegAndOff(rawToUse,stackedEstimated,cMat.(ft),lambda);
             else
-                [calibMatrices.(ft),fullscale.(ft),offset.(ft)]=estimateCalibMatrixWithRegAndOff(stackedRaw,stackedEstimated,cMat.(ft),lambda);
+                [calibMatrices.(ft),fullscale.(ft),offset.(ft),tempCoeff.(ft)]=estimateCalibMatrixWithRegTempAndOff(rawToUse,stackedEstimated,cMat.(ft),lambda);
             end
             %% put offset correctly just in case
             [rows,columns]=size(offset.(ft));
@@ -156,6 +212,9 @@ for ftIdx =1:length(sensorsToAnalize)
         calibMatrices.(ft)=preCalibMat.(ft);
         
     end
-   
+    
 end
- varargout{1}=offset;
+varargout{1}=offset;
+if exist('tempCoeff','var')
+    varargout{2}=tempCoeff;
+end
