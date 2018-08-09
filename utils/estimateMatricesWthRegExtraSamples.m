@@ -1,4 +1,4 @@
-function [calibMatrices,fullscale,augmentedDataset,varargout]=estimateMatricesWthRegExtraSamples(dataset,sensorsToAnalize,cMat,lambda,extraSample,varargin)
+function [calibMatrices,fullscale,augmentedDataset,varargout]=estimateMatricesWthRegExtraSamples(dataset,sensorsToAnalize,extraSample,cMat,lambda,varargin)
 %% Inputs
 % dataset: is the main data from de experiment.
 % sensorsToAnalize: are the sensors which are required to be recalibrated
@@ -20,7 +20,7 @@ offset=[];
 preCalibMat=[];
 offsetAvailable=false;
 calibrationDimension=size(dataset.rawData.(sensorsToAnalize{1}),2);
-for v=1:length(varargin)    
+for v=1:length(varargin)
     if (isstruct(varargin{v}))
         vnames= fieldnames(varargin{v});
         if (~strcmp((vnames{1}),(sensorsToAnalize{1})) && length(vnames)>=length(sensorsToAnalize))
@@ -48,7 +48,7 @@ for v=1:length(varargin)
         if ischar(varargin{v})
             if strcmp('temperatureEstimationOn',varargin{v})
                 useTemperature=true;
-            end            
+            end
         else
             warning('estimateMatricesWthRegExtraSamples: no struct or string in varargin, variable will not be used');
         end
@@ -58,14 +58,14 @@ end
 
 if isempty(preCalibMat)
     preCalibMat= cMat;
-    info('estimateMatricesWthRegExtraSamples: no other calibration matrix available so if required workbench matrix will be used');
+    disp('estimateMatricesWthRegExtraSamples: no other calibration matrix available so if required workbench matrix will be used');
 end
 
 if useTemperature
     dataFields=fieldnames(dataset);
     if ~ismember('temperature',dataFields)
-    useTemperature=false;
-    warning('estimateMatricesWthRegExtraSamples: expected temperature info but not available, calibration will be perform without temperature');
+        useTemperature=false;
+        warning('estimateMatricesWthRegExtraSamples: expected temperature info but not available, calibration will be perform without temperature');
     end
 end
 
@@ -141,21 +141,20 @@ for ftIdx =1:length(sensorsToAnalize)
                     end
                 end
             end
-            
-        else % Only general extra sample can be considered for adding info to the arms since in theory it could affect all sensors
-            if (isstruct(extraSample.(eSampleID)) && strcmp(eSampleID,'general' ))
-                rawData2=extraSample.(eSampleID).rawData;
-                rawDataFiltered2=extraSample.(eSampleID).rawDataFiltered;
-                estimatedFtData2=extraSample.(eSampleID).estimatedFtData;
-                calibrationRequired=true;
-                if useTemperature
-                    dataFields=fieldnames(extraSample.(eSampleID));
-                    if ~ismember('temperature',dataFields)
-                        useTemperature=false;
-                        warning('estimateMatricesWthRegExtraSamples: expected temperature info but not available, calibration will be perform without temperature');
-                    else
-                        temperature2=extraSample.(eSampleID).temperature;
-                    end
+        end
+        % Only general extra sample can be considered for adding info to the arms since in theory it could affect all sensors
+        if (isstruct(extraSample.(eSampleID)) && strcmp(eSampleID,'general' ))
+            rawData2=extraSample.(eSampleID).rawData;
+            rawDataFiltered2=extraSample.(eSampleID).rawDataFiltered;
+            estimatedFtData2=extraSample.(eSampleID).estimatedFtData;
+            calibrationRequired=true;
+            if useTemperature
+                dataFields=fieldnames(extraSample.(eSampleID));
+                if ~ismember('temperature',dataFields)
+                    useTemperature=false;
+                    warning('estimateMatricesWthRegExtraSamples: expected temperature info but not available, calibration will be perform without temperature');
+                else
+                    temperature2=extraSample.(eSampleID).temperature;
                 end
             end
         end
@@ -165,7 +164,7 @@ for ftIdx =1:length(sensorsToAnalize)
             stackedEstimated=[stackedEstimated;estimatedFtData2.(ft)];
             stackedRawFiltered=[stackedRawFiltered;rawDataFiltered2.(ft)];
             if useTemperature
-               stackedTemperature=[ stackedTemperature;temperature2.(ft)];
+                stackedTemperature=[ stackedTemperature;temperature2.(ft)];
             end
         end
         
@@ -188,8 +187,8 @@ for ftIdx =1:length(sensorsToAnalize)
             [rows,columns]=size(offset.(ft));
             if rows==6 && columns==1
                 offset.(ft)=offset.(ft)';
-            end            
-            rawNoOffset = rawToUse-repmat(offset.(ft),size(rawToUse,1),1);            
+            end
+            rawNoOffset = rawToUse-repmat(offset.(ft),size(rawToUse,1),1);
             if ~useTemperature
                 [calibMatrices.(ft),fullscale.(ft)]=estimateCalibMatrixWithReg(rawNoOffset,stackedEstimated,cMat.(ft),lambda);
             else

@@ -15,10 +15,10 @@ end
 if(calibOptions.usingInsitu)
     [calibMatrices,offset,fullscale]= estimateMatricesWthReg(dataset.rawDataFiltered,dataset.estimatedFtData,sensorsToAnalize, dataset.cMat,lambda);
     if extraSamplesAvailable
-        [calibMatrices,fullscale,augmentedDataset]= estimateMatricesWthRegExtraSamples(dataset,sensorsToAnalize, dataset.cMat,lambda...
-            ,extraSample,offset,calibMatrices);
+        [calibMatrices,fullscale,augmentedDataset]= estimateMatricesWthRegExtraSamples(dataset,sensorsToAnalize,extraSample, dataset.cMat,lambda...
+            ,offset,calibMatrices);
         dataset=augmentedDataset;
-    end    
+    end
 else
     %not using insitu offset
     offsetOnMainDataset=false;
@@ -36,8 +36,8 @@ else
             % stack all extra samples together for calculation
             [calibMatrices,fullscale,augmentedDataset]= ...
                 estimateMatricesWthRegExtraSamples(...
-                dataset,sensorsToAnalize, dataset.cMat,lambda...
-                ,extraSample,offset,calibMatrices);
+                dataset,sensorsToAnalize,extraSample, dataset.cMat,lambda...
+                ,offset,calibMatrices);
             dataset=augmentedDataset;
         end
     else
@@ -45,8 +45,9 @@ else
         if extraSamplesAvailable
             [calibMatrices,fullscale,augmentedDataset,offsetC]= ...
                 estimateMatricesWthRegExtraSamples(...
-                dataset,sensorsToAnalize, dataset.cMat,lambda...
-                ,extraSample);
+                dataset,sensorsToAnalize,extraSample,...
+                dataset.cMat,lambda...
+                );
             dataset=augmentedDataset;
         else % no extra sampels available
             [calibMatrices,offsetC,fullscale]=...
@@ -57,7 +58,7 @@ else
                 lambda,...
                 sensorsToAnalize);% weighting coefficient
             
-        end        
+        end
         offset=getRawData(offsetC,calibMatrices);
         reCabData.offset=offset; % REMARK:This offset is dependent on the calibration matrix, since the calibration matrix changes when using extra sample the offset needs re-estimation or being substracted from the raw.
     end
@@ -126,40 +127,63 @@ if(scriptOptions.saveData)
     end
 end
 %% Plotting section
-if(calibOptions.plot)
-    
-    %% plot 3D graph
-    if (calibOptions.onlyWSpace)
-        for ftIdx =1:length(sensorsToAnalize)
-            ft = sensorsToAnalize{ftIdx};
-            if (round(dataset.cMat.(ft))==eye(6))
-                scriptOptions.firstTime=true;
-            else
-                scriptOptions.firstTime=false;
-            end
-            
+% if(calibOptions.plot)
+%     
+%     %% plot 3D graph
+%     if (calibOptions.onlyWSpace)
+%         for ftIdx =1:length(sensorsToAnalize)
+%             ft = sensorsToAnalize{ftIdx};
+%             if (round(dataset.cMat.(ft))==eye(6))
+%                 scriptOptions.firstTime=true;
+%             else
+%                 scriptOptions.firstTime=false;
+%             end
+%             
+%             filteredOffset.(ft)=(dataset.cMat.(ft)*offset.(ft)')';
+%             filteredNoOffset.(ft)=dataset.filteredFtData.(ft) -repmat(filteredOffset.(ft),size(dataset.filteredFtData.(ft),1),1);
+%             
+%             if(~scriptOptions.firstTime)
+%                 namesdatasets={'measuredDataNoOffset','estimatedData','reCalibratedData'};
+%                 force3DPlots(namesdatasets,(ft),filteredNoOffset.(ft),dataset.estimatedFtData.(ft),reCalibData.(ft));
+%             else
+%                 namesdatasets={'estimatedData','reCalibratedData'};
+%                 force3DPlots(namesdatasets,(ft),dataset.estimatedFtData.(ft),reCalibData.(ft));
+%             end
+%         end
+%     else
+%         %% FTPLOTs
+%         for ftIdx =1:length(sensorsToAnalize)
+%             ft = sensorsToAnalize{ftIdx};
+%             FTplots(struct(ft,reCalibData.(ft),strcat('estimate',ft),dataset.estimatedFtData.(ft)),dataset.time,'forcecomparison');
+%             %FTplots(struct(strcat('measure',ft),filteredNoOffset.(ft),strcat('estimate',ft),dataset.estimatedFtData.(ft)),dataset.time,'forcecomparison');
+%             %FTplots(struct(ft,reCalibData.(ft),strcat('measure',ft),filteredNoOffset.(ft)),dataset.time,'forcecomparison');
+%         end
+%     end
+% end
+if (calibOptions.plotForceSpace)
+    for ftIdx =1:length(sensorsToAnalize)
+        ft = sensorsToAnalize{ftIdx};
+        if (round(dataset.cMat.(ft))==eye(6))
+            namesdatasets={'estimatedData','reCalibratedData'};
+            force3DPlots(namesdatasets,(ft),dataset.estimatedFtData.(ft),reCalibData.(ft));
+        else
             filteredOffset.(ft)=(dataset.cMat.(ft)*offset.(ft)')';
-            filteredNoOffset.(ft)=dataset.filteredFtData.(ft) -repmat(filteredOffset.(ft),size(dataset.filteredFtData.(ft),1),1);            
-            
-            if(~scriptOptions.firstTime)
-                namesdatasets={'measuredDataNoOffset','estimatedData','reCalibratedData'};
-                force3DPlots(namesdatasets,(ft),filteredNoOffset.(ft),dataset.estimatedFtData.(ft),reCalibData.(ft));
-            else
-                namesdatasets={'estimatedData','reCalibratedData'};                
-                force3DPlots(namesdatasets,(ft),dataset.estimatedFtData.(ft),reCalibData.(ft));
-            end            
+            filteredNoOffset.(ft)=dataset.filteredFtData.(ft) -repmat(filteredOffset.(ft),size(dataset.filteredFtData.(ft),1),1);
+            namesdatasets={'measuredDataNoOffset','estimatedData','reCalibratedData'};
+            force3DPlots(namesdatasets,(ft),filteredNoOffset.(ft),dataset.estimatedFtData.(ft),reCalibData.(ft));
         end
-    else
-        %% FTPLOTs
-        for ftIdx =1:length(sensorsToAnalize)
-            ft = sensorsToAnalize{ftIdx};
-            FTplots(struct(ft,reCalibData.(ft),strcat('estimate',ft),dataset.estimatedFtData.(ft)),dataset.time,'forcecomparison');
-            %FTplots(struct(strcat('measure',ft),filteredNoOffset.(ft),strcat('estimate',ft),dataset.estimatedFtData.(ft)),dataset.time,'forcecomparison');
-            %FTplots(struct(ft,reCalibData.(ft),strcat('measure',ft),filteredNoOffset.(ft)),dataset.time,'forcecomparison');
-        end
+        
     end
 end
-
+if(calibOptions.plotForceVsTime)
+    %% FTPLOTs
+    for ftIdx =1:length(sensorsToAnalize)
+        ft = sensorsToAnalize{ftIdx};
+        FTplots(struct(ft,reCalibData.(ft),strcat('estimate',ft),dataset.estimatedFtData.(ft)),dataset.time,'forcecomparison');
+        %FTplots(struct(strcat('measure',ft),filteredNoOffset.(ft),strcat('estimate',ft),dataset.estimatedFtData.(ft)),dataset.time,'forcecomparison');
+        %FTplots(struct(ft,reCalibData.(ft),strcat('measure',ft),filteredNoOffset.(ft)),dataset.time,'forcecomparison');
+    end
+end
 %% Evaluation and secondary matrix generation
 for ftIdx =1:length(sensorsToAnalize)
     ft = sensorsToAnalize{ftIdx};
