@@ -77,12 +77,15 @@ lambdaName='';
 
 %calibration script options
 calibOptions.saveMat=true;
-calibOptions.usingInsitu=true;
-calibOptions.plot=true;
-calibOptions.onlyWSpace=true;
+calibOptions.usingInsitu=false;
+calibOptions.estimateType=1;
+calibOptions.useTemperature=true;
+calibOptions.plotForceSpace=true;
+calibOptions.plotForceVsTime=false;
 calibOptions.secMatrixFormat=false;
 calibOptions.resultEvaluation=true;
-calibOptions.useTemperature=true;
+%0 only insitu offset, 1 is insitu, 2 is offset on main dataset, 3 is oneshot offset on main dataset, 4 is full oneshot
+
 %% Start
 %Read data
 %[dataset,extraSample]=read_estimate_experimentData(experimentName,scriptOptions);
