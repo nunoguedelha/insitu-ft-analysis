@@ -1,8 +1,6 @@
 clear all
 close all
 clc
-
-
 %% Calibrate a sensor
 % This script allows to calibrate six axis force torque (F/T)
 % sensors once they are mounted on the robot. This procedure
@@ -42,68 +40,53 @@ addpath external/quadfit
 addpath external/walkingDatasetScripts
 addpath utils
 
-%% general reading configuration options
-scriptOptions = {};
-scriptOptions.forceCalculation=false;%false;
-scriptOptions.printPlots=true;%true
-scriptOptions.raw=true;
-scriptOptions.saveData=true;
-scriptOptions.testDir=false;% to calculate the raw data, for recalibration always true
-scriptOptions.filterData=true;
-scriptOptions.estimateWrenches=true;
-scriptOptions.useInertial=false;
-scriptOptions.visualizeExp=false;
-scriptOptions.multiSens=true;
-
-% Script of the mat file used for save the intermediate results
-scriptOptions.matFileName='ftDataset';
-
-%% name and paths of the experiment files
+%% Read data
+% general reading configuration options
+readOptions = {};
+readOptions.forceCalculation=false;%false;
+readOptions.raw=true;
+readOptions.saveData=true;
+readOptions.testDir=false;% to calculate the raw data, for recalibration always true
+readOptions.filterData=true;
+readOptions.estimateWrenches=true;
+readOptions.useInertial=false;
+readOptions.multiSens=true;
+readOptions.matFileName='ftDataset'; % name of the mat file used for save the experiment data
+% options not from read experiment
+readOptions.printPlots=true;%true
+readOptions.visualizeExp=false;
+% name and paths of the experiment files
 % change name to desired experiment folder
-%experimentName='icub-insitu-ft-analysis-big-datasets/iCubGenova04/exp_1/poleLeftRight';
 experimentName='/green-iCub-Insitu-Datasets/2018_07_10_Grid';
-
-%% We carry the calibration for just a subset of the sensors
-% the names are associated to the location of the sensor in the
-% in the iCub options are {'left_arm','right_arm','left_leg','right_leg','right_foot','left_foot'};
-
-%sensorsToAnalize = {'left_leg','left_foot','right_leg','right_foot'};
-sensorsToAnalize = {'right_leg','left_leg'};
+[dataset,~,input,extraSample]=readExperiment(experimentName,readOptions);
 
 %% Calibration options
+% Select sensors to calibrate the names are associated to the location of
+% the sensor in the robot 
+% on iCub  {'left_arm','right_arm','left_leg','right_leg','right_foot','left_foot'};
+sensorsToAnalize = {'right_leg','left_leg'};
 %Regularization parameter
 lambda=0;
 lambdaName='';
-
 %calibration script options
 calibOptions.saveMat=true;
-calibOptions.usingInsitu=false;
-calibOptions.estimateType=1;
+calibOptions.estimateType=1;%0 only insitu offset, 1 is insitu, 2 is offset on main dataset, 3 is oneshot offset on main dataset, 4 is full oneshot
 calibOptions.useTemperature=true;
 calibOptions.plotForceSpace=true;
 calibOptions.plotForceVsTime=false;
 calibOptions.secMatrixFormat=false;
 calibOptions.resultEvaluation=true;
-%0 only insitu offset, 1 is insitu, 2 is offset on main dataset, 3 is oneshot offset on main dataset, 4 is full oneshot
+% Calibrate
+calibrateAndCheck
 
-%% Start
-%Read data
-%[dataset,extraSample]=read_estimate_experimentData(experimentName,scriptOptions);
-[dataset,~,input,extraSample]=readExperiment(experimentName,scriptOptions);
-%Plot for inspection of data
-if( scriptOptions.printPlots )
+%% Plot for inspection of data
+if( readOptions.printPlots )
     run('plottinScript.m')
 end
-
-if( scriptOptions.visualizeExp )
+if( readOptions.visualizeExp )
     robotName='iCubGenova04';
     onTestDir=false;
     visualizeExperiment(dataset,input,sensorsToAnalize,'contactFrame','root_link');
 %     iCubVizWithSlider(dataset,robotName,sensorsToAnalize,'l_sole',onTestDir);
 %     iCubVizAndForcesSynchronized(dataset,robotName,sensorsToAnalize,'root_link',100);
 end
-
-%Calibrate
-
-run('CalibMatCorrection.m');
-

@@ -19,7 +19,7 @@ for n=1:num
   
    temprawSet=rawNorm([sample,newIndex(n)],:);
    temprefSet=estNorm([sample,newIndex(n)],:);
-         % [calibMatrices,offset,fullscale]=estimateMatrices(dataset.rawData,dataset.estimatedFtData,sensorsToAnalize);
+         % [calibMatrices,offset,fullscale]=useLinearModelToCalibrate(dataset,sensorsToAnalize);
 
  [~,s,~]=svd(temprawSet,'econ');
  eigMax(n)=max(diag(s));

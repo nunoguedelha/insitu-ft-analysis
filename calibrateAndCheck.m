@@ -18,11 +18,16 @@ if isstruct(extraSample)
 else
     extraSampleAvailable=false;
 end
-
+dataFields=fieldnames(dataset);
 if calibOptions.useTemperature
+    if ~ismember('temperature',dataFields)
+        calibOptions.useTemperature=false;
+        warning('calibrateAndCheck: expected temperature info but not available, calibration will be perform without temperature');
+    else        
     varInput{narin+1}='withTemperature';
     varInput{narin+2}=true;
     narin=narin+2;
+    end
 end
 [calibMatrices,fullscale,offset,temperatureCoeff]=useLinearModelToCalibrate(dataset,sensorsToAnalize,...
     'estimationType',calibOptions.estimateType,'cMat',dataset.cMat,'lambda',lambda,'useFilteredData',true,...
@@ -144,9 +149,5 @@ end
 %     %save recalibrated matrices, offsets, new wrenches, sensor serial
 %     numbers
 if(scriptOptions.saveData)
-    if (calibOptions.usingInsitu)
-        save(strcat('data/',experimentName,'/reCabDataInsitu.mat'),'reCabData')
-    else
-        save(strcat('data/',experimentName,'/reCabData.mat'),'reCabData')
-    end
+        save(strcat('data/',experimentName,'/reCabData.mat'),'reCabData')   
 end
