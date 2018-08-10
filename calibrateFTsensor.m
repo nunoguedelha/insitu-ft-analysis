@@ -75,7 +75,6 @@ checkMatrixOptions.plotForceSpace=true;
 checkMatrixOptions.plotForceVsTime=false;
 checkMatrixOptions.secMatrixFormat=false;
 checkMatrixOptions.resultEvaluation=true;
-checkMatrixOptions.saveRecalibratedData=false;
 %% logic to select data in which we will test the result
 datasetToUse=dataset;
 if extraSampleAvailable
@@ -87,7 +86,23 @@ if extraSampleAvailable
         end
     end
 end
-run('utils/checkNewMatrixPerformance.m')
+reCalibData=checkNewMatrixPerformance(datasetToUse,sensorsToAnalize,calibMatrices,offset,checkMatrixOptions,'otherCoeff',temperatureCoeff,'varName','temperature');
+
+%% save results
+%% Save the workspace again to include calib Matrices, scale and offset
+%     %save recalibrated matrices, offsets, new wrenches, sensor serial
+%     numbers
+saveResults=readOptions.saveData; % for the time being save if readOption.saveData is true
+if(saveResults)
+    results.usedDataset=datasetToUse;
+    results.calibrationMatrices=calibMatrices;
+    results.fullscale=fullscale;
+    results.offset=offset;
+    results.temperatureCoeff=temperatureCoeff;
+    results.offsetInWrenchSpace=offsetInWrenchSpace;
+    results.recalibratedData=reCalibData;
+    save(strcat('data/',experimentName,'/results.mat'),'results')
+end
 
     % Plot for inspection of data
 if( readOptions.printPlots )
