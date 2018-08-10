@@ -140,7 +140,7 @@ end
 if ~withRegularization
     lambda=0;
     toPenalize=eye(outputSize*(inputSize+extraLinearVariablesNumber));
-    toPenalizeReference=eye(outputSize*(inputSize+extraLinearVariablesNumber));
+    toPenalizeReference=eye(outputSize*(inputSize+extraLinearVariablesNumber),1);
 else %% build toPenalize based on previousLinearVariables info
     previous_Calibration=[previous_Calibration previous_extraLinearVariable];
     toPenalizeReference=previous_Calibration(:);
