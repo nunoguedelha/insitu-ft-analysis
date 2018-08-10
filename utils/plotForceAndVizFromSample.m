@@ -59,7 +59,10 @@ for indx=1:length(sensorsToAnalize)
         ylabel('F_{y}');
         zlabel('F_{z}');
     end
+    
     axis(H.(ft).minMaxForces);
+    pbaspect([1 1 1]);
+    axis vis3d;
     grid on;
     view(az,el);
     %axis manual;

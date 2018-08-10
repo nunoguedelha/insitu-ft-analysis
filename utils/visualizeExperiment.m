@@ -143,7 +143,7 @@ viz3.camera().setPosition(cPos);
 H.handle=figure,
 for indx=1:length(sensorsToAnalize)
     ft =sensorsToAnalize{indx};
-    H.(ft).sub=subplot(length(sensorsToAnalize),1,indx);
+    H.(ft).sub=subplot(1,length(sensorsToAnalize),indx);
     H.(ft).old=plot3(0,0,0); hold on;
     H.(ft).old2=plot3(0,0,0);
     
