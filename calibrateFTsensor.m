@@ -41,52 +41,56 @@ addpath external/walkingDatasetScripts
 addpath utils
 
 %% Read data
-% general reading configuration options
+    % general reading configuration options
 readOptions = {};
 readOptions.forceCalculation=false;%false;
 readOptions.raw=true;
 readOptions.saveData=true;
-readOptions.testDir=false;% to calculate the raw data, for recalibration always true
-readOptions.filterData=true;
-readOptions.estimateWrenches=true;
-readOptions.useInertial=false;
 readOptions.multiSens=true;
 readOptions.matFileName='ftDataset'; % name of the mat file used for save the experiment data
-% options not from read experiment
+    % options not from read experiment
 readOptions.printPlots=true;%true
-readOptions.visualizeExp=false;
-% name and paths of the experiment files
-% change name to desired experiment folder
+    % name and paths of the experiment files
+    % change name to desired experiment folder
 experimentName='/green-iCub-Insitu-Datasets/2018_07_10_Grid';
 [dataset,~,input,extraSample]=readExperiment(experimentName,readOptions);
 
 %% Calibration options
-% Select sensors to calibrate the names are associated to the location of
-% the sensor in the robot 
-% on iCub  {'left_arm','right_arm','left_leg','right_leg','right_foot','left_foot'};
+    % Select sensors to calibrate the names are associated to the location of
+    % the sensor in the robot
+    % on iCub  {'left_arm','right_arm','left_leg','right_leg','right_foot','left_foot'};
 sensorsToAnalize = {'right_leg','left_leg'};
-%Regularization parameter
+    %Regularization parameter
 lambda=0;
 lambdaName='';
-%calibration script options
+    %calibration script options
 calibOptions.saveMat=true;
 calibOptions.estimateType=1;%0 only insitu offset, 1 is insitu, 2 is offset on main dataset, 3 is oneshot offset on main dataset, 4 is full oneshot
 calibOptions.useTemperature=true;
-calibOptions.plotForceSpace=true;
-calibOptions.plotForceVsTime=false;
-calibOptions.secMatrixFormat=false;
-calibOptions.resultEvaluation=true;
-% Calibrate
-calibrateAndCheck
+    % Calibrate
+calibrationStep
 
-%% Plot for inspection of data
+%% Check results
+checkMatrixOptions.plotForceSpace=true;
+checkMatrixOptions.plotForceVsTime=false;
+checkMatrixOptions.secMatrixFormat=false;
+checkMatrixOptions.resultEvaluation=true;
+checkMatrixOptions.saveRecalibratedData=false;
+%% logic to select data in which we will test the result
+datasetToUse=dataset;
+if extraSampleAvailable
+    extraSampleNames=fieldnames(extraSample);
+    for eSampleIDNum =1:length(extraSampleNames)
+        eSampleID = extraSampleNames{eSampleIDNum};
+        if (isstruct(extraSample.(eSampleID)))
+            datasetToUse=addDatasets(datasetToUse,extraSample.(eSampleID));
+        end
+    end
+end
+run('utils/checkNewMatrixPerformance.m')
+
+    % Plot for inspection of data
 if( readOptions.printPlots )
     run('plottinScript.m')
 end
-if( readOptions.visualizeExp )
-    robotName='iCubGenova04';
-    onTestDir=false;
-    visualizeExperiment(dataset,input,sensorsToAnalize,'contactFrame','root_link');
-%     iCubVizWithSlider(dataset,robotName,sensorsToAnalize,'l_sole',onTestDir);
-%     iCubVizAndForcesSynchronized(dataset,robotName,sensorsToAnalize,'root_link',100);
-end
+
