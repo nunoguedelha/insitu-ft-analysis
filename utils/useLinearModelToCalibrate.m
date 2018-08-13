@@ -53,7 +53,7 @@ for v=1:2:length(varargin)
                     lambda=varargin{v+1};
                 else
                     warning('useLinearModelToCalibrate: Expected numeric, using default lambda value of 0.')
-                end            
+                end
             case {'withTemperature','withtemperature','temperature'}
                 if logical(varargin{v+1})
                     withTemperature=varargin{v+1};
@@ -136,24 +136,31 @@ if extraSamplesAvailable && useExtraSample
         fieldsToStack{3}='temperature';
     end
 end
+if withRegularization
+    varInput{narin+1}='cMat';
+    varInput{narin+3}='lambda';
+    %varInput{narin+2}=cMat.(ft);
+    varInput{narin+4}=lambda;
+    cmatIndex=narin+2;
+    narin=narin+4;
+    
+end
+if withTemperature
+    varInput{narin+1}='addLinearVariable';
+    %varInput{narin+2}=temperature.(ft);    
+    temperatureDataIndex=narin;
+    narin=narin+2;
+    
+end
 %% Call appropiate methods
 for ftIdx =1:length(sensorsToAnalize)
     ft = sensorsToAnalize{ftIdx};
     if withRegularization
-        varInput{narin+1}='cMat';
-        varInput{narin+3}='lambda';
-        varInput{narin+2}=cMat.(ft);
-        varInput{narin+4}=lambda;
-        narin=narin+4;
+        varInput{cmatIndex}=cMat.(ft);
     end
     if withTemperature
-        varInput{narin+1}='addLinearVariable';
-        varInput{narin+2}=temperature.(ft);
-        narin=narin+2;
-        if useExtraSample && extraSamplesAvailable
-            temperatureDataIndex=narin;
-        end
-    end    
+        varInput{narin}=temperature.(ft);
+    end
     %% first 3 options only insitu offset , estimation with insitu offset , offset in main dataset
     if estimationType<3
         if estimationType<2 %% calculate insitu offset
@@ -167,8 +174,8 @@ for ftIdx =1:length(sensorsToAnalize)
             expectedWrench=estimatedFtData.(ft)-repmat(meanEst,size(estimatedFtData.(ft),1),1);
         end
         if ( (estimationType==1 && ~extraSamplesAvailable) || estimationType>1)%% not only insitu offset
-                         [calibMatrices.(ft),fullscale.(ft),~,tempCoeff]=estimateCalibrationMatrix(rawToUse,expectedWrench,varInput{:});             
-            if estimationType==2               
+            [calibMatrices.(ft),fullscale.(ft),~,tempCoeff]=estimateCalibrationMatrix(rawToUse,expectedWrench,varInput{:});
+            if estimationType==2
                 offsetInForce=calibMatrices.(ft)*meanFt'-meanEst';
                 offset.(ft)=calibMatrices.(ft)\offsetInForce;
             end
@@ -177,10 +184,10 @@ for ftIdx =1:length(sensorsToAnalize)
     %% one shot on main dataset
     if estimationType==3
         rawToUse=rawData.(ft);
-        expectedWrench=estimatedFtData.(ft);        
+        expectedWrench=estimatedFtData.(ft);
         [calibMatrices.(ft),fullscale.(ft),offsetInForce,tempCoeff]=...
             estimateCalibrationMatrix(rawToUse,expectedWrench,varInput{:});
-        offset.(ft)=calibMatrices.(ft)\offsetInForce;         
+        offset.(ft)=calibMatrices.(ft)\offsetInForce;
     end
     if estimationType<4
         %% correct dimensions of the offset if needed before use
@@ -194,7 +201,7 @@ for ftIdx =1:length(sensorsToAnalize)
         if withTemperature
             [calibrationRequired,stackedExpectedWrench,stackedRawtoUse, stackedTemperature]= stackLogic(dataset,ft,extraSample,fieldsToStack);
             if calibrationRequired %% insert temperature  in format for calibration
-               varInput{temperatureDataIndex}= stackedTemperature;
+                varInput{temperatureDataIndex}= stackedTemperature;
             end
         else
             [calibrationRequired,stackedExpectedWrench,stackedRawtoUse]= stackLogic(dataset,ft,extraSample,fieldsToStack);
