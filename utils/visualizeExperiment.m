@@ -192,7 +192,7 @@ if(~video)
     storedInis=[];
     storedEnds=[];
     storedTimeInis=0;
-    storedTimeEnds=1500;
+    storedTimeEnds=(dataset.time(end)-dataset.time(1));
     
     intervalIni=true;
     
@@ -205,7 +205,7 @@ if(~video)
         'String',num2str(0));
     
     uiHandles.sliderHandle = uicontrol('Parent',H.handle,'Style','slider',...
-        'Units','normalized','Position',[0.15,0,0.75,0.05],...
+        'Units','normalized','Position',[0.15,0,0.75,0.03],...
         'value',1, 'min',1, 'max',length(dataset.time),...
         'SliderStep', [1/length(dataset.time) 1/length(dataset.time)]);
 
@@ -314,7 +314,7 @@ if testDir
     cd ( currentDir)
 end
 
-%callback functions
+%% Callback functions
     function callBackSlider(hObject,evt,dataset,sensorsToAnalize,odom,viz3,H,whichFtData,estimatedAvailable,fixedFrame,jointPos,model,uiHandles,varargin)
         sample = hObject.Value;
         set(uiHandles.txt,'String',"S ="+num2str(round(sample))+newline+sprintf('t= %.2f',(dataset.time(round(sample))-dataset.time(1))));
@@ -341,9 +341,11 @@ end
         if intervalIni
             storedInis=[storedInis sample];
             storedTimeInis=[storedTimeInis timeSample];
+            storedTimeInis=sort(storedTimeInis);
         else
             storedEnds=[storedEnds sample];
             storedTimeEnds=[timeSample storedTimeEnds];
+            storedTimeEnds=sort(storedTimeEnds);
         end
     end
 

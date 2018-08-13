@@ -1,8 +1,6 @@
 clear all
 close all
 clc
-
-
 %% Calibrate a sensor
 % This script allows to calibrate six axis force torque (F/T)
 % sensors once they are mounted on the robot. This procedure
@@ -42,64 +40,74 @@ addpath external/quadfit
 addpath external/walkingDatasetScripts
 addpath utils
 
-%% general reading configuration options
-scriptOptions = {};
-scriptOptions.forceCalculation=true;%false;
-scriptOptions.printPlots=true;%true
-scriptOptions.raw=true;
-scriptOptions.saveData=true;
-scriptOptions.testDir=false;% to calculate the raw data, for recalibration always true
-scriptOptions.filterData=true;
-scriptOptions.estimateWrenches=true;
-scriptOptions.useInertial=false;
-scriptOptions.visualizeExp=false;
-scriptOptions.multiSens=true;
+%% Read data
+    % general reading configuration options
+readOptions = {};
+readOptions.forceCalculation=true;%false;
+readOptions.raw=true;
+readOptions.saveData=true;
+readOptions.multiSens=true;
+readOptions.matFileName='ftDataset'; % name of the mat file used for save the experiment data
+    % options not from read experiment
+readOptions.printPlots=true;%true
+    % name and paths of the experiment files
+    % change name to desired experiment folder
+% experimentName='/green-iCub-Insitu-Datasets/2018_07_10_Grid';
 
-% Script of the mat file used for save the intermediate results
-scriptOptions.matFileName='ftDataset';
-
-%% name and paths of the experiment files
-% change name to desired experiment folder
-%experimentName='icub-insitu-ft-analysis-big-datasets/iCubGenova04/exp_1/poleLeftRight';
-experimentName='/green-iCub-Insitu-Datasets/2018_07_10_Grid';
-
-%% We carry the calibration for just a subset of the sensors
-% the names are associated to the location of the sensor in the
-% in the iCub options are {'left_arm','right_arm','left_leg','right_leg','right_foot','left_foot'};
-
-%sensorsToAnalize = {'left_leg','left_foot','right_leg','right_foot'};
-sensorsToAnalize = {'right_leg','left_leg'};
+experimentName='/green-iCub-Insitu-Datasets/2018_07_10_TZ';
+[dataset,~,input,extraSample]=readExperiment(experimentName,readOptions);
 
 %% Calibration options
-%Regularization parameter
+    % Select sensors to calibrate the names are associated to the location of
+    % the sensor in the robot
+    % on iCub  {'left_arm','right_arm','left_leg','right_leg','right_foot','left_foot'};
+sensorsToAnalize = {'right_leg','left_leg'};
+    %Regularization parameter
 lambda=0;
 lambdaName='';
-
-%calibration script options
+    %calibration script options
 calibOptions.saveMat=true;
-calibOptions.usingInsitu=false;
-calibOptions.plot=true;
-calibOptions.onlyWSpace=true;
-calibOptions.secMatrixFormat=false;
-calibOptions.resultEvaluation=false;
-%% Start
-%Read data
-%[dataset,extraSample]=read_estimate_experimentData(experimentName,scriptOptions);
-[dataset,~,input,extraSample]=readExperiment(experimentName,scriptOptions);
-%Plot for inspection of data
-if( scriptOptions.printPlots )
+calibOptions.estimateType=1;%0 only insitu offset, 1 is insitu, 2 is offset on main dataset, 3 is oneshot offset on main dataset, 4 is full oneshot
+calibOptions.useTemperature=true;
+    % Calibrate
+calibrationStep
+
+%% Check results
+checkMatrixOptions.plotForceSpace=true;
+checkMatrixOptions.plotForceVsTime=false;
+checkMatrixOptions.secMatrixFormat=false;
+checkMatrixOptions.resultEvaluation=true;
+%% logic to select data in which we will test the result
+datasetToUse=dataset;
+if extraSampleAvailable
+    extraSampleNames=fieldnames(extraSample);
+    for eSampleIDNum =1:length(extraSampleNames)
+        eSampleID = extraSampleNames{eSampleIDNum};
+        if (isstruct(extraSample.(eSampleID)))
+            datasetToUse=addDatasets(datasetToUse,extraSample.(eSampleID));
+        end
+    end
+end
+[reCalibData,offsetInWrenchSpace]=checkNewMatrixPerformance(datasetToUse,sensorsToAnalize,calibMatrices,offset,checkMatrixOptions,'otherCoeff',temperatureCoeff,'varName','temperature');
+
+%% save results
+%% Save the workspace again to include calib Matrices, scale and offset
+%     %save recalibrated matrices, offsets, new wrenches, sensor serial
+%     numbers
+saveResults=readOptions.saveData; % for the time being save if readOption.saveData is true
+if(saveResults)
+    results.usedDataset=datasetToUse;
+    results.calibrationMatrices=calibMatrices;
+    results.fullscale=fullscale;
+    results.offset=offset;
+    results.temperatureCoeff=temperatureCoeff;
+    results.offsetInWrenchSpace=offsetInWrenchSpace;
+    results.recalibratedData=reCalibData;
+    save(strcat('data/',experimentName,'/results.mat'),'results')
+end
+
+    % Plot for inspection of data
+if( readOptions.printPlots )
     run('plottinScript.m')
 end
-
-if( scriptOptions.visualizeExp )
-    robotName='iCubGenova04';
-    onTestDir=false;
-    visualizeExperiment(dataset,input,sensorsToAnalize,'contactFrame','root_link');
-%     iCubVizWithSlider(dataset,robotName,sensorsToAnalize,'l_sole',onTestDir);
-%     iCubVizAndForcesSynchronized(dataset,robotName,sensorsToAnalize,'root_link',100);
-end
-
-%Calibrate
-
-run('CalibMatCorrection.m');
 

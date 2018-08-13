@@ -1,3 +1,4 @@
+%TODO change to use the new functions for estimation of matrices
 %test calibration matrices obtained from different datasets
 %use from test directory
 %load calibration matrices to compare
@@ -73,9 +74,10 @@ ftNames=fieldnames(e1.dataset2.ftData);
 %    moreData.rawNoOffset.( ftNames{i})=[rawNoOffset1(1:(size(e1.dataset2.rawData.( ftNames{i}),1)/n1),:);rawNoOffset2((size(e2.dataset2.rawData.( ftNames{i}),1)/n2):end,:)];
 %     moreData.estimatedFtData.( ftNames{i})=[e1.dataset2.estimatedFtData.( ftNames{i})(1:(size(e1.dataset2.estimatedFtData.( ftNames{i}),1)/n1),:);e2.dataset2.estimatedFtData.( ftNames{i})((size(e2.dataset2.estimatedFtData.( ftNames{i}),1)/n2):end,:)];
 % 
-%     [calibMatrices.(ftNames{i}),fullscale.(ftNames{i})]=estimateCalibMatrix(moreData.rawNoOffset.(ftNames{i}),moreData.estimatedFtData.(ftNames{i}));
+%     [calibMatrices.(ftNames{i}),fullscale.(ftNames{i})]=estimateCalibrationMatrix(moreData.rawNoOffset.(ftNames{i}),moreData.estimatedFtData.(ftNames{i}));
 % 
 % end
+
 %not insitu
 for i=4:4
      % generate random vectors for mixed training
@@ -92,12 +94,12 @@ rande2=randperm(e2size);
        e2.dataset2.estimatedFtData.( ftNames{i})(rande2(1:e2size/n2),:)];
 
     [calibMatrices.(ftNames{i}),fullscale.(ftNames{i}),offset.(ftNames{i})]=...
-        estimateCalibMatrixWithRegAndOff(...
+        estimateCalibrationMatrix(...
              moreData.rawData.(ftNames{i}),...
              moreData.estimatedFtData.(ftNames{i}),...
-             calibMat1,...
-             .5,...
-             [0;0;0;0;0;0]);
+             'cMat',calibMat1,...
+             'lambda',.5,...
+             'estimateOffset',true);
 
 end
 

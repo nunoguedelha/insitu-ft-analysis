@@ -23,6 +23,8 @@ if (length(namesDatasets) <=length(varargin))
     xlabel('F_{x}');
     ylabel('F_{y}');
     zlabel('F_{z}');
+    pbaspect([1 1 1]);
+    axis vis3d;
 else
     warning('Insuficient arguments');
 end
