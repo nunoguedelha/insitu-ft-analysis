@@ -1,7 +1,7 @@
 %TODO: possible to move dave to the end and everything else inside the same ft loop to make it into
 %a function that receives the data directly and doesnt need to deal with
 %the sensors themselves
-function [reCalibData]=checkNewMatrixPerformance(datasetToUse,sensorsToAnalize,calibMatrices,offset,checkMatrixOptions,varargin)
+function [reCalibData,offsetInWrenchSpace]=checkNewMatrixPerformance(datasetToUse,sensorsToAnalize,calibMatrices,offset,checkMatrixOptions,varargin)
 %% Check required fields in dataset are there
 dataFields=fieldnames(datasetToUse);
 otherCoeff=[];

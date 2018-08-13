@@ -43,7 +43,7 @@ addpath utils
 %% Read data
     % general reading configuration options
 readOptions = {};
-readOptions.forceCalculation=false;%false;
+readOptions.forceCalculation=true;%false;
 readOptions.raw=true;
 readOptions.saveData=true;
 readOptions.multiSens=true;
@@ -52,7 +52,9 @@ readOptions.matFileName='ftDataset'; % name of the mat file used for save the ex
 readOptions.printPlots=true;%true
     % name and paths of the experiment files
     % change name to desired experiment folder
-experimentName='/green-iCub-Insitu-Datasets/2018_07_10_Grid';
+% experimentName='/green-iCub-Insitu-Datasets/2018_07_10_Grid';
+
+experimentName='/green-iCub-Insitu-Datasets/2018_07_10_TZ';
 [dataset,~,input,extraSample]=readExperiment(experimentName,readOptions);
 
 %% Calibration options
@@ -86,7 +88,7 @@ if extraSampleAvailable
         end
     end
 end
-reCalibData=checkNewMatrixPerformance(datasetToUse,sensorsToAnalize,calibMatrices,offset,checkMatrixOptions,'otherCoeff',temperatureCoeff,'varName','temperature');
+[reCalibData,offsetInWrenchSpace]=checkNewMatrixPerformance(datasetToUse,sensorsToAnalize,calibMatrices,offset,checkMatrixOptions,'otherCoeff',temperatureCoeff,'varName','temperature');
 
 %% save results
 %% Save the workspace again to include calib Matrices, scale and offset
