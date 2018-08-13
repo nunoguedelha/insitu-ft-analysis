@@ -23,7 +23,7 @@ function [dataset,estimator,input,extraSample]=readExperiment(experimentName,scr
 %       scriptOptions.testDir=false;% true
 %       scriptOptions.filterData=true;
 %       scriptOptions.raw=false;
-%       scriptOptions.estimateWrenches=false;
+%       scriptOptions.estimateWrenches=true;
 %       scriptOptions.useInertial=false;
 %       scriptOptions.multiSens=false;
 % % Script of the mat file used for save the intermediate results
@@ -191,10 +191,10 @@ else
     % Warning!! iDynTree takes in input **radians** based units,
     % while the iCub port stream **degrees** based units.
     dofs = estimator.model().getNrOfDOFs();
-    qj_all = zeros(dofs,size(time,1));
-    dqj_all = zeros(dofs,size(time,1));
-    ddqj_all = zeros(dofs,size(time,1));
-    tau_all = zeros(dofs,size(time,1));
+    qj_all = zeros(size(time,1),dofs);
+    dqj_all = zeros(size(time,1),dofs);
+    ddqj_all = zeros(size(time,1),dofs);
+    tau_all = zeros(size(time,1),dofs);
     
     %get the names of the model to match the names from the data file read
     for i=0:dofs-1
@@ -217,25 +217,23 @@ else
         % we resample joint encoders on the timestamp of the FT sensors
         fprintf('readExperiment: Resampling the state for the part %s\n',stateNames{i});
         [qj_temp,dqj_temp,ddqj_temp] = resampleState(time, time_temp, qj_temp, dqj_temp, ddqj_temp);
-        tau_temp= interp1(time_temp, tau_temp'  , time)';
-        
+        tau_temp= interp1(time_temp, tau_temp  , time);        
         for j=1:Dof
             index = find(strcmp(names, input.stateNames.(stateNames{i}){j}));
             if(isempty(index)==0)
                 dataset.jointNames{index} = input.stateNames.(stateNames{i}){j};
-                qj_all(index,:) = deg2rad*qj_temp(j,:);
-                dqj_all(index,:) =deg2rad* dqj_temp(j,:);
-                ddqj_all(index,:) =deg2rad* ddqj_temp(j,:);
-                tau_all(index,:) =tau_temp(j,:);
+                qj_all(:,index) = deg2rad*qj_temp(:,j);
+                dqj_all(:,index) =deg2rad* dqj_temp(:,j);
+                ddqj_all(:,index) =deg2rad* ddqj_temp(:,j);
+                tau_all(:,index) =tau_temp(:,j);
             end
         end
-    end
-    
+    end    
     % Store the information into final output
-    dataset.qj = qj_all';
-    dataset.dqj = dqj_all';
-    dataset.ddqj = ddqj_all';
-    dataset.tau=tau_all';
+    dataset.qj = qj_all;
+    dataset.dqj = dqj_all;
+    dataset.ddqj = ddqj_all;
+    dataset.tau=tau_all;
     %% This section modifies or estimates data
     %% Filter ft data
     if(scriptOptions.filterData)

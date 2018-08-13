@@ -38,6 +38,17 @@ tau  = cell2mat(C(1, 3+6*n:3+7*n-1)); % n columns of "joint tau" ("torques") val
 pwm  = cell2mat(C(1, 3+7*n:3+8*n-1)); % n columns of "motor pwm" ("pwmDutycycle") value
 
 [tu,iu] = unique(time);
+if size(tu,1)==length(tu) % ensure row matches the dimension of the unique time vector
+    time    = tu; 
+q       = q(iu, :);
+dq      = dq(iu, :);
+d2q     = d2q(iu, :);
+qM      = qM(iu, :);
+dqM     = dqM(iu, :);
+d2qM    = d2qM(iu, :);
+tau     = tau(iu, :);
+pwm     = pwm(iu, :);
+else
 time    = tu';
 q       = q(iu, :)';
 dq      = dq(iu, :)';
@@ -47,7 +58,7 @@ dqM     = dqM(iu, :)';
 d2qM    = d2qM(iu, :)';
 tau     = tau(iu, :)';
 pwm     = pwm(iu, :)';
-
+end
 if fclose(fid) == -1
    error('[ERROR] there was a problem in closing the file')
 end
