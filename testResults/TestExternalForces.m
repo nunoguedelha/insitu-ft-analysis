@@ -1,6 +1,8 @@
 scriptOptions = {};
 scriptOptions.testDir=true;% to calculate the raw data, for recalibration always true
+scriptOptions.raw=true;
 scriptOptions.matFileName='ftDataset';
+% scriptOptions.multiSens=false;
 scriptOptions.insituVar='reCabDataInsitu';
 scriptOptions.printAll=true;
 % Script of the mat file used for save the intermediate results
@@ -97,7 +99,8 @@ for i=1:length(experimentNames)
     if (i==ttCompare-1)
         inputToCompare=input;
     end
-    [data.(names2use{(i-1)*length(lambdasNames)+2}),WorkbenchMat]=load_measurements_and_cMat(experimentNames{i},scriptOptions,26);
+    [data.(names2use{(i-1)*length(lambdasNames)+2}),WorkbenchMat]=readExperiment(experimentNames{i},scriptOptions);
+    WorkbenchMat=data.(names2use{(i-1)*length(lambdasNames)+2}).cMat;
     data.(names2use{(i-1)*length(lambdasNames)+2})=dataSampling(data.(names2use{(i-1)*length(lambdasNames)+2}),10);
    if (any(strcmp('hangingInit', fieldnames(input))))
     if(input.hangingInit==1)
