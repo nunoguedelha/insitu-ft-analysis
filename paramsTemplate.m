@@ -26,7 +26,7 @@ input.intervals=struct(); %this will have the relevant intervals of the demos 4 
 % input.wbdNames='';
 % input.subModels='';
 
-%input.type='';% 
+%input.type='';%
 %   Type options:
 %       right_leg_yoga
 %       left_leg_yoga
@@ -42,8 +42,10 @@ input.intervals=struct(); %this will have the relevant intervals of the demos 4 
 
 input.inertialName='inertial'; %enable in case there is info read from the
 %IMU
-input.ftPortName='analog'; % (arm, foot and leg have FT data), usually is 'analog:o'
 input.statePortName='stateExt'; % (only foot has no state data), usually is 'stateExt:i'
+%input.ftPortName='analog'; % (arm, foot and leg have FT data), usually is 'analog:o'
+input.ftPortName={'analog';'analog';'measures';'measures';'measures';'measures'}; % (arm, foot and leg have FT data), usually is 'analog:o'
+input.ftPortType={'forceTorque';'forceTorque';'multipleSensors';'multipleSensors';'multipleSensors';'multipleSensors'}; % should be the same size as ftPortName
 input.ftNames={'left_arm';'right_arm';'left_leg';'right_leg';'left_foot';'right_foot'};
 %usual values are {'left_arm';'right_arm';'left_leg';'right_leg';'left_foot';'right_foot'}; %name of folders that contain ft measures
 input.calibFlag=true; %if the flag for obtaining calibrated data is on ( by default
@@ -60,7 +62,7 @@ input.calibMatFileNames={}; % name of the files containing the calibration matri
 input.calibOutputNames={}; % names to be used in case the sensor has an identity matrix (optional variable)
 
 %-----------------------------------------------------------
-%% Variables that depend on the urdf 
+%% Variables that depend on the urdf
 
 input.sensorNames={'l_arm_ft_sensor'; 'r_arm_ft_sensor'; 'l_leg_ft_sensor'; 'r_leg_ft_sensor'; 'l_foot_ft_sensor'; 'r_foot_ft_sensor';};
 % usual values are {'l_arm_ft_sensor'; 'r_arm_ft_sensor'; 'l_leg_ft_sensor'; 'r_leg_ft_sensor'; 'l_foot_ft_sensor'; 'r_foot_ft_sensor';};
@@ -68,7 +70,7 @@ input.sensorNames={'l_arm_ft_sensor'; 'r_arm_ft_sensor'; 'l_leg_ft_sensor'; 'r_l
 %this will be used for matching names used in the model to names used in
 %ftNames
 
-%input.stateNames=struct();% this should have a structure with the %knowledge 
+%input.stateNames=struct();% this should have a structure with the %knowledge
 %of the name of the degrees of freedom that are printed in each state data
 %file (normally fixed for the general iCub robot)
 % example
@@ -89,6 +91,11 @@ if(size (input.calibMatFileNames)~=size (input.ftNames))
 end
 if(size (input.sensorNames)~=size (input.ftNames))
     disp('amount of sensor names does not match the amount of sensors available in the dataset')
+end
+if iscellstr(input.ftPortName)
+    if(size (input.ftPortName)~=size (input.ftPortType))
+        disp('the name and type of port should be a cell vector of the same size')
+    end
 end
 if(size (fieldnames(input.intervals),1)==1)
     disp('only one interval setting a general contactframe')
