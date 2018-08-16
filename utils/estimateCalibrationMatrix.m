@@ -169,6 +169,7 @@ b=(kA'*kb)/kaSize+lambda*toPenalizeReference;
 %
 %% apply least squares (linear regression)
 x=pinv(A)*b;
+
 calibrationMatrix = reshape(x(1:calibrationMatrixLength), outputSize, inputSize);
 %% depending on options
 if length(x)>calibrationMatrixLength
@@ -181,6 +182,7 @@ if length(x)>calibrationMatrixLength
             extraCoeff=extraCoeff(:,end-1);
         else
             offset=-extraCoeff;
+            extraCoeff=zeros(outputSize,1);
         end
     end
 end
