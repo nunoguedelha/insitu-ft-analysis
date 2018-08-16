@@ -122,6 +122,7 @@ end
 if estimationType>2
     varInput{narin+1}='estimateoffset';
     varInput{narin+2}=true;
+    offsetIndex=narin+2;
     narin=narin+2;
 end
 % Stack names to use in stackLogic
@@ -146,8 +147,8 @@ if withRegularization
     
 end
 if withTemperature
-    varInput{narin+1}='addLinearVariable';
-    %varInput{narin+2}=temperature.(ft);    
+    %varInput{narin+1}='addLinearVariable';
+    %varInput{narin+2}=temperature.(ft);
     temperatureDataIndex=narin;
     narin=narin+2;
     
@@ -155,11 +156,20 @@ end
 %% Call appropiate methods
 for ftIdx =1:length(sensorsToAnalize)
     ft = sensorsToAnalize{ftIdx};
+    if estimationType>2
+        varInput{offsetIndex}=true;
+    end
     if withRegularization
         varInput{cmatIndex}=cMat.(ft);
     end
     if withTemperature
-        varInput{narin}=temperature.(ft);
+        if any(strcmp(ft,fieldnames(temperature)))
+            varInput{temperatureDataIndex}=temperature.(ft);
+            varInput{temperatureDataIndex-1}='addLinearVariable';
+        else
+            varInput{temperatureDataIndex-1}='nothing';
+            warning('useLinearModelToCalibrate: no temperature info for sensor %s',ft);
+        end
     end
     %% first 3 options only insitu offset , estimation with insitu offset , offset in main dataset
     if estimationType<3
@@ -176,7 +186,11 @@ for ftIdx =1:length(sensorsToAnalize)
         if ( (estimationType==1 && ~extraSamplesAvailable) || estimationType>1)%% not only insitu offset
             [calibMatrices.(ft),fullscale.(ft),~,tempCoeff]=estimateCalibrationMatrix(rawToUse,expectedWrench,varInput{:});
             if estimationType==2
-                offsetInForce=calibMatrices.(ft)*meanFt'-meanEst';
+                if sum(tempCoeff)~=0
+                    offsetInForce=calibMatrices.(ft)*meanFt'-meanEst'+ tempCoeff*mean(temperature.(ft));
+                else
+                    offsetInForce=calibMatrices.(ft)*meanFt'-meanEst';
+                end
                 offset.(ft)=calibMatrices.(ft)\offsetInForce;
             end
         end
@@ -188,6 +202,7 @@ for ftIdx =1:length(sensorsToAnalize)
         [calibMatrices.(ft),fullscale.(ft),offsetInForce,tempCoeff]=...
             estimateCalibrationMatrix(rawToUse,expectedWrench,varInput{:});
         offset.(ft)=calibMatrices.(ft)\offsetInForce;
+        varInput{offsetIndex}=false;
     end
     if estimationType<4
         %% correct dimensions of the offset if needed before use
