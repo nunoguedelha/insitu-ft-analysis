@@ -112,6 +112,8 @@ for v=1:2:length(varargin)
                                 end
                             end
                             previous_extraLinearVariable=[previous_extraLinearVariable tempPrevLinVar];
+                        else
+                             warning('estimateCalibrationMatrix: length of vecotr incorrect, not extra linear variable.')
                         end
                     else
                         warning('estimateCalibrationMatrix: Expected logical, using default withTemperature value.')
