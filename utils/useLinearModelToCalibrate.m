@@ -140,18 +140,13 @@ end
 if withRegularization
     varInput{narin+1}='cMat';
     varInput{narin+3}='lambda';
-    %varInput{narin+2}=cMat.(ft);
     varInput{narin+4}=lambda;
     cmatIndex=narin+2;
     narin=narin+4;
-    
 end
 if withTemperature
-    %varInput{narin+1}='addLinearVariable';
-    %varInput{narin+2}=temperature.(ft);
-    temperatureDataIndex=narin;
     narin=narin+2;
-    
+    temperatureDataIndex=narin;
 end
 %% Call appropiate methods
 for ftIdx =1:length(sensorsToAnalize)
@@ -232,6 +227,12 @@ for ftIdx =1:length(sensorsToAnalize)
             [calibMatrices.(ft),fullscale.(ft),~,tempCoeff]=...
                 estimateCalibrationMatrix(rawToUse,expectedWrench,varInput{:});
         else % estimate offset as well
+            if  withTemperature %TODO: decide to keep this or not
+                varInput{narin+1}='previousOffset';
+                narin=narin+2;
+                prevOffsetIndex=narin;
+                varInput{prevOffsetIndex}=expectedWrench(1,:)'-cMat.(ft)*rawToUse(1,:)';
+            end
             [calibMatrices.(ft),fullscale.(ft),offsetInForce,tempCoeff]=...
                 estimateCalibrationMatrix(rawToUse,expectedWrench,varInput{:});
             offset.(ft)=calibMatrices.(ft)\offsetInForce;
