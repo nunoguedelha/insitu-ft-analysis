@@ -1,7 +1,7 @@
 %TODO: possible to move dave to the end and everything else inside the same ft loop to make it into
 %a function that receives the data directly and doesnt need to deal with
 %the sensors themselves
-function [reCalibData,offsetInWrenchSpace]=checkNewMatrixPerformance(datasetToUse,sensorsToAnalize,calibMatrices,offset,checkMatrixOptions,varargin)
+function [reCalibData,offsetInWrenchSpace,varargout]=checkNewMatrixPerformance(datasetToUse,sensorsToAnalize,calibMatrices,offset,checkMatrixOptions,varargin)
 %% Check required fields in dataset are there
 dataFields=fieldnames(datasetToUse);
 otherCoeff=[];
@@ -100,7 +100,7 @@ for ftIdx =1:length(sensorsToAnalize)
             namesdatasets={'measuredDataNoOffset','estimatedData','reCalibratedData'};
             force3DPlots(namesdatasets,(ft),filteredNoOffset.(ft),datasetToUse.estimatedFtData.(ft),reCalibData.(ft));
         end
-        
+        legendmarkeradjust(20);
     end
     % plot forces with time as x axis
     if(checkMatrixOptions.plotForceVsTime)
@@ -119,8 +119,11 @@ for ftIdx =1:length(sensorsToAnalize)
     if (checkMatrixOptions.resultEvaluation)
         disp(ft)
         %Workbench_no_offset_mse=mean((filteredNoOffset.(ft)-modifiedDataset.estimatedFtData.(ft)).^2)
-        New_calibration_no_offset_mse=mean((reCalibData.(ft)-datasetToUse.estimatedFtData.(ft)).^2)
+        New_calibration_no_offset_mse.(ft)=mean((reCalibData.(ft)-datasetToUse.estimatedFtData.(ft)).^2);
         %Workbench_mse=mean((modifiedDataset.ftData.(ft)-modifiedDataset.estimatedFtData.(ft)).^2)
     end
+end
+if exist('New_calibration_no_offset_mse','var')
+   varargout{1}= New_calibration_no_offset_mse;    
 end
 
