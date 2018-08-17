@@ -117,7 +117,7 @@ for ftIdx =1:length(sensorsToAnalize)
     
     %% Evaluation of results
     if (checkMatrixOptions.resultEvaluation)
-        disp(ft)
+        %disp(ft)
         %Workbench_no_offset_mse=mean((filteredNoOffset.(ft)-modifiedDataset.estimatedFtData.(ft)).^2)
         New_calibration_no_offset_mse.(ft)=mean((reCalibData.(ft)-datasetToUse.estimatedFtData.(ft)).^2);
         %Workbench_mse=mean((modifiedDataset.ftData.(ft)-modifiedDataset.estimatedFtData.(ft)).^2)
