@@ -85,7 +85,7 @@ if  extraLinearVariablesNumber==0 || isempty(extraLinearVariables)
     extraCoeff=extraCoeffDefaultValue;
 end
 for sample=1:length(rawData)
-    recalibratedData(sample,:)=calibrationMatrix*(rawData(sample,:)'-offset)+extraCoeff*extraLinearVariables(sample,:)';
+    recalibratedData(sample,:)=calibrationMatrix*(rawData(sample,:)'+offset)+extraCoeff*extraLinearVariables(sample,:)';
 end
 
 offsetInForce=calibrationMatrix*offset;

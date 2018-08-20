@@ -168,6 +168,9 @@ kb=expectedWrench_trans(:);
 kaSize=size(kA,1); 
 A=(kA'*kA)/kaSize+lambda*toPenalize;
 b=(kA'*kb)/kaSize+lambda*toPenalizeReference;
+
+% Normal regularized formula
+% x=pinv(kA'*kA)*kA'*kb;
 %
 %% apply least squares (linear regression)
 x=pinv(A)*b;
@@ -180,10 +183,10 @@ if length(x)>calibrationMatrixLength
     end
     if estimateOffset
         if extraLinearVariablesNumber>1
-            offset=-extraCoeff(:,end);
+            offset=extraCoeff(:,end);
             extraCoeff=extraCoeff(:,end-1);
         else
-            offset=-extraCoeff;
+            offset=extraCoeff;
             extraCoeff=zeros(outputSize,1);
         end
     end

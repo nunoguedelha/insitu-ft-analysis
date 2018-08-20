@@ -46,7 +46,7 @@ end
 [centers,ax] = ellipsoid_im2ex(p_ft_norm);
 center_ft_proj = denormalize2(centers',mean(ft_raw_projected),std(ft_raw_projected));
 offset_ft = ((ft_raw_projector')*center_ft_proj')'+ft_raw_mean;
-
+offset_ft=-offset_ft;
 
 end
 

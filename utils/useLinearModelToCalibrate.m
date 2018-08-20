@@ -170,7 +170,7 @@ for ftIdx =1:length(sensorsToAnalize)
     if estimationType<3
         if estimationType<2 %% calculate insitu offset
             offset.(ft)=estimateOffsetUsingInSitu(rawData.(ft), estimatedFtData.(ft)(:,1:3));
-            rawToUse=rawData.(ft)-repmat(offset.(ft),size(rawData.(ft),1),1);
+            rawToUse=rawData.(ft)+repmat(offset.(ft),size(rawData.(ft),1),1);
             expectedWrench=estimatedFtData.(ft);
         else %% prepare mean values for non insitu offset
             meanFt=mean(rawData.(ft));
@@ -182,9 +182,9 @@ for ftIdx =1:length(sensorsToAnalize)
             [calibMatrices.(ft),fullscale.(ft),~,tempCoeff]=estimateCalibrationMatrix(rawToUse,expectedWrench,varInput{:});
             if estimationType==2
                 if sum(tempCoeff)~=0
-                    offsetInForce=calibMatrices.(ft)*meanFt'-meanEst'+ tempCoeff*mean(temperature.(ft));
+                    offsetInForce=meanEst'-calibMatrices.(ft)*meanFt'+ tempCoeff*mean(temperature.(ft));
                 else
-                    offsetInForce=calibMatrices.(ft)*meanFt'-meanEst';
+                    offsetInForce=meanEst'-calibMatrices.(ft)*meanFt';
                 end
                 offset.(ft)=calibMatrices.(ft)\offsetInForce;
             end
@@ -222,17 +222,17 @@ for ftIdx =1:length(sensorsToAnalize)
         end
         if estimationType<4 %% offset is known, remove from the raw data
             if calibrationRequired
-                rawToUse=stackedRawtoUse-repmat(offset.(ft),size(stackedRawtoUse,1),1);
+                rawToUse=stackedRawtoUse+repmat(offset.(ft),size(stackedRawtoUse,1),1);
             end
             [calibMatrices.(ft),fullscale.(ft),~,tempCoeff]=...
                 estimateCalibrationMatrix(rawToUse,expectedWrench,varInput{:});
         else % estimate offset as well
-            if  withTemperature %TODO: decide to keep this or not
-                varInput{narin+1}='previousOffset';
-                narin=narin+2;
-                prevOffsetIndex=narin;
-                varInput{prevOffsetIndex}=expectedWrench(1,:)'-cMat.(ft)*rawToUse(1,:)';
-            end
+%             if  withTemperature %TODO: decide to keep this or not
+%                 varInput{narin+1}='previousOffset';
+%                 narin=narin+2;
+%                 prevOffsetIndex=narin;
+%                 varInput{prevOffsetIndex}=expectedWrench(1,:)'-cMat.(ft)*rawToUse(1,:)';
+%             end
             [calibMatrices.(ft),fullscale.(ft),offsetInForce,tempCoeff]=...
                 estimateCalibrationMatrix(rawToUse,expectedWrench,varInput{:});
             offset.(ft)=calibMatrices.(ft)\offsetInForce;
