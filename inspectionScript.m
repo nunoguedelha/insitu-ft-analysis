@@ -9,7 +9,8 @@ addpath utils
 addpath external/quadfit
 
 %experimentName='dataSamples/First_Time_Sensor';%
-experimentName='green-iCub-Insitu-Datasets/2018_07_10_TZ';
+%experimentName='gridNoCover2';
+experimentName='testingLeftLegShaking';
 
 
 %Desired inspection sections

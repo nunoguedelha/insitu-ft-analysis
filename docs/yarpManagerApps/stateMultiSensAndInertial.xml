@@ -17,7 +17,7 @@
 	</dependencies>
 	<module>
 		<name>yarpdatadumper</name>
-		<parameters>--name /dumper/icub/head/stateExt:o --type bottle --rxTime </parameters>
+		<parameters>--name /dumper/icub/head/stateExt --type bottle --rxTime </parameters>
 		<node>localhost</node>
 		<tag>data-dumpericub-head-stateExt-o</tag>
 	</module>
@@ -28,7 +28,7 @@
 	</connection>
 	<module>
 		<name>yarpdatadumper</name>
-		<parameters>--name /dumper/icub/left_arm/stateExt:o --type bottle --rxTime </parameters>
+		<parameters>--name /dumper/icub/left_arm/stateExt --type bottle --rxTime </parameters>
 		<node>localhost</node>
 		<tag>data-dumpericub-left_arm-stateExt-o</tag>
 	</module>
@@ -39,7 +39,7 @@
 	</connection>
 	<module>
 		<name>yarpdatadumper</name>
-		<parameters>--name /dumper/icub/left_leg/stateExt:o --type bottle --rxTime </parameters>
+		<parameters>--name /dumper/icub/left_leg/stateExt --type bottle --rxTime </parameters>
 		<node>localhost</node>
 		<tag>data-dumpericub-left_leg-stateExt-o</tag>
 	</module>
@@ -50,7 +50,7 @@
 	</connection>
 	<module>
 		<name>yarpdatadumper</name>
-		<parameters>--name /dumper/icub/right_arm/stateExt:o --type bottle --rxTime </parameters>
+		<parameters>--name /dumper/icub/right_arm/stateExt --type bottle --rxTime </parameters>
 		<node>localhost</node>
 		<tag>data-dumpericub-right_arm-stateExt-o</tag>
 	</module>
@@ -61,7 +61,7 @@
 	</connection>
 	<module>
 		<name>yarpdatadumper</name>
-		<parameters>--name /dumper/icub/right_leg/stateExt:o --type bottle --rxTime </parameters>
+		<parameters>--name /dumper/icub/right_leg/stateExt --type bottle --rxTime </parameters>
 		<node>localhost</node>
 		<tag>data-dumpericub-right_leg-stateExt-o</tag>
 	</module>
@@ -72,7 +72,7 @@
 	</connection>
 	<module>
 		<name>yarpdatadumper</name>
-		<parameters>--name /dumper/icub/torso/stateExt:o --type bottle --rxTime </parameters>
+		<parameters>--name /dumper/icub/torso/stateExt --type bottle --rxTime </parameters>
 		<node>localhost</node>
 		<tag>data-dumpericub-torso-stateExt-o</tag>
 	</module>
@@ -83,7 +83,7 @@
 	</connection>
 	<module>
 		<name>yarpdatadumper</name>
-		<parameters>--name /dumper/icub/left_arm/measures:o --type bottle --rxTime </parameters>
+		<parameters>--name /dumper/icub/left_arm/measures --type bottle --rxTime </parameters>
 		<node>localhost</node>
 		<tag>data-dumpericub-left_arm-measures-o</tag>
 	</module>
@@ -94,7 +94,7 @@
 	</connection>
 	<module>
 		<name>yarpdatadumper</name>
-		<parameters>--name /dumper/icub/left_leg/measures:o --type bottle --rxTime </parameters>
+		<parameters>--name /dumper/icub/left_leg/measures --type bottle --rxTime </parameters>
 		<node>localhost</node>
 		<tag>data-dumpericub-left_leg-measures-o</tag>
 	</module>
@@ -105,7 +105,7 @@
 	</connection>
 	<module>
 		<name>yarpdatadumper</name>
-		<parameters>--name /dumper/icub/right_arm/measures:o --type bottle --rxTime </parameters>
+		<parameters>--name /dumper/icub/right_arm/measures --type bottle --rxTime </parameters>
 		<node>localhost</node>
 		<tag>data-dumpericub-right_arm-measures-o</tag>
 	</module>
@@ -116,7 +116,7 @@
 	</connection>
 	<module>
 		<name>yarpdatadumper</name>
-		<parameters>--name /dumper/icub/right_leg/measures:o --type bottle --rxTime </parameters>
+		<parameters>--name /dumper/icub/right_leg/measures --type bottle --rxTime </parameters>
 		<node>localhost</node>
 		<tag>data-dumpericub-right_leg-measures-o</tag>
 	</module>
@@ -127,7 +127,7 @@
 	</connection>
 	<module>
 		<name>yarpdatadumper</name>
-		<parameters>--name /dumper/icub/left_foot/measures:o --type bottle --rxTime </parameters>
+		<parameters>--name /dumper/icub/left_foot/measures --type bottle --rxTime </parameters>
 		<node>localhost</node>
 		<tag>data-dumpericub-left_foot-measures-o</tag>
 	</module>
@@ -138,7 +138,7 @@
 	</connection>
 	<module>
 		<name>yarpdatadumper</name>
-		<parameters>--name /dumper/icub/right_foot/measures:o --type bottle --rxTime </parameters>
+		<parameters>--name /dumper/icub/right_foot/measures --type bottle --rxTime </parameters>
 		<node>localhost</node>
 		<tag>data-dumpericub-right_foot-measures-o</tag>
 	</module>
